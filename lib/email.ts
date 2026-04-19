@@ -10,6 +10,11 @@ export type SendEmailResult = { ok: boolean; mode: "resend" | "stub"; status?: n
  * Versand: mit RESEND_API_KEY über Resend, sonst Stub (Konsolen-Log, ok für Dev).
  */
 export async function sendTransactionalEmail(input: SendEmailInput): Promise<SendEmailResult> {
+  if (process.env.EMAIL_MOCK === "1") {
+    console.info("[email mock]", { to: input.to, subject: input.subject });
+    return { ok: true, mode: "stub" };
+  }
+
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM ?? "BAUVIBE <onboarding@resend.dev>";
 

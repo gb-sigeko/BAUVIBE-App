@@ -1,8 +1,10 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { PlanungSource, PlanungStatus, PlanungType, SpecialCode, Turnus } from "@/generated/prisma/client";
-import { addIsoWeeks, compareIsoWeek, isIsoWeekBefore, isoWeekKey, mondayUtcOfIsoWeek } from "@/lib/iso-week";
+import { addIsoWeeks, compareIsoWeek, isIsoWeekBefore, isoWeekKey } from "@/lib/iso-week";
 import { getIsoWeekParts } from "@/lib/utils";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
+import { isEmployeeUnavailableInWeek, isoWeekOverlapsSubstitute } from "@/lib/availability-week";
+import { findDelegateForCoveredInWeek } from "@/lib/substitute-resolve";
 
 /** Priorität: fester Termin (0) > Vertretung (1) > Turnus (2) > manuell (3). */
 export const PLANUNG_PRIORITY = {
@@ -37,14 +39,6 @@ export type HorizonWeek = { isoYear: number; isoWeek: number };
 
 function horizonKeySet(weeks: HorizonWeek[]) {
   return new Set(weeks.map((w) => isoWeekKey(w.isoYear, w.isoWeek)));
-}
-
-function weekInSubstitute(sub: { startsOn: Date; endsOn: Date }, isoYear: number, isoWeek: number) {
-  const mon = mondayUtcOfIsoWeek(isoYear, isoWeek);
-  const sun = new Date(mon);
-  sun.setUTCDate(mon.getUTCDate() + 6);
-  sun.setUTCHours(23, 59, 59, 999);
-  return sub.startsOn <= sun && sub.endsOn >= mon;
 }
 
 async function hasCellEntry(
@@ -163,13 +157,22 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
     include: { delegateEmployee: true, coveredEmployee: true },
   });
 
+  const projectsByResponsible = await db.project.findMany({
+    where: { status: "ACTIVE", responsibleEmployeeId: { not: null } },
+    select: { id: true, responsibleEmployeeId: true },
+  });
+  const projectIdsForCovered = (coveredId: string) =>
+    projectsByResponsible.filter((p) => p.responsibleEmployeeId === coveredId).map((p) => p.id);
+
   for (const sub of subs) {
-    const affected = Array.isArray(sub.affectedProjectIds)
+    const affectedExplicit = Array.isArray(sub.affectedProjectIds)
       ? (sub.affectedProjectIds as unknown[]).filter((x): x is string => typeof x === "string")
       : [];
     for (const w of horizon) {
-      if (!weekInSubstitute(sub, w.isoYear, w.isoWeek)) continue;
-      for (const projectId of affected) {
+      if (!isoWeekOverlapsSubstitute(sub, w.isoYear, w.isoWeek)) continue;
+      const targets =
+        affectedExplicit.length > 0 ? affectedExplicit : projectIdsForCovered(sub.coveredEmployeeId);
+      for (const projectId of targets) {
         await clearTurnusSuggestionsForCell(db, projectId, w.isoYear, w.isoWeek);
         await createIfEmpty(db, {
           projectId,
@@ -219,11 +222,24 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
           },
         });
         if (blocksTurnus === 0) {
+          let assigneeId: string | null | undefined = p.responsibleEmployeeId;
+          if (assigneeId && (await isEmployeeUnavailableInWeek(db, assigneeId, isoYear, isoWeek))) {
+            assigneeId = await findDelegateForCoveredInWeek(db, {
+              coveredEmployeeId: assigneeId,
+              projectId: p.id,
+              isoYear,
+              isoWeek,
+            });
+            if (!assigneeId) {
+              cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
+              continue;
+            }
+          }
           await createIfEmpty(db, {
             projectId: p.id,
             isoYear,
             isoWeek,
-            employeeId: p.responsibleEmployeeId,
+            employeeId: assigneeId ?? undefined,
             planungStatus: "VORGESCHLAGEN",
             planungType: "REGULAER",
             planungSource: "TURNUS",

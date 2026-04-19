@@ -21,6 +21,14 @@ enum EmployeeKind {
   EXTERN
 }
 
+/// Rolle im Einsatz (SiGeKo, Büro, GF, Extern) — unabhängig vom Login-`User.role`.
+enum EmployeeJobRole {
+  SIKOGO
+  BUERO
+  GF
+  EXTERN
+}
+
 enum ProjectStatus {
   ACTIVE
   PAUSED
@@ -168,9 +176,12 @@ model Employee {
   shortCode         String         @unique
   displayName       String
   kind              EmployeeKind
+  jobRole           EmployeeJobRole?
   active            Boolean        @default(true)
   region            String?
   weeklyCapacity    Int            @default(5)
+  qualifications    Json?
+  contactInfo       Json?
   user              User?
   availabilities    Availability[]
   coveringFor       Substitute[]   @relation("SubstitutionDelegate")
@@ -207,6 +218,7 @@ model Substitute {
   startsOn            DateTime
   endsOn              DateTime
   note                String?
+  priority            Int?
   affectedProjectIds  Json      @default("[]")
   coveredEmployee     Employee  @relation("SubstitutionCovered", fields: [coveredEmployeeId], references: [id], onDelete: Cascade)
   delegateEmployee    Employee  @relation("SubstitutionDelegate", fields: [delegateEmployeeId], references: [id], onDelete: Cascade)

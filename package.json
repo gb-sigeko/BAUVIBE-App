@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "playwright test",
+    "test:automated": "tsx scripts/run-full-test-suite.ts",
     "test:suite": "tsx scripts/run-full-test-suite.ts",
     "qa:recherche": "tsx scripts/qa-recherche-json.ts",
     "postinstall": "prisma generate",

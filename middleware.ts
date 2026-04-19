@@ -27,7 +27,11 @@ export async function middleware(req: NextRequest) {
   const role = token.role as string | undefined;
 
   if (role === "EXTERN") {
-    const allowed = pathname.startsWith("/eigene-planung") || pathname.startsWith("/api/me/");
+    const allowed =
+      pathname.startsWith("/eigene-planung") ||
+      pathname.startsWith("/api/me/") ||
+      pathname.startsWith("/api/planung") ||
+      pathname.startsWith("/api/availability");
     if (!allowed) {
       const url = req.nextUrl.clone();
       url.pathname = "/eigene-planung";

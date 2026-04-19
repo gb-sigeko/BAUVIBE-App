@@ -62,6 +62,7 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
+      data-testid={`planung-cell-${isoYear}-${isoWeek}`}
       className={cn(
         "min-h-[84px] rounded-md border border-dashed p-1.5 transition-colors",
         isOver ? "bg-muted" : "bg-background",
@@ -156,7 +157,7 @@ function PlanungRow({
   }
 
   return (
-    <div {...ariaAttributes} style={style} className="flex border-b bg-background">
+    <div {...ariaAttributes} style={style} className="flex border-b bg-background" data-testid={`planung-row-${p.code}`}>
       <div
         className="shrink-0 border-r bg-background px-2 py-2 align-top"
         style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}

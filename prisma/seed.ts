@@ -43,15 +43,15 @@ async function main() {
   const passwordHash = await bcrypt.hash("Bauvibe2026!", 10);
 
   const e1 = await prisma.employee.create({
-    data: { shortCode: "MW", displayName: "Maria Weber", kind: "INTERN" },
+    data: { shortCode: "MW", displayName: "Maria Weber", kind: "INTERN", jobRole: "SIKOGO" },
   });
 
   const e2 = await prisma.employee.create({
-    data: { shortCode: "TK", displayName: "Tom Klein", kind: "INTERN" },
+    data: { shortCode: "TK", displayName: "Tom Klein", kind: "INTERN", jobRole: "SIKOGO" },
   });
 
   const eExt = await prisma.employee.create({
-    data: { shortCode: "EXT-01", displayName: "Extern SiGeKo Nord", kind: "EXTERN" },
+    data: { shortCode: "EXT-01", displayName: "Extern SiGeKo Nord", kind: "EXTERN", jobRole: "EXTERN" },
   });
 
   const users = [
@@ -162,6 +162,7 @@ async function main() {
       startsOn: new Date("2026-05-01"),
       endsOn: new Date("2026-05-10"),
       note: "Vertretung während Urlaub",
+      priority: 0,
       affectedProjectIds: [],
     },
   });

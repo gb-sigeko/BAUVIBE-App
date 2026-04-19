@@ -3,13 +3,16 @@ import { PlanungBoard, type PlanungBoardEntry, type PlanungBoardProject, type Pl
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
 import { syncTurnusSuggestions } from "@/lib/turnus-engine";
+import { applyKrankVertretungForHorizon } from "@/lib/vertretung";
 
 export const dynamic = "force-dynamic";
 
 export default async function PlanungPage() {
   const anchor = new Date();
   const weeks: PlanungBoardWeek[] = buildPlanungHorizon(anchor, 12);
-  await syncTurnusSuggestions(prisma, anchor, horizonToIsoWeeks(weeks));
+  const horizon = horizonToIsoWeeks(weeks);
+  await applyKrankVertretungForHorizon(prisma, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon);
 
   const projects = await prisma.project.findMany({
     where: { status: "ACTIVE" },
@@ -24,6 +27,24 @@ export default async function PlanungPage() {
     include: { employee: true, _count: { select: { vorOrtRueckmeldungen: true } } },
     orderBy: [{ projectId: "asc" }, { isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
   });
+
+  const employees = await prisma.employee.findMany({
+    where: { active: true },
+    orderBy: { shortCode: "asc" },
+    select: { id: true, shortCode: true, displayName: true, weeklyCapacity: true },
+  });
+
+  const weekKey = (y: number, w: number) => `${y}-${w}`;
+  const visibleWeekKeys = new Set(weeks.map((w) => weekKey(w.isoYear, w.isoWeek)));
+  const excludeCapStatuses = new Set(["ERLEDIGT", "ABGESAGT"]);
+  const usedByEmployee = new Map<string, number>();
+  for (const e of entriesRaw) {
+    if (!e.employeeId) continue;
+    if (!visibleWeekKeys.has(weekKey(e.isoYear, e.isoWeek))) continue;
+    if (excludeCapStatuses.has(e.planungStatus)) continue;
+    usedByEmployee.set(e.employeeId, (usedByEmployee.get(e.employeeId) ?? 0) + 1);
+  }
+  const capDen = Math.max(1, weeks.length);
 
   const boardProjects: PlanungBoardProject[] = projects;
   const boardEntries: PlanungBoardEntry[] = entriesRaw.map((e) => ({
@@ -55,6 +76,37 @@ export default async function PlanungPage() {
           Projektzeilen, KW-Spalten, Drag &amp; Drop zwischen Wochen, Turnus- und Rückmeldefelder. Konflikte werden automatisch markiert.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Kapazität (Horizont)</CardTitle>
+          <CardDescription>
+            Geplante Slots in den sichtbaren Kalenderwochen vs. Wochenkapazität × Anzahl Wochen ({weeks.length} Spalten).
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {employees.map((emp) => {
+            const used = usedByEmployee.get(emp.id) ?? 0;
+            const maxSlots = Math.max(1, emp.weeklyCapacity * capDen);
+            const pct = Math.min(100, Math.round((used / maxSlots) * 100));
+            return (
+              <div key={emp.id} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="font-medium">
+                    {emp.shortCode} · {emp.displayName}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {used} / {maxSlots} ({pct}%)
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
