@@ -86,3 +86,27 @@ test("Test 7: Planung Performance (Raster sichtbar)", async ({ page }) => {
   const jankBudget = Number(process.env.PLANUNG_PERF_JANK_MS ?? "200");
   expect(jank, `p90 rAF delta ${jank}ms`).toBeLessThan(jankBudget);
 });
+
+test("Test 8: Arbeitskorb Kontextkarten und Rechtslinks", async ({ page }) => {
+  await page.goto("/arbeitskorb", { waitUntil: "domcontentloaded", timeout: 90_000 });
+
+  const cards = page.getByTestId("arbeitskorb-context-cards");
+  await expect(cards).toBeVisible();
+
+  await expect(page.getByRole("heading", { name: "Hinweise & Quellen" })).toBeVisible();
+  await expect(page.getByTestId("arbeitskorb-hinweis-vorankuendigung")).toBeVisible();
+  await expect(page.getByTestId("arbeitskorb-hinweis-sigeplan")).toBeVisible();
+  await expect(page.getByTestId("arbeitskorb-hinweis-koordination")).toBeVisible();
+  await expect(page.getByTestId("arbeitskorb-hinweis-ordnungswidrigkeiten")).toBeVisible();
+
+  const primaryVoran = page.getByTestId("arbeitskorb-link-primary-vorankuendigung");
+  await expect(primaryVoran).toHaveAttribute("href", /gesetze-im-internet\.de\/baustellv/);
+  const href = await primaryVoran.getAttribute("href");
+  expect(href).toBeTruthy();
+  expect(href!.startsWith("http")).toBeTruthy();
+
+  const primarySige = page.getByTestId("arbeitskorb-link-primary-sigeplan");
+  await expect(primarySige).toHaveAttribute("href", /baua\.de.*RAB-31/i);
+
+  await expect(page.getByText(/keine rechtsverbindliche Auskunft/i)).toBeVisible();
+});

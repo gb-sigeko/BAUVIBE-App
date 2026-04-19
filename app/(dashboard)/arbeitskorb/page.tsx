@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArbeitskorbContextCards } from "@/components/arbeitskorb-context-cards";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,7 +88,8 @@ export default async function ArbeitskorbPage() {
     ]);
 
   return (
-    <div className="space-y-6">
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_min(320px,100%)] lg:items-start">
+      <div className="min-w-0 space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
         <p className="text-muted-foreground">Heute fällig, überfällig, Rückläufe und fehlende Protokolle (&gt;3 Tage).</p>
@@ -148,6 +150,11 @@ export default async function ArbeitskorbPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
+
+      <aside className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+        <ArbeitskorbContextCards />
+      </aside>
     </div>
   );
 }
