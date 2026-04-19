@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text -- @react-pdf/render Image hat kein alt-Prop */
 import React from "react";
 import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 
@@ -41,7 +42,7 @@ function MangelRow({ m }: { m: BegehungPdfMangel }) {
       </View>
       <View style={styles.colR}>
         {m.fotoUrl && (m.fotoUrl.startsWith("data:") || m.fotoUrl.startsWith("http")) ? (
-          <Image style={styles.img} src={m.fotoUrl} alt="" />
+          <Image style={styles.img} src={m.fotoUrl} />
         ) : (
           <Text>—</Text>
         )}
@@ -65,7 +66,7 @@ function ProtokollDoc({ data }: { data: BegehungPdfInput }) {
         {data.uebersichtFoto && (data.uebersichtFoto.startsWith("data:") || data.uebersichtFoto.startsWith("http")) ? (
           <View style={{ marginVertical: 8 }}>
             <Text style={{ marginBottom: 4 }}>Übersichtsfoto</Text>
-            <Image style={{ maxHeight: 160, objectFit: "contain" }} src={data.uebersichtFoto} alt="" />
+            <Image style={{ maxHeight: 160, objectFit: "contain" }} src={data.uebersichtFoto} />
           </View>
         ) : null}
         <Text style={{ marginTop: 12, marginBottom: 6, fontSize: 11 }}>Mängel</Text>

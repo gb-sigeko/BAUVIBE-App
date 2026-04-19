@@ -93,8 +93,16 @@ async function createIfEmpty(
     note?: string | null;
     plannedDate?: Date | null;
   },
+  /** Optional: belegte Zellen im Horizont (reduziert DB-Roundtrips bei vielen Projekten). */
+  occupiedCache?: Set<string>,
+  opts?: { skipConflictRecalc?: boolean },
 ) {
-  if (await hasCellEntry(db, data.projectId, data.isoYear, data.isoWeek)) return;
+  const cellKey = festCellKey(data.projectId, data.isoYear, data.isoWeek);
+  if (occupiedCache?.has(cellKey)) return;
+  if (await hasCellEntry(db, data.projectId, data.isoYear, data.isoWeek)) {
+    occupiedCache?.add(cellKey);
+    return;
+  }
   await db.planungEntry.create({
     data: {
       projectId: data.projectId,
@@ -111,7 +119,10 @@ async function createIfEmpty(
       plannedDate: data.plannedDate ?? undefined,
     },
   });
-  await recalcConflictsForWeek(data.isoYear, data.isoWeek);
+  occupiedCache?.add(cellKey);
+  if (!opts?.skipConflictRecalc) {
+    await recalcConflictsForWeek(data.isoYear, data.isoWeek);
+  }
 }
 
 /**
@@ -161,6 +172,11 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
   const minW = horizon.reduce((a, b) => (compareIsoWeek(a, b) < 0 ? a : b));
   const maxW = horizon.reduce((a, b) => (compareIsoWeek(a, b) > 0 ? a : b));
 
+  const projects = await db.project.findMany({
+    where: { status: "ACTIVE", turnus: { not: null } },
+    include: { responsibleEmployee: true },
+  });
+
   const festRows = await db.planungEntry.findMany({
     where: {
       planungType: "FEST",
@@ -170,10 +186,28 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
   });
   const festCells = new Set(festRows.map((r) => festCellKey(r.projectId, r.isoYear, r.isoWeek)));
 
-  const projects = await db.project.findMany({
-    where: { status: "ACTIVE", turnus: { not: null } },
-    include: { responsibleEmployee: true },
-  });
+  const activeProjectIds = projects.map((p) => p.id);
+  const horizonOr = horizon.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek }));
+  const occupiedCache = new Set<string>();
+  let priorityBlockCells = new Set<string>();
+  if (activeProjectIds.length) {
+    const existingCells = await db.planungEntry.findMany({
+      where: { projectId: { in: activeProjectIds }, OR: horizonOr },
+      select: { projectId: true, isoYear: true, isoWeek: true },
+    });
+    for (const r of existingCells) {
+      occupiedCache.add(festCellKey(r.projectId, r.isoYear, r.isoWeek));
+    }
+    const higherPri = await db.planungEntry.findMany({
+      where: {
+        projectId: { in: activeProjectIds },
+        priority: { lt: PLANUNG_PRIORITY.TURNUS },
+        OR: horizonOr,
+      },
+      select: { projectId: true, isoYear: true, isoWeek: true },
+    });
+    priorityBlockCells = new Set(higherPri.map((r) => festCellKey(r.projectId, r.isoYear, r.isoWeek)));
+  }
 
   const subs = await db.substitute.findMany({
     include: { delegateEmployee: true, coveredEmployee: true },
@@ -187,18 +221,27 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
       if (!weekInSubstitute(sub, w.isoYear, w.isoWeek)) continue;
       for (const projectId of affected) {
         await clearTurnusSuggestionsForCell(db, projectId, w.isoYear, w.isoWeek);
-        await createIfEmpty(db, {
-          projectId,
-          isoYear: w.isoYear,
-          isoWeek: w.isoWeek,
-          employeeId: sub.delegateEmployeeId,
-          planungStatus: "VORGESCHLAGEN",
-          planungType: "VERTRETUNG",
-          planungSource: "MANUELL",
-          priority: PLANUNG_PRIORITY.VERTRETUNG,
-          turnusLabel: `Vertretung ${sub.delegateEmployee.shortCode}`,
-          note: `Vertretung für ${sub.coveredEmployee.shortCode}`,
-        });
+        occupiedCache.delete(festCellKey(projectId, w.isoYear, w.isoWeek));
+        await createIfEmpty(
+          db,
+          {
+            projectId,
+            isoYear: w.isoYear,
+            isoWeek: w.isoWeek,
+            employeeId: sub.delegateEmployeeId,
+            planungStatus: "VORGESCHLAGEN",
+            planungType: "VERTRETUNG",
+            planungSource: "MANUELL",
+            priority: PLANUNG_PRIORITY.VERTRETUNG,
+            turnusLabel: `Vertretung ${sub.delegateEmployee.shortCode}`,
+            note: `Vertretung für ${sub.coveredEmployee.shortCode}`,
+          },
+          occupiedCache,
+          { skipConflictRecalc: true },
+        );
+        if (occupiedCache.has(festCellKey(projectId, w.isoYear, w.isoWeek))) {
+          priorityBlockCells.add(festCellKey(projectId, w.isoYear, w.isoWeek));
+        }
       }
     }
   }
@@ -230,16 +273,13 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
           cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
           continue;
         }
-        const blocksHigher = await db.planungEntry.count({
-          where: {
-            projectId: p.id,
-            isoYear,
-            isoWeek,
-            priority: { lt: PLANUNG_PRIORITY.TURNUS },
-          },
-        });
-        if (blocksHigher === 0) {
-          await createIfEmpty(db, {
+        if (priorityBlockCells.has(festCellKey(p.id, isoYear, isoWeek))) {
+          cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
+          continue;
+        }
+        await createIfEmpty(
+          db,
+          {
             projectId: p.id,
             isoYear,
             isoWeek,
@@ -250,10 +290,16 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
             priority: PLANUNG_PRIORITY.TURNUS,
             turnusLabel: p.turnus ?? undefined,
             note: `Turnus-Vorschlag (${p.turnus})`,
-          });
-        }
+          },
+          occupiedCache,
+          { skipConflictRecalc: true },
+        );
       }
       cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
     }
+  }
+
+  for (const w of horizon) {
+    await recalcConflictsForWeek(w.isoYear, w.isoWeek);
   }
 }

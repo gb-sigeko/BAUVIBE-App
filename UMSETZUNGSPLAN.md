@@ -33,7 +33,7 @@ Vollständige, testbare Umsetzung der Prioritäten Turnus/Vertrag, Rückmeldunge
 
 ## Phase 6 – Tests (Grind)
 1. **Skript** `scripts/kernfunktionen-test.ts` (tsx): Legt `tenantId = e2e-kern-<timestamp>` an, 50 Projekte, 10 Mitarbeiter, generiert Turnus, prüft NB/OB/UF, festen Termin, Protokoll-PDF-Buffer, E-Mail-Mock; räumt Daten am Ende auf.
-2. **`npm run test:kern`**: Muss grün sein vor Merge.
+2. **`npm run test:kern`**: Muss grün sein vor Merge. Optional `KERN_E2E_PROJECTS=50` (Standard 50); bei langsamer DB kleiner setzen.
 3. **Branch `feature/kernfunktionen`** + PR nach grünem Lauf.
 
 ## Abhängigkeiten npm

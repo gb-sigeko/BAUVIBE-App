@@ -17,6 +17,7 @@ import { sendTransactionalEmail } from "../lib/email";
 process.env.EMAIL_MOCK = "1";
 
 const tag = `e2e-${Date.now()}`;
+const PROJECT_COUNT = Number.parseInt(process.env.KERN_E2E_PROJECTS ?? "50", 10);
 
 async function main() {
   const employees: { id: string; shortCode: string }[] = [];
@@ -37,7 +38,8 @@ async function main() {
 
   const turnusCycle = ["W", "W2", "W3", "ABRUF"] as const;
   const projects: { id: string; code: string; turnus: string | null }[] = [];
-  for (let i = 0; i < 50; i++) {
+  console.log(`[kern] creating ${PROJECT_COUNT} projects…`);
+  for (let i = 0; i < PROJECT_COUNT; i++) {
     const t = turnusCycle[i % 4];
     const p = await prisma.project.create({
       data: {
@@ -66,6 +68,7 @@ async function main() {
   const anchor = new Date();
   const weeks = buildPlanungHorizon(anchor, 12);
   const horizon = horizonToIsoWeeks(weeks);
+  console.log("[kern] sync turnus…");
   await syncTurnusSuggestions(prisma, anchor, horizon);
 
   const turnusSuggestions = await prisma.planungEntry.count({
@@ -197,7 +200,7 @@ async function main() {
     where: { shortCode: { startsWith: `${tag}-` } },
   });
 
-  console.log("kernfunktionen-test: OK");
+  console.log("[kern] kernfunktionen-test: OK");
 }
 
 main()
