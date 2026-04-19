@@ -406,15 +406,16 @@ async function testArbeitskorbUeberfaellig(push: (t: string, m: string) => void)
     },
   });
 
-  const fiveDaysAgo = new Date();
-  fiveDaysAgo.setHours(0, 0, 0, 0);
-  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const threeDaysAgo = new Date(startOfDay);
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
   const overdue = await prisma.planungEntry.findMany({
     where: {
       id: entry.id,
       planungStatus: { in: ["RUECKMELDUNG_OFFEN", "VORGESCHLAGEN"] },
-      updatedAt: { lt: fiveDaysAgo },
+      updatedAt: { lt: threeDaysAgo },
     },
   });
 

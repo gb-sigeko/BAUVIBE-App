@@ -11,6 +11,7 @@ import {
 import { getIsoWeekParts } from "@/lib/utils";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { isoWeekOverlapsClosedInterval } from "@/lib/planung-week-overlap";
+import { appendChronikEntry } from "@/lib/chronik";
 
 /** Priorität: fester Termin (0) > Vertretung (1) > Turnus (2) > manuell (3). */
 export const PLANUNG_PRIORITY = {
@@ -351,28 +352,24 @@ export async function applyKrankVertretungForHorizon(db: PrismaClient, horizon: 
               turnusLabel: ent.turnusLabel ? `${ent.turnusLabel} (Vertretung)` : "Vertretung (Krankheit)",
             },
           });
-          await db.chronikEntry.create({
-            data: {
-              projectId: ent.projectId,
-              body: `Automatische Vertretung in KW ${w.isoWeek}/${w.isoYear}: ${av.employee.shortCode} → ${del?.shortCode ?? "?"} (Krankheit).`,
-              action: "planung_vertretung_abwesenheit",
-              targetType: "PlanungEntry",
-              targetId: ent.id,
-            },
+          await appendChronikEntry({
+            projectId: ent.projectId,
+            body: `Automatische Vertretung in KW ${w.isoWeek}/${w.isoYear}: ${av.employee.shortCode} → ${del?.shortCode ?? "?"} (Krankheit).`,
+            action: "planung_vertretung_abwesenheit",
+            targetType: "PlanungEntry",
+            targetId: ent.id,
           });
         } else if (!ent.conflict) {
           await db.planungEntry.update({
             where: { id: ent.id },
             data: { conflict: true },
           });
-          await db.chronikEntry.create({
-            data: {
-              projectId: ent.projectId,
-              body: `Keine Vertretung hinterlegt: ${av.employee.shortCode} ist in KW ${w.isoWeek}/${w.isoYear} krank, Eintrag markiert als Konflikt.`,
-              action: "planung_vertretung_fehlt",
-              targetType: "PlanungEntry",
-              targetId: ent.id,
-            },
+          await appendChronikEntry({
+            projectId: ent.projectId,
+            body: `Keine Vertretung hinterlegt: ${av.employee.shortCode} ist in KW ${w.isoWeek}/${w.isoYear} krank, Eintrag markiert als Konflikt.`,
+            action: "planung_vertretung_fehlt",
+            targetType: "PlanungEntry",
+            targetId: ent.id,
           });
         }
       }

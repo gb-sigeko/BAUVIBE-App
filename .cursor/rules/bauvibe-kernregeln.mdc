@@ -1,0 +1,36 @@
+---
+description: Kernfachregeln BAUVIBE (Grundidee) – Arbeitskorb, Priorität, Zählung, Chronik
+globs:
+alwaysApply: true
+---
+
+# BAUVIBE – Kernfachregeln (bindend)
+
+Diese Regeln entsprechen der Spezifikation in `Grundidee_APP_Bauvibe.md` (Checkliste D, Teil 5). Bei Konflikt mit älterem Code gilt diese Datei als Leitlinie für neue Änderungen.
+
+## Arbeitskorb – Schwellen (Planung / Rückmeldung)
+
+- **Heute relevant („>1 Tag“):** `PlanungEntry` mit `planungStatus` in `RUECKMELDUNG_OFFEN`, `VORGESCHLAGEN` und `updatedAt` **älter als 1 Kalendertag** (bezogen auf Tagesbeginn heute), aber **noch nicht** in der überfälligen Kategorie.
+- **Überfällig (rot, „>3 Tage“):** dieselben Status, `updatedAt` **älter als 3 Kalendertage** (bezogen auf Tagesbeginn heute).
+- **Fehlende Protokolle (Begehung):** Begehung mit `protocolMissing` und `date` mindestens **3 Tage** vor heutigem Tagesbeginn (wie Spez „fehlendes Protokoll“).
+
+Implementierung: `app/(dashboard)/arbeitskorb/page.tsx` (Listen „Fehlende Rückläufe“).
+
+## Priorität Planungseinträge
+
+Reihenfolge (höchste zuerst): **fester Termin (`PlanungType.FEST`) > Vertretung > Turnus > manuell**.
+
+Referenz: `lib/turnus-engine.ts` (`PLANUNG_PRIORITY`).
+
+## Vertrags-Zählung (`completedBegehungen` / `isCompletedForContract`)
+
+- `isCompletedForContract = true` nur bei **Status erledigt** (`ERLEDIGT`) **und** `specialCode = NONE` **und** zugewiesener Mitarbeiter **nicht** Kürzel `UF` (Büro).
+- `nb` und `ob` zählen **nicht** als reguläre vertragliche Erledigung.
+- Synchronisation der Summe: `lib/planung-contract-sync.ts` (`syncProjectCompletedBegehungenCount`).
+
+## Chronik-Pflicht
+
+Jede **schreibende** fachliche Änderung an **Projekt, Planung, Begehung, Aufgabe, Dokument, Kommunikation** (Mutation, die in der Akte sichtbar sein soll) **muss** einen `ChronikEntry` erzeugen.
+
+- Zentraler Einstieg: `appendChronikEntry` in `lib/chronik.ts` (keine direkten `prisma.chronikEntry.create` in neuem Code).
+- Bestehende Routen schrittweise umstellen; neue API-Routen **ohne** Chronik sind nicht akzeptabel.

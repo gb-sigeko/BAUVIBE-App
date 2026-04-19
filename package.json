@@ -10,6 +10,7 @@
     "lint": "next lint",
     "test:kern": "tsx scripts/kernfunktionen-test.ts",
     "test:automated": "tsx scripts/run-full-test-suite.ts",
+    "ci": "npm run lint && npm run build && npm run test:automated",
     "test:generate-data": "tsx scripts/generate-test-data.ts",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

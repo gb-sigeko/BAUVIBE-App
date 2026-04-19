@@ -43,8 +43,6 @@ export default async function ArbeitskorbPage() {
   oneDayAgo.setDate(oneDayAgo.getDate() - 1);
   const threeDaysAgo = new Date(startOfDay);
   threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-  const fiveDaysAgo = new Date(startOfDay);
-  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
 
   const [dueToday, overdue, missingTaskProtocols, missingBegehungProtocols, offeneRueckmeldungen, overdueRueckmeldungen] =
     await Promise.all([
@@ -71,7 +69,7 @@ export default async function ArbeitskorbPage() {
       prisma.planungEntry.findMany({
         where: {
           planungStatus: { in: ["RUECKMELDUNG_OFFEN", "VORGESCHLAGEN"] },
-          updatedAt: { lt: oneDayAgo },
+          updatedAt: { lt: oneDayAgo, gte: threeDaysAgo },
         },
         include: { project: true, employee: true },
         orderBy: { updatedAt: "asc" },
@@ -80,7 +78,7 @@ export default async function ArbeitskorbPage() {
       prisma.planungEntry.findMany({
         where: {
           planungStatus: { in: ["RUECKMELDUNG_OFFEN", "VORGESCHLAGEN"] },
-          updatedAt: { lt: fiveDaysAgo },
+          updatedAt: { lt: threeDaysAgo },
         },
         include: { project: true, employee: true },
         orderBy: { updatedAt: "asc" },
@@ -128,7 +126,7 @@ export default async function ArbeitskorbPage() {
             <PlanungTable entries={offeneRueckmeldungen} emptyHint="Keine offenen Rückläufe." />
           </div>
           <div>
-            <div className="mb-2 text-sm font-medium text-destructive">Überfällig (&gt;5 Tage)</div>
+            <div className="mb-2 text-sm font-medium text-destructive">Überfällig (&gt;3 Tage)</div>
             <PlanungTable entries={overdueRueckmeldungen} emptyHint="Keine überfälligen Rückläufe." highlight />
           </div>
         </CardContent>
