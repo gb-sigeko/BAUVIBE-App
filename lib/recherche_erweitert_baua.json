@@ -1,0 +1,324 @@
+﻿{
+  "meta": {
+    "dokument": "recherche_erweitert_baua.json",
+    "projekt": "BAUVIBE",
+    "stand_recherche": "2026-04-19",
+    "hinweis": "standardisierte Hilfe auf Basis von AI-Recherche ÔÇô keine rechtsverbindliche Auskunft. Inhalte sind strukturierte Arbeitshilfen; verbindliche Auslegung obliegt zust├ñndigen Beh├Ârden/Gerichten. Prim├ñrquellen jeweils im Original pr├╝fen.",
+    "fokus": [
+      "BaustellV (gesetze-im-internet, konsolidierte Fassung)",
+      "BAuA RAB/SiGePlan-Materialien",
+      "ASR (technische Regeln f├╝r Arbeitsst├ñtten) mit Baustellenbezug",
+      "Querverweise DGUV/ArbSchG (nur soweit f├╝r SiGeKo-Kontext ├╝blich)"
+    ]
+  },
+  "quellen_kern": [
+    {
+      "typ": "Rechtsnorm",
+      "kuerzel": "BaustellV",
+      "titel": "Verordnung ├╝ber Sicherheit und Gesundheitsschutz auf Baustellen",
+      "url": "https://www.gesetze-im-internet.de/baustellv/",
+      "bemerkung": "F├╝r Paragraphenz├ñhlung und ├änderungsst├ñnde stets die dort angezeigte konsolidierte Fassung heranziehen."
+    },
+    {
+      "typ": "Regelwerk",
+      "kuerzel": "RAB 31",
+      "titel": "Regeln zum Arbeitsschutz auf Baustellen ÔÇô Sicherheits- und Gesundheitsschutzplan (SiGePlan)",
+      "herausgeber": "BAuA",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/RAB/RAB-31.html",
+      "bemerkung": "RAB sind anerkannte Regeln zum Arbeitsschutz; SiGePlan-Inhalte orientieren sich an BaustellV und werden in RAB 31 inhaltlich und formal beschrieben."
+    },
+    {
+      "typ": "Forschungsprojekt",
+      "kuerzel": "F 2229",
+      "titel": "Entwicklung und Verbreitung von Informationsmaterial und Handlungshilfen zur Unterst├╝tzung der Baubeteiligten bei der sicherheits- und gesundheitsgerechten Planung und Durchf├╝hrung von Bauvorhaben",
+      "url": "https://www.baua.de/DE/Forschung/Forschungsprojekte/f2229",
+      "nutzen_fuer_bauvibe": "Ideen f├╝r Aufkl├ñrung, Nutzenargumentation Koordination/SiGe, didaktische Textbausteine im Arbeitskorb."
+    },
+    {
+      "typ": "Forschungsprojekt",
+      "kuerzel": "F 2142",
+      "titel": "Entwicklung von Instrumenten zur Integration der Koordination nach Baustellenverordnung in die Wertsch├Âpfungskette Bauen",
+      "url": "https://www.baua.de/DE/Forschung/Forschungsprojekte/f2142",
+      "nutzen_fuer_bauvibe": "Prozess-/Rollenmodelle f├╝r Checklisten (Planung vs. Ausf├╝hrung) und Schnittstellenmanagement."
+    }
+  ],
+  "baustellv": {
+    "quelle": "BaustellV",
+    "version": "konsolidierte Fassung (Stand laut Recherchebasis 2026-04-19; ├änderungen ├╝ber Normenkette fortlaufend pr├╝fen)",
+    "paragrafen": [
+      {
+        "nummer": "┬º 2",
+        "titel": "Planung der Ausf├╝hrung des Bauvorhabens (einschlie├ƒlich Vorank├╝ndigung und SiGe-Plan-Pflichten)",
+        "inhalt": "(1) Planung der Arbeiten (gleichzeitig/nacheinander) und Ausf├╝hrungszeiten unter Ber├╝cksichtigung der ArbSchG-Grunds├ñtze (┬º 4 ArbSchG). (2) Vorank├╝ndigung an die zust├ñndige Beh├Ârde sp├ñtestens zwei Wochen vor Einrichtung der Baustelle, wenn Schwellenwerte erreicht werden (voraussichtlich >30 Arbeitstage und >20 gleichzeitig Besch├ñftigte ODER >500 Personentage); Mindestinhalt Anhang I; sichtbar auszuh├ñngen und bei erheblichen ├änderungen anzupassen. (3) SiGe-Plan vor Einrichtung, wenn Vorank├╝ndigungspflicht besteht ODER besonders gef├ñhrliche Arbeiten nach Anhang II auf Mehr-Arbeitgeber-Baustellen; Plan muss anwendbare Arbeitsschutzbestimmungen erkennen lassen und Ma├ƒnahmen f├╝r Anhang-II-Arbeiten enthalten; ggf. betriebliche T├ñtigkeiten auf dem Gel├ñnde ber├╝cksichtigen. (4) Analoge Informationspflichten, wenn zwar Mehr-Arbeitgeber-Konstellation/SiGe-Plan-Inhalte nicht zwingend nach Abs. 3, aber Ein-Arbeitgeber-Baustelle mit Vorank├╝ndigung oder Anhang-II-Arbeiten: Verantwortlicher sorgt daf├╝r, dass der Arbeitgeber ├╝ber Umst├ñnde unterrichtet wird, die in einen SiGe-Plan einzubeziehen w├ñren.",
+        "relevant_fuer": [
+          "Vorank├╝ndigung",
+          "SiGe-Plan",
+          "Projektakte",
+          "Begehungs-Checkliste (Planungsphase)"
+        ],
+        "keywords": [
+          "Vorank├╝ndigung",
+          "Anhang I",
+          "SiGe-Plan",
+          "Anhang II",
+          "Personentage",
+          "30 Arbeitstage",
+          "Koordinationsrelevante Schwellenwerte"
+        ],
+        "mangel_textbaustein_hinweise": [
+          "Fehlende/veraltete Vorank├╝ndigung (sichtbarer Aushang/Beh├Ârden├╝bermittlung) ÔÇô Pr├╝fung anhand BaustellV ┬º 2 Abs. 2.",
+          "Fehlender SiGe-Plan vor Einrichtung bei einschl├ñgiger Konstellation ÔÇô BaustellV ┬º 2 Abs. 3.",
+          "SiGe-Plan ohne erkennbare Ma├ƒnahmen zu Anhang-II-T├ñtigkeiten ÔÇô BaustellV ┬º 2 Abs. 3 Satz 2/3."
+        ]
+      },
+      {
+        "nummer": "┬º 3",
+        "titel": "Koordinierung",
+        "inhalt": "(1) Bei Mehr-Arbeitgeber-Baustellen: Bestellung geeigneter Koordinatoren durch den Verantwortlichen; Bauherr/beauftragter Dritter kann Koordinator selbst sein. (1a) Beauftragung entbindet Bauherrn/Dritten nicht von Verantwortung. (2) Planungsphase: Koordination der ┬º 2 Abs. 1-Ma├ƒnahmen; SiGe-Plan ausarbeiten/ausarbeiten lassen; Unterlage f├╝r sp├ñtere Arbeiten zusammenstellen. (3) Ausf├╝hrungsphase: Koordination ArbSchG-Grunds├ñtze; ├£berwachung der Pflichten von Arbeitgebern und Unternehmern o.B.; SiGe-Plan bei wirkungsvollen ├änderungen anpassen; Zusammenarbeit der Arbeitgeber organisieren; ├£berwachung ordnungsgem├ñ├ƒer Arbeitsverfahren koordinieren.",
+        "relevant_fuer": [
+          "SiGeKo",
+          "SiGe-Plan",
+          "Unterlage sp├ñtere Arbeiten",
+          "Begehungs-Checkliste (Koordination/Abstimmung)"
+        ],
+        "keywords": [
+          "Koordinator",
+          "Planung",
+          "Ausf├╝hrung",
+          "Unterlage sp├ñtere Arbeiten",
+          "Zusammenarbeit Arbeitgeber"
+        ],
+        "mangel_textbaustein_hinweise": [
+          "Koordinationsl├╝cken zwischen Gewerken (Wechselwirkungen) ÔÇô BaustellV ┬º 3 Abs. 3 Ziff. 1/4 i.V.m. ┬º 5 Abs. 1 Nr. 4 ArbSchG-Grunds├ñtze ├╝ber Koordinator koordinieren.",
+          "SiGe-Plan nicht fortgeschrieben nach wesentlicher ├änderung der Ausf├╝hrung ÔÇô BaustellV ┬º 3 Abs. 3 Ziff. 3."
+        ]
+      },
+      {
+        "nummer": "┬º 4",
+        "titel": "Beauftragung (Bauherr / Dritter)",
+        "inhalt": "Die Ma├ƒnahmen nach ┬º 2 und ┬º 3 Abs. 1 Satz 1 hat der Bauherr zu treffen, sofern er nicht einen Dritten beauftragt, diese Ma├ƒnahmen in eigener Verantwortung zu treffen.",
+        "relevant_fuer": [
+          "Zust├ñndigkeiten",
+          "Vertrags-/Organisationsmodell",
+          "SiGe-Plan-Workflow in BAUVIBE"
+        ],
+        "keywords": [
+          "Bauherr",
+          "Dritter",
+          "Verantwortlicher",
+          "Delegation"
+        ]
+      },
+      {
+        "nummer": "┬º 5",
+        "titel": "Pflichten der Arbeitgeber (inkl. Unterrichtung der Besch├ñftigten)",
+        "inhalt": "(1) Arbeitsschutzma├ƒnahmen u.a. zu Instandhaltung Arbeitsmittel; Lager/Entsorgung (Gefahrstoffe); Ausf├╝hrungszeiten; Zusammenarbeit; Wechselwirkungen; betriebliche Fremdt├ñtigkeiten; besonders gef├ñhrliche Arbeiten; Ber├╝cksichtigung Unterrichtung ┬º 2 Abs. 4, Hinweise Koordinator, SiGe-Plan. (2) Besch├ñftigte verst├ñndlich ├╝ber Schutzma├ƒnahmen informieren. (3) Arbeitgeberverantwortung unber├╝hrt von ┬º┬º 2 und 3.",
+        "relevant_fuer": [
+          "Baustellenbegehung",
+          "Unterweisungsnachweise",
+          "M├ñngelmanagement"
+        ],
+        "keywords": [
+          "Arbeitgeberpflichten",
+          "Information",
+          "Unterweisung",
+          "Gefahrstoffe",
+          "Wechselwirkungen"
+        ],
+        "mangel_textbaustein_hinweise": [
+          "Fehlende/unzureichende Information der Besch├ñftigten ├╝ber einschl├ñgige Schutzma├ƒnahmen ÔÇô BaustellV ┬º 5 Abs. 2 i.V.m. ArbSchG-Informationspflichten (Detailpr├╝fung ArbSchG).",
+          "Wechselwirkungen zwischen Gewerken nicht adressiert (St├Ârfeuer, Kranhub, Fahrwege) ÔÇô BaustellV ┬º 5 Abs. 1 Nr. 5."
+        ]
+      },
+      {
+        "nummer": "┬º 6",
+        "titel": "Pflichten sonstiger Personen (Unternehmer ohne Besch├ñftigte)",
+        "inhalt": "Unternehmer ohne Besch├ñftigte m├╝ssen anwendbare Arbeitsschutzvorschriften einhalten; Hinweise des Koordinators und den SiGe-Plan ber├╝cksichtigen. Entsprechendes gilt f├╝r selbst auf der Baustelle t├ñtige Arbeitgeber (Satz 3).",
+        "relevant_fuer": [
+          "Nachunternehmer-Steuerung",
+          "SiGe-Plan-Verbindlichkeit auch f├╝r Solo-Selbst├ñndige"
+        ],
+        "keywords": [
+          "Unternehmer o.B.",
+          "Selbst├ñndige",
+          "Subunternehmer"
+        ],
+        "korrektur_haeufige_verwechslung": "Die in Praxisleitf├ñden oft als ÔÇ×BaustelleneinrichtungÔÇ£ gemeinte Thematik (Sozialr├ñume/Sanit├ñr/Verpflegung/Erste Hilfe) ist in der BaustellV nicht unter ┬º 6 geregelt, sondern ├╝berwiegend ├╝ber ArbSt├ñttV/ASR/DGUV Vorschrift 1 und branchenspezifische Regeln zu bewerten."
+      },
+      {
+        "nummer": "┬º 7",
+        "titel": "Ordnungswidrigkeiten und Strafvorschriften (BaustellV-spezifische OWi-Tatbest├ñnde)",
+        "inhalt": "OWi nach ArbSchG ┬º 25 Abs. 1 Nr. 1 u.a. bei Verst├Â├ƒen gegen Vorank├╝ndigungspflicht (┬º 2 Abs. 2 Satz 1) und SiGe-Plan-Pflicht (┬º 2 Abs. 3 Satz 1). Strafbarkeit nach ArbSchG ┬º 26 Nr. 2 bei vors├ñtzlicher OWi-Handlung mit Lebens-/Gesundheitsgef├ñhrdung.",
+        "relevant_fuer": [
+          "Risikoampel im Arbeitskorb",
+          "Eskalationslogik (nur beschreibend, keine Rechtsberatung)"
+        ],
+        "keywords": [
+          "OWi",
+          "Strafbarkeit",
+          "Vorank├╝ndigung",
+          "SiGe-Plan"
+        ]
+      },
+      {
+        "nummer": "┬º 8",
+        "titel": "Inkrafttreten und ├£bergangsvorschrift",
+        "inhalt": "Inkrafttreten/├£bergang f├╝r bereits begonnene Bauvorhaben (├£bergangsregelungen sind gesetzesabh├ñngig und im Gesetzestext zu lesen).",
+        "relevant_fuer": [
+          "Versions-/├£bergangshinweise in Projektdokumentation"
+        ],
+        "keywords": [
+          "Inkrafttreten",
+          "├£bergang"
+        ],
+        "korrektur_haeufige_verwechslung": "Die ÔÇ×Anzeige der BaustelleÔÇ£ im Sinne der Vorank├╝ndigung ist in der aktuellen BaustellV in ┬º 2 Abs. 2 geregelt, nicht in ┬º 8."
+      }
+    ]
+  },
+  "asr_baustellen_relevant": [
+    {
+      "kuerzel": "ASR A2.1",
+      "thema": "Verkehrswege und T├╝ren/Tore/Treppen, Fl├ñchenanforderungen (Arbeitsst├ñtten)",
+      "baustellenbezug": "Umsetzung h├ñufig ├╝ber tempor├ñre Verkehrswege, Zufahrten, Steigungen, Begehbarkeit; Kollision mit Kfz-/Kranverkehr.",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/ASR-A2-1.html",
+      "relevant_fuer": [
+        "Checkliste Verkehrsf├╝hrung",
+        "M├ñngeltext Wege/Zufahrt"
+      ]
+    },
+    {
+      "kuerzel": "ASR A4.1",
+      "thema": "Lufttechnische Ma├ƒnahmen (Raumluftqualit├ñt)",
+      "baustellenbezug": "Innenbereiche/Container/B├╝ro-/Sozialcontainer; L├╝ftung bei Arbeiten mit Emissionen.",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/ASR-A4-1.html",
+      "relevant_fuer": [
+        "Container-Baustellen",
+        "Innenbaustellen"
+      ]
+    },
+    {
+      "kuerzel": "ASR A4.2",
+      "thema": "Beleuchtung",
+      "baustellenbezug": "Nat├╝rliche/k├╝nstliche Beleuchtung in Arbeitsbereichen; Dunkelarbeit/Notbeleuchtung je nach Konstellation.",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/ASR-A4-2.html",
+      "relevant_fuer": [
+        "Checkliste Nachtarbeit",
+        "M├ñngeltext Beleuchtung"
+      ]
+    },
+    {
+      "kuerzel": "ASR A4.3",
+      "thema": "Erste-Hilfe-R├ñume, Mittel und Einrichtungen",
+      "baustellenbezug": "Regelwerk enth├ñlt erg├ñnzende/abweichende Anforderungen f├╝r Baustellen (z. B. Verbandmittel staffeln; EH-Raum/vergleichbare Einrichtung ab bestimmter Gr├Â├ƒe ÔÇô exakte Schwellen im Originaltext pr├╝fen).",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/ASR-A4-3.html",
+      "relevant_fuer": [
+        "Erste-Hilfe-Check Baustelle",
+        "Sanit├ñts-/Erste-Hilfe-Container"
+      ]
+    },
+    {
+      "kuerzel": "ASR A5.2",
+      "thema": "Unterweisung (inhaltliche Mindestlogik in ASR-Systematik)",
+      "baustellenbezug": "Baustellenspezifische Unterweisungsinhalte mit Gef├ñhrdungsbeurteilung und SiGe-Plan verzahnen.",
+      "url": "https://www.baua.de/DE/Angebote/Rechtstexte-und-Technische-Regeln/Regelwerk/ASR/ASR-A5-2.html",
+      "relevant_fuer": [
+        "Onboarding-Felder",
+        "Nachweis-Management"
+      ]
+    }
+  ],
+  "sigeplan_struktur_rab31_arbeits_hypothese": {
+    "hinweis": "Konkrete Kapitel├╝berschriften und Mindestanforderungen exakt aus RAB 31 PDF/HTML ├╝bernehmen. Nachfolgend eine API-taugliche Grobstruktur f├╝r BAUVIBE-Datenmodellierung.",
+    "kapitel": [
+      {
+        "id": "allgemeines",
+        "titel": "Allgemeines (Projekt/Baustelle, Verantwortliche, Geltungsbereich, Aktualisierung)",
+        "pflichtinhalt": true
+      },
+      {
+        "id": "mindestanforderungen_1_5",
+        "titel": "F├╝nf inhaltliche Mindestanforderungen laut RAB 31 (im Originaltext benennen und splitten)",
+        "pflichtinhalt": true,
+        "unterpunkte_archetypen": [
+          "Beschreibung Bauvorhaben/Phasen",
+          "Zeitliche Abl├ñufe und Schnittstellen",
+          "Gef├ñhrdungen und Ma├ƒnahmen (inkl. besonders gef├ñhrliche Arbeiten/Anhang II)",
+          "Notfall-/Rettungsmanagement",
+          "├£berwachung/Abstimmung/Kommunikation"
+        ]
+      },
+      {
+        "id": "formales",
+        "titel": "Formanforderungen (Lesbarkeit, Aktualit├ñt, ├£bergabe, Versionierung)",
+        "pflichtinhalt": true
+      },
+      {
+        "id": "empfehlungen",
+        "titel": "Inhaltliche Empfehlungen / vertiefende Module (optional)",
+        "pflichtinhalt": false
+      }
+    ],
+    "quelle": "RAB 31 inkl. Anlage A (Leitfaden), bereitgestellt ├╝ber BAuA/Spiegelungen bei Fachverlagen"
+  },
+  "baua_handlungshilfen_themen_cluster": [
+    {
+      "cluster": "BaustellV-FAQ / Grundlagen",
+      "nutzen": "UI-Hilfetexte und Tooltips",
+      "url": "https://www.baua.de/DE/Themen/Arbeitsgestaltung/Arbeitsstaetten/Bauwirtschaft/FAQ/_functions/faq.html",
+      "suchbegriffe": [
+        "BaustellV",
+        "Vorank├╝ndigung",
+        "SiGePlan"
+      ]
+    },
+    {
+      "cluster": "SiGePlan-Seite (├£berblick)",
+      "nutzen": "Onboarding SiGeKo",
+      "url": "https://www.baua.de/DE/Themen/Arbeitsgestaltung/Arbeitsstaetten/Bauwirtschaft/Sicherheits-und-Gesundheitsschutzplan.html",
+      "suchbegriffe": [
+        "SiGePlan",
+        "Mehrarbeitgeber",
+        "Anhang II"
+      ]
+    },
+    {
+      "cluster": "Gef├ñhrdungsbeurteilung (├╝bergeordnet ArbSchG)",
+      "nutzen": "Verkn├╝pfung M├ñngel Ôåö Gef├ñhrdungslogik",
+      "url": "https://www.baua.de/DE/Themen/Arbeitsgestaltung/Gefaehrdungsbeurteilung/Gefaehrdungsbeurteilung.html",
+      "suchbegriffe": [
+        "Gef├ñhrdungsbeurteilung",
+        "Dokumentation",
+        "├£berpr├╝fungspflicht"
+      ]
+    }
+  ],
+  "standard_maengel_katalog_auszug": [
+    {
+      "id": "M-BV-001",
+      "kurztext": "Vorank├╝ndigung nicht sichtbar/veraltet",
+      "rechtliche_einordnung": "BaustellV ┬º 2 Abs. 2 (Sichtbarkeit/Anpassung bei erheblichen ├änderungen) ÔÇô Detailnachweis Projektparameter",
+      "checkliste_tags": [
+        "organisation",
+        "planung"
+      ]
+    },
+    {
+      "id": "M-BV-002",
+      "kurztext": "SiGe-Plan fehlt oder deckt Anhang-II-Arbeiten nicht ab",
+      "rechtliche_einordnung": "BaustellV ┬º 2 Abs. 3; ggf. RAB 31 inhaltliche Mindestanforderungen",
+      "checkliste_tags": [
+        "planung",
+        "hochrisiko"
+      ]
+    },
+    {
+      "id": "M-BV-003",
+      "kurztext": "Kooperationsdefizite zwischen Arbeitgebern (Wechselwirkungen)",
+      "rechtliche_einordnung": "BaustellV ┬º 3 Abs. 3 Ziff. 4 i.V.m. ┬º 5 Abs. 1 Nr. 4",
+      "checkliste_tags": [
+        "ausf├╝hrung",
+        "schnittstellen"
+      ]
+    }
+  ]
+}
