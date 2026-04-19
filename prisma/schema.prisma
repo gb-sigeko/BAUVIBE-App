@@ -312,6 +312,7 @@ model ProjectParticipant {
   @@index([projectId])
 }
 
+/// Entspricht der fachlichen „CommunicationEntry“-Spezifikation (E-Mail-/Telefon-/Meeting-Notizen, Wiedervorlagen).
 model Communication {
   id                    String             @id @default(cuid())
   projectId             String
@@ -326,10 +327,13 @@ model Communication {
   body                  String
   status                String             @default("offen")
   followUp              DateTime?
+  /// Wiedervorlage abgearbeitet (Eintrag verschwindet aus dem Arbeitskorb).
+  erledigt              Boolean            @default(false)
   responsibleEmployeeId String?
   responsibleEmployee   Employee?          @relation("CommunicationResponsible", fields: [responsibleEmployeeId], references: [id], onDelete: SetNull)
 
   @@index([projectId])
+  @@index([followUp, erledigt])
 }
 
 /// Persistiert als Tabelle "Inspection" (Legacy-Name).

@@ -186,6 +186,17 @@ async function main() {
   const iso = isoWeekAndYear(today);
   const next = nextIsoWeek(iso.year, iso.week);
 
+  await prisma.communication.create({
+    data: {
+      projectId: p1.id,
+      kind: "EMAIL",
+      subject: "Unterlagen nachreichen",
+      body: "Bitte fehlende Nachweise bis KW-Ende liefern.",
+      followUp: addDays(today, -1),
+      erledigt: false,
+    },
+  });
+
   await prisma.begehung.createMany({
     data: [
       {
@@ -196,6 +207,16 @@ async function main() {
         protocolMissing: true,
         employeeId: e1.id,
         laufendeNr: 1,
+        begehungStatus: "DURCHGEFUEHRT",
+      },
+      {
+        projectId: p1.id,
+        date: addDays(today, -5),
+        title: "E2E verzögertes Protokoll",
+        notes: "Begehung durchgeführt, Protokoll fehlt seit >3 Tagen",
+        protocolMissing: true,
+        employeeId: e1.id,
+        laufendeNr: 2,
         begehungStatus: "DURCHGEFUEHRT",
       },
       {
@@ -238,6 +259,7 @@ async function main() {
     data: [
       { projectId: p1.id, name: "SiGeKo-Plan.pdf", url: "#", docType: "PLAN", docStatus: "VORHANDEN" },
       { projectId: p1.id, name: "Gefährdungsbeurteilung.docx", url: "#", docType: "GBU", docStatus: "VORHANDEN" },
+      { projectId: p2.id, name: "Brandschutznachweis.pdf", url: null, docType: "Nachweis", docStatus: "FEHLT" },
     ],
   });
 

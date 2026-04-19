@@ -1,35 +1,41 @@
-import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { PlanungStatus } from "@/generated/prisma/client";
+import {
+  ArbeitskorbClient,
+  type BegehungRow,
+  type CommRow,
+  type DocRow,
+  type PlanRueckRow,
+  type ProjectAmpelRow,
+  type TaskRow,
+} from "@/components/arbeitskorb/arbeitskorb-client";
 
-type TaskRow = {
-  id: string;
-  title: string;
-  status: string;
-  dueDate: Date | null;
-  projectId: string;
-  project: { name: string };
-  assignee: { shortCode: string } | null;
-};
+export const dynamic = "force-dynamic";
 
-type BegehungRow = {
-  id: string;
-  date: Date;
-  title: string | null;
-  projectId: string;
-  project: { name: string };
-};
+function subDays(d: Date, days: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() - days);
+  return x;
+}
 
 export default async function ArbeitskorbPage() {
   const today = new Date();
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const endOfDay = new Date(startOfDay);
   endOfDay.setHours(23, 59, 59, 999);
+  const protocolDueCutoff = subDays(startOfDay, 3);
 
-  const [dueToday, overdue, missingTaskProtocols, missingBegehungProtocols] = await Promise.all([
+  const [
+    dueToday,
+    overdue,
+    missingTaskProtocols,
+    missingBegehungProtocols,
+    missingDocuments,
+    delayedProtocolBegehungen,
+    followUps,
+    planRueckmeldungOffen,
+    projectsAmpelBase,
+  ] = await Promise.all([
     prisma.task.findMany({
       where: { status: { not: "DONE" }, dueDate: { gte: startOfDay, lte: endOfDay } },
       include: { project: true, assignee: true },
@@ -50,123 +56,132 @@ export default async function ArbeitskorbPage() {
       include: { project: true },
       orderBy: { date: "desc" },
     }),
+    prisma.document.findMany({
+      where: { docStatus: "FEHLT" },
+      include: { project: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.begehung.findMany({
+      where: {
+        begehungStatus: "DURCHGEFUEHRT",
+        date: { lt: protocolDueCutoff },
+        OR: [{ protocolMissing: true }, { protokollPdf: null }],
+      },
+      include: { project: true },
+      orderBy: { date: "asc" },
+    }),
+    prisma.communication.findMany({
+      where: {
+        followUp: { not: null, lte: endOfDay },
+        erledigt: false,
+      },
+      include: { project: true },
+      orderBy: { followUp: "asc" },
+    }),
+    prisma.planungEntry.findMany({
+      where: { planungStatus: PlanungStatus.RUECKMELDUNG_OFFEN },
+      include: { project: true, employee: true },
+      orderBy: [{ isoYear: "asc" }, { isoWeek: "asc" }],
+      take: 80,
+    }),
+    prisma.project.findMany({
+      where: { status: "ACTIVE" },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        contractualBegehungen: true,
+        completedBegehungen: true,
+        _count: {
+          select: {
+            tasks: {
+              where: {
+                isMangel: true,
+                priority: "CRITICAL",
+                status: { notIn: ["DONE", "CANCELLED"] },
+              },
+            },
+          },
+        },
+      },
+    }),
   ]);
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
-        <p className="text-muted-foreground">Heute fällig, überfällig und fehlende Protokolle.</p>
-      </div>
+  const criticalProjects: ProjectAmpelRow[] = projectsAmpelBase
+    .map((p) => {
+      const contractual = p.contractualBegehungen ?? 0;
+      const pct = contractual > 0 ? p.completedBegehungen / contractual : 1;
+      const lowCompletion = contractual > 0 && pct < 0.7;
+      const manyCritical = p._count.tasks > 3;
+      if (!lowCompletion && !manyCritical) return null;
+      const reasons: string[] = [];
+      if (lowCompletion) reasons.push(`Begehungsquote ${Math.round(pct * 100)} % (< 70 %)`);
+      if (manyCritical) reasons.push(`${p._count.tasks} offene kritische Mängel-Aufgaben (> 3)`);
+      return {
+        id: p.id,
+        code: p.code,
+        name: p.name,
+        reason: reasons.join(" · "),
+      };
+    })
+    .filter((x): x is ProjectAmpelRow => x != null);
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Heute fällig</CardTitle>
-          <CardDescription>Aufgaben mit Fälligkeit heute.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TaskTable tasks={dueToday} emptyHint="Heute nichts Fälliges – gut so." />
-        </CardContent>
-      </Card>
+  const toTaskRow = (t: (typeof dueToday)[0]): TaskRow => ({
+    id: t.id,
+    title: t.title,
+    status: t.status,
+    dueDate: t.dueDate ? t.dueDate.toISOString() : null,
+    projectId: t.projectId,
+    projectName: t.project.name,
+    assigneeShort: t.assignee?.shortCode ?? null,
+  });
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Überfällig</CardTitle>
-          <CardDescription>Aufgaben mit Fälligkeit vor heute.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TaskTable tasks={overdue} emptyHint="Keine überfälligen Aufgaben." />
-        </CardContent>
-      </Card>
+  const toBegehRow = (i: (typeof missingBegehungProtocols)[0]): BegehungRow => ({
+    id: i.id,
+    date: i.date.toISOString(),
+    title: i.title,
+    projectId: i.projectId,
+    projectName: i.project.name,
+  });
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Fehlende Protokolle</CardTitle>
-          <CardDescription>Aufgaben und Begehungen ohne vollständiges Protokoll.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          <div>
-            <div className="mb-2 text-sm font-medium">Aufgaben</div>
-            <TaskTable tasks={missingTaskProtocols} emptyHint="Keine Aufgaben mit fehlendem Protokoll." />
-          </div>
-          <div>
-            <div className="mb-2 text-sm font-medium">Begehungen</div>
-            <BegehungTable begehungen={missingBegehungProtocols} />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+  const toDocRow = (d: (typeof missingDocuments)[0]): DocRow => ({
+    id: d.id,
+    name: d.name,
+    projectId: d.projectId,
+    projectName: d.project.name,
+  });
 
-function TaskTable({ tasks, emptyHint }: { tasks: TaskRow[]; emptyHint: string }) {
-  if (!tasks.length) {
-    return <p className="text-sm text-muted-foreground">{emptyHint}</p>;
-  }
+  const toCommRow = (c: (typeof followUps)[0]): CommRow => ({
+    id: c.id,
+    kind: c.kind,
+    subject: c.subject,
+    body: c.body,
+    followUp: c.followUp!.toISOString(),
+    projectId: c.projectId,
+    projectName: c.project.name,
+  });
 
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Aufgabe</TableHead>
-          <TableHead>Projekt</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Fällig</TableHead>
-          <TableHead>Zuständig</TableHead>
-          <TableHead className="text-right">Aktion</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {tasks.map((t) => (
-          <TableRow key={t.id}>
-            <TableCell className="font-medium">{t.title}</TableCell>
-            <TableCell>{t.project.name}</TableCell>
-            <TableCell>
-              <Badge variant="secondary">{t.status}</Badge>
-            </TableCell>
-            <TableCell>{t.dueDate ? t.dueDate.toLocaleDateString("de-DE") : "—"}</TableCell>
-            <TableCell>{t.assignee?.shortCode ?? "—"}</TableCell>
-            <TableCell className="text-right">
-              <Button asChild size="sm" variant="outline">
-                <Link href={`/projects/${t.projectId}`}>Zur Akte</Link>
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-function BegehungTable({ begehungen }: { begehungen: BegehungRow[] }) {
-  if (!begehungen.length) {
-    return <p className="text-sm text-muted-foreground">Keine Begehungen mit fehlendem Protokoll.</p>;
-  }
+  const toPlanRow = (r: (typeof planRueckmeldungOffen)[0]): PlanRueckRow => ({
+    id: r.id,
+    projectId: r.projectId,
+    projectName: r.project.name,
+    projectCode: r.project.code,
+    isoYear: r.isoYear,
+    isoWeek: r.isoWeek,
+    employeeShort: r.employee?.shortCode ?? null,
+  });
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Datum</TableHead>
-          <TableHead>Titel</TableHead>
-          <TableHead>Projekt</TableHead>
-          <TableHead className="text-right">Aktion</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {begehungen.map((i) => (
-          <TableRow key={i.id}>
-            <TableCell>{i.date.toLocaleDateString("de-DE")}</TableCell>
-            <TableCell className="font-medium">{i.title ?? "—"}</TableCell>
-            <TableCell>{i.project.name}</TableCell>
-            <TableCell className="text-right">
-              <Button asChild size="sm" variant="outline">
-                <Link href={`/projects/${i.projectId}`}>Zur Akte</Link>
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <ArbeitskorbClient
+      dueToday={dueToday.map(toTaskRow)}
+      overdue={overdue.map(toTaskRow)}
+      missingTaskProtocols={missingTaskProtocols.map(toTaskRow)}
+      missingBegehungProtocols={missingBegehungProtocols.map(toBegehRow)}
+      missingDocuments={missingDocuments.map(toDocRow)}
+      delayedProtocolBegehungen={delayedProtocolBegehungen.map(toBegehRow)}
+      followUps={followUps.map(toCommRow)}
+      criticalProjects={criticalProjects}
+      planRueckmeldungOffen={planRueckmeldungOffen.map(toPlanRow)}
+    />
   );
 }
