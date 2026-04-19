@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { MitarbeiterAvailabilityClient } from "@/components/mitarbeiter/mitarbeiter-availability-client";
+import {
+  EigenePlanungEinsaetzeClient,
+  type EinsatzRow,
+} from "@/components/eigene-planung/eigene-planung-einsaetze-client";
 
 export default async function EigenePlanungPage() {
   const session = await auth();
@@ -48,6 +50,18 @@ export default async function EigenePlanungPage() {
     orderBy: { startsOn: "asc" },
   });
 
+  const einsatzRows: EinsatzRow[] = entries.map((e) => ({
+    id: e.id,
+    isoYear: e.isoYear,
+    isoWeek: e.isoWeek,
+    projectName: e.project.name,
+    projectCode: e.project.code,
+    turnusLabel: e.turnusLabel,
+    note: e.note,
+    feedback: e.feedback,
+    conflict: e.conflict,
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -84,41 +98,7 @@ export default async function EigenePlanungPage() {
           <CardDescription>Kürzel: {user.employee?.shortCode}</CardDescription>
         </CardHeader>
         <CardContent>
-          {!entries.length ? (
-            <p className="text-sm text-muted-foreground">Aktuell keine Planungseinträge.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>KW</TableHead>
-                  <TableHead>Projekt</TableHead>
-                  <TableHead>Turnus</TableHead>
-                  <TableHead>Notiz</TableHead>
-                  <TableHead>Rückmeldung</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {entries.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="font-mono text-xs">
-                      {e.isoWeek}/{e.isoYear}
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">{e.project.name}</div>
-                      <div className="text-xs text-muted-foreground">{e.project.code}</div>
-                    </TableCell>
-                    <TableCell>{e.turnusLabel ?? "—"}</TableCell>
-                    <TableCell className="max-w-[280px] text-xs text-muted-foreground">{e.note ?? "—"}</TableCell>
-                    <TableCell className="max-w-[220px] text-xs">{e.feedback ?? "—"}</TableCell>
-                    <TableCell>
-                      {e.conflict ? <Badge variant="warning">Konflikt</Badge> : <Badge variant="secondary">OK</Badge>}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <EigenePlanungEinsaetzeClient entries={einsatzRows} />
         </CardContent>
       </Card>
     </div>

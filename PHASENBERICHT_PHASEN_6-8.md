@@ -10,9 +10,13 @@
 - **Tests:** `e2e/phase6.spec.ts` prüft verzögertes Protokoll im Arbeitskorb.
 - **Datenbank:** Migration `20260421120000_communication_erledigt` (Spalte `erledigt`, Index). Seed um E2E-Begehung, fehlendes Dokument und Wiedervorlage ergänzt.
 
-## Phase 7
+## Phase 7 – Kommunikation & Vor-Ort
 
-_(wird nach Umsetzung ergänzt)_
+- **Telefonnotizen:** CRUD über `/api/projects/:id/telefonnotizen` (GET/POST) und `PATCH`/`DELETE` je Notiz; UI mit Wiedervorlage pro Zeile (Follow-up speichern).
+- **E-Mail-Notizen:** Formular im Tab Kommunikation (`EmailNotizForm`), Speicherung als `Communication` mit `kind: EMAIL`, optional Empfängerzeile im Text und optionale Wiedervorlage (`followUp`).
+- **Vor-Ort-Rückmeldung:** Dialog „Weitere Rückmeldung“ auf `/eigene-planung`; POST `/api/planung/entries/:entryId/vorort` – Zugriff für zugeordneten **EXTERN**-Mitarbeiter oder Büro/SiGeKo/GF (`assertVorOrtRueckmeldungAccess`).
+- **Arbeitskorb:** Sektion „Vor-Ort-Rückmeldungen“ mit Link zur Projektakte Tab Termine.
+- **Tests:** `e2e/phase7.spec.ts` (Extern → Fee-Arbeitskorb).
 
 ## Phase 8
 

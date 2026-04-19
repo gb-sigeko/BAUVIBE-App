@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TelefonnotizenSection } from "@/components/project/telefonnotizen-section";
+import { EmailNotizForm } from "@/components/project/email-notiz-form";
 import { AddCommunicationForm } from "@/components/project/project-stakeholders-forms";
 
 type CommRow = {
@@ -53,6 +54,16 @@ export function ProjectKommunikationTab({
         </CardHeader>
         <CardContent>
           <TelefonnotizenSection projectId={projectId} notes={telefonnotizen} />
+        </CardContent>
+      </Card>
+
+      <Card data-testid="kommunikation-email-card">
+        <CardHeader>
+          <CardTitle>E-Mail-Notiz (manuell)</CardTitle>
+          <CardDescription>Kurze dokumentierte E-Mail ohne Versand aus der App.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EmailNotizForm projectId={projectId} />
         </CardContent>
       </Card>
 

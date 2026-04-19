@@ -8,6 +8,7 @@ import {
   type PlanRueckRow,
   type ProjectAmpelRow,
   type TaskRow,
+  type VorOrtRow,
 } from "@/components/arbeitskorb/arbeitskorb-client";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,7 @@ export default async function ArbeitskorbPage() {
     followUps,
     planRueckmeldungOffen,
     projectsAmpelBase,
+    vorOrtRueckmeldungenRaw,
   ] = await Promise.all([
     prisma.task.findMany({
       where: { status: { not: "DONE" }, dueDate: { gte: startOfDay, lte: endOfDay } },
@@ -105,6 +107,11 @@ export default async function ArbeitskorbPage() {
         },
       },
     }),
+    prisma.vorOrtRueckmeldung.findMany({
+      orderBy: { gemeldetAm: "desc" },
+      take: 40,
+      include: { planung: { include: { project: true } } },
+    }),
   ]);
 
   const criticalProjects: ProjectAmpelRow[] = projectsAmpelBase
@@ -161,6 +168,21 @@ export default async function ArbeitskorbPage() {
     projectName: c.project.name,
   });
 
+  const vorOrtRueckmeldungen: VorOrtRow[] = vorOrtRueckmeldungenRaw.map((v) => ({
+    id: v.id,
+    gemeldetAm: v.gemeldetAm.toISOString(),
+    rueckmeldung: v.rueckmeldung,
+    aushangOk: v.aushangOk,
+    werbungOk: v.werbungOk,
+    unterbrechung: v.unterbrechung,
+    planEntryId: v.planungId,
+    isoYear: v.planung.isoYear,
+    isoWeek: v.planung.isoWeek,
+    projectId: v.planung.projectId,
+    projectName: v.planung.project.name,
+    projectCode: v.planung.project.code,
+  }));
+
   const toPlanRow = (r: (typeof planRueckmeldungOffen)[0]): PlanRueckRow => ({
     id: r.id,
     projectId: r.projectId,
@@ -182,6 +204,7 @@ export default async function ArbeitskorbPage() {
       followUps={followUps.map(toCommRow)}
       criticalProjects={criticalProjects}
       planRueckmeldungOffen={planRueckmeldungOffen.map(toPlanRow)}
+      vorOrtRueckmeldungen={vorOrtRueckmeldungen}
     />
   );
 }

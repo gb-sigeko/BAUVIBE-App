@@ -13,7 +13,8 @@ const createSchema = z.object({
   occurredAt: z.string().datetime().optional(),
   responsibleEmployeeId: z.string().optional().nullable(),
   status: z.string().optional(),
-  followUp: z.string().datetime().optional().nullable(),
+  followUp: z.string().optional().nullable(),
+  erledigt: z.boolean().optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: { projectId: string } }) {
@@ -60,6 +61,7 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
       responsibleEmployeeId: parsed.data.responsibleEmployeeId ?? undefined,
       status: parsed.data.status ?? undefined,
       followUp: parsed.data.followUp ? new Date(parsed.data.followUp) : undefined,
+      erledigt: parsed.data.erledigt ?? undefined,
     },
     include: {
       organization: true,

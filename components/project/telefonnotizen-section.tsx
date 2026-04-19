@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,18 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
   const [notiz, setNotiz] = useState("");
   const [followUp, setFollowUp] = useState("");
   const [busy, setBusy] = useState(false);
+  const initialFollowDraft = useMemo(() => {
+    const o: Record<string, string> = {};
+    for (const n of notes) {
+      o[n.id] = n.followUp ? new Date(n.followUp).toISOString().slice(0, 16) : "";
+    }
+    return o;
+  }, [notes]);
+
+  const [followDraft, setFollowDraft] = useState<Record<string, string>>(initialFollowDraft);
+  useEffect(() => {
+    setFollowDraft(initialFollowDraft);
+  }, [initialFollowDraft]);
 
   async function create() {
     if (!notiz.trim()) return;
@@ -49,6 +61,17 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
     router.refresh();
   }
 
+  async function saveFollowUp(id: string) {
+    const raw = followDraft[id]?.trim();
+    const iso = raw ? new Date(raw).toISOString() : null;
+    await fetch(`/api/projects/${projectId}/telefonnotizen/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ followUp: iso }),
+    });
+    router.refresh();
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3 md:grid-cols-2">
@@ -71,6 +94,7 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
             <TableHead>Notiz</TableHead>
             <TableHead>Erfasst</TableHead>
             <TableHead>Follow-up</TableHead>
+            <TableHead>Wiedervorlage setzen</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Erledigt</TableHead>
           </TableRow>
@@ -84,6 +108,19 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
                 <div>{n.erfasstVon}</div>
               </TableCell>
               <TableCell className="text-xs">{n.followUp ? new Date(n.followUp).toLocaleString("de-DE") : "—"}</TableCell>
+              <TableCell className="min-w-[200px]">
+                <div className="flex flex-col gap-1">
+                  <Input
+                    type="datetime-local"
+                    className="h-8 text-xs"
+                    value={followDraft[n.id] ?? ""}
+                    onChange={(e) => setFollowDraft((d) => ({ ...d, [n.id]: e.target.value }))}
+                  />
+                  <Button type="button" size="sm" variant="secondary" className="h-7 text-xs" onClick={() => void saveFollowUp(n.id)}>
+                    Speichern
+                  </Button>
+                </div>
+              </TableCell>
               <TableCell>
                 {n.erledigt ? <Badge variant="secondary">Erledigt</Badge> : <Badge variant="outline">Offen</Badge>}
               </TableCell>

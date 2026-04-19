@@ -60,6 +60,21 @@ export type PlanRueckRow = {
   employeeShort: string | null;
 };
 
+export type VorOrtRow = {
+  id: string;
+  gemeldetAm: string;
+  rueckmeldung: string;
+  aushangOk: boolean | null;
+  werbungOk: boolean | null;
+  unterbrechung: string | null;
+  planEntryId: string;
+  isoYear: number;
+  isoWeek: number;
+  projectId: string;
+  projectName: string;
+  projectCode: string;
+};
+
 function SourceButton({ href, label = "Zur Quelle" }: { href: string; label?: string }) {
   return (
     <Button asChild size="sm" variant="outline">
@@ -78,6 +93,7 @@ export function ArbeitskorbClient({
   followUps,
   criticalProjects,
   planRueckmeldungOffen,
+  vorOrtRueckmeldungen,
 }: {
   dueToday: TaskRow[];
   overdue: TaskRow[];
@@ -88,6 +104,7 @@ export function ArbeitskorbClient({
   followUps: CommRow[];
   criticalProjects: ProjectAmpelRow[];
   planRueckmeldungOffen: PlanRueckRow[];
+  vorOrtRueckmeldungen: VorOrtRow[];
 }) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -188,6 +205,53 @@ export function ArbeitskorbClient({
                     <TableCell>{r.employeeShort ?? "—"}</TableCell>
                     <TableCell className="text-right space-x-2">
                       <SourceButton href="/planung" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card data-testid="arbeitskorb-vorort">
+        <CardHeader>
+          <CardTitle>Vor-Ort-Rückmeldungen (SiGeKo → Fee)</CardTitle>
+          <CardDescription>Zuletzt gemeldete Eindrücke von der Baustelle.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {vorOrtRueckmeldungen.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Keine Vor-Ort-Rückmeldungen.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Gemeldet</TableHead>
+                  <TableHead>Projekt / KW</TableHead>
+                  <TableHead>Inhalt</TableHead>
+                  <TableHead className="text-right">Aktion</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vorOrtRueckmeldungen.map((v) => (
+                  <TableRow key={v.id} data-testid={`arbeitskorb-vorort-${v.id}`}>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {new Date(v.gemeldetAm).toLocaleString("de-DE")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">{v.projectName}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {v.projectCode} · KW {v.isoWeek}/{v.isoYear}
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[360px] text-xs">
+                      <div className="whitespace-pre-wrap">{v.rueckmeldung}</div>
+                      {v.unterbrechung ? (
+                        <div className="mt-1 text-muted-foreground">Unterbrechung: {v.unterbrechung}</div>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <SourceButton href={`/projects/${v.projectId}?tab=termine`} label="Zur Planungszelle" />
                     </TableCell>
                   </TableRow>
                 ))}

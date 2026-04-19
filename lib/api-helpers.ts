@@ -5,6 +5,23 @@ import type { AppRole } from "@/types/roles";
 
 const WRITE_ROLES: AppRole[] = ["ADMIN", "BUERO", "SIKOGO", "GF"];
 
+/** Vor-Ort-Rückmeldung: Büro/SiGeKo/GF/Admin oder zugeordneter Extern-Mitarbeiter. */
+export function assertVorOrtRueckmeldungAccess(
+  session: { user: { role: AppRole; employeeId?: string | null } },
+  entry: { employeeId: string | null },
+) {
+  const role = session.user.role;
+  if (WRITE_ROLES.includes(role)) return null;
+  if (role === "EXTERN") {
+    const eid = session.user.employeeId;
+    if (!eid || entry.employeeId !== eid) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return null;
+  }
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+}
+
 export async function requireApiUser() {
   const session = await auth();
   if (!session?.user?.id) {

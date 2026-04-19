@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireApiUser, requireWriteRole } from "@/lib/api-helpers";
+import { assertVorOrtRueckmeldungAccess, requireApiUser } from "@/lib/api-helpers";
 
 const createSchema = z.object({
   aushangOk: z.boolean().optional().nullable(),
@@ -13,8 +13,6 @@ const createSchema = z.object({
 export async function GET(_req: Request, { params }: { params: { entryId: string } }) {
   const { session, response } = await requireApiUser();
   if (!session) return response!;
-  const forbidden = requireWriteRole(session.user.role);
-  if (forbidden) return forbidden;
 
   const entry = await prisma.planungEntry.findUnique({
     where: { id: params.entryId },
@@ -22,17 +20,21 @@ export async function GET(_req: Request, { params }: { params: { entryId: string
   });
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  const denied = assertVorOrtRueckmeldungAccess(session, entry);
+  if (denied) return denied;
+
   return NextResponse.json(entry.vorOrtRueckmeldungen);
 }
 
 export async function POST(req: Request, { params }: { params: { entryId: string } }) {
   const { session, response } = await requireApiUser();
   if (!session) return response!;
-  const forbidden = requireWriteRole(session.user.role);
-  if (forbidden) return forbidden;
 
   const entry = await prisma.planungEntry.findUnique({ where: { id: params.entryId } });
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const denied = assertVorOrtRueckmeldungAccess(session, entry);
+  if (denied) return denied;
 
   const json = await req.json().catch(() => null);
   const parsed = createSchema.safeParse(json);
