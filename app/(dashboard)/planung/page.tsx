@@ -1,32 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { getIsoWeekParts } from "@/lib/utils";
 import { PlanungBoard, type PlanungBoardEntry, type PlanungBoardProject, type PlanungBoardWeek } from "@/components/planung-board";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
+import { syncTurnusSuggestions } from "@/lib/turnus-engine";
 
-function buildWeeks(anchor: Date, total: number): PlanungBoardWeek[] {
-  const out: PlanungBoardWeek[] = [];
-  const seen = new Set<string>();
-
-  for (let i = -1; i < total; i++) {
-    const d = new Date(anchor);
-    d.setDate(d.getDate() + i * 7);
-    const { isoYear, isoWeek } = getIsoWeekParts(d);
-    const key = `${isoYear}-${isoWeek}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push({
-      isoYear,
-      isoWeek,
-      label: `KW ${isoWeek} · ${isoYear}`,
-    });
-  }
-
-  return out;
-}
+export const dynamic = "force-dynamic";
 
 export default async function PlanungPage() {
   const anchor = new Date();
-  const weeks = buildWeeks(anchor, 8);
+  const weeks: PlanungBoardWeek[] = buildPlanungHorizon(anchor, 12);
+  await syncTurnusSuggestions(prisma, anchor, horizonToIsoWeeks(weeks));
 
   const projects = await prisma.project.findMany({
     where: { status: "ACTIVE" },
@@ -51,6 +34,12 @@ export default async function PlanungPage() {
     sortOrder: e.sortOrder,
     employeeId: e.employeeId,
     employeeShortCode: e.employee?.shortCode ?? null,
+    planungType: e.planungType,
+    planungStatus: e.planungStatus,
+    planungSource: e.planungSource,
+    priority: e.priority,
+    specialCode: e.specialCode,
+    isCompletedForContract: e.isCompletedForContract,
     turnusLabel: e.turnusLabel,
     note: e.note,
     feedback: e.feedback,

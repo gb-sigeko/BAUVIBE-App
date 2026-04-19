@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Briefcase, CalendarDays, Inbox, Users, Building2, LogOut, FileText } from "lucide-react";
+import { LayoutDashboard, Briefcase, CalendarDays, Inbox, Users, Building2, LogOut, FileText, Contact } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/types/roles";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ const links: Array<{
 }> = [
   { href: "/fee", label: "Start (Fee)", icon: LayoutDashboard, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
   { href: "/projects", label: "Projekte", icon: Briefcase, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
+  { href: "/kontakte", label: "Kontakte", icon: Contact, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
   { href: "/planung", label: "Wochenplanung", icon: CalendarDays, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
   { href: "/arbeitskorb", label: "Arbeitskorb", icon: Inbox, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
   { href: "/mitarbeiter", label: "Mitarbeiter", icon: Users, roles: ["ADMIN", "BUERO", "SIKOGO", "GF"] },
