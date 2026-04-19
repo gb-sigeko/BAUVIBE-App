@@ -8,6 +8,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "test:e2e": "playwright test",
+    "test:suite": "tsx scripts/run-full-test-suite.ts",
     "qa:recherche": "tsx scripts/qa-recherche-json.ts",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
@@ -46,6 +48,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.17.14",
     "@types/pg": "^8.11.11",

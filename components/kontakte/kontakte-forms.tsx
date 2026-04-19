@@ -60,6 +60,7 @@ export function CreateOrganizationForm() {
 export function CreateContactForm({ organizations }: { organizations: { id: string; name: string }[] }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [dupHint, setDupHint] = useState<string | null>(null);
 
   return (
     <form
@@ -116,7 +117,25 @@ export function CreateContactForm({ organizations }: { organizations: { id: stri
       </div>
       <div className="space-y-2">
         <Label htmlFor="c-mail">E-Mail</Label>
-        <Input id="c-mail" name="email" type="email" placeholder="mail@firma.de" />
+        <Input
+          id="c-mail"
+          name="email"
+          type="email"
+          placeholder="mail@firma.de"
+          onBlur={async (e) => {
+            const mail = e.target.value.trim().toLowerCase();
+            if (!mail || !mail.includes("@")) {
+              setDupHint(null);
+              return;
+            }
+            const res = await fetch(`/api/contacts?q=${encodeURIComponent(mail)}`);
+            if (!res.ok) return;
+            const rows = (await res.json()) as { email: string | null }[];
+            const hit = rows.some((r) => (r.email ?? "").toLowerCase() === mail);
+            setDupHint(hit ? "Es existiert bereits ein Kontakt mit dieser E-Mail (einfache Dublettenprüfung)." : null);
+          }}
+        />
+        {dupHint ? <p className="text-xs text-amber-700 dark:text-amber-300">{dupHint}</p> : null}
       </div>
       <div className="space-y-2">
         <Label htmlFor="c-phone">Telefon</Label>

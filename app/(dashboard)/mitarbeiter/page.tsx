@@ -7,7 +7,7 @@ export default async function MitarbeiterPage() {
   const employees = await prisma.employee.findMany({
     orderBy: { shortCode: "asc" },
     include: {
-      holidays: true,
+      availabilities: true,
       coveredBy: { include: { delegateEmployee: true, coveredEmployee: true } },
       coveringFor: { include: { delegateEmployee: true, coveredEmployee: true } },
     },
@@ -47,8 +47,8 @@ export default async function MitarbeiterPage() {
                   </TableCell>
                   <TableCell>{e.active ? <Badge variant="secondary">Aktiv</Badge> : <Badge variant="destructive">Inaktiv</Badge>}</TableCell>
                   <TableCell className="max-w-[260px] text-xs text-muted-foreground">
-                    {e.holidays.length
-                      ? e.holidays
+                    {e.availabilities.length
+                      ? e.availabilities
                           .map((h) => `${h.startsOn.toLocaleDateString("de-DE")}–${h.endsOn.toLocaleDateString("de-DE")}${h.note ? ` (${h.note})` : ""}`)
                           .join(" · ")
                       : "—"}
