@@ -37,3 +37,29 @@ Kurzdokumentation der Umsetzung auf Branch `feature/phasen-3-5`.
 
 - `npm run test:automated` → identisch zu `test:suite` (Lint, Build, Playwright).
 - E-Mail: `EMAIL_MOCK=1` erzwingt Logging statt Versand (`lib/email.ts`).
+
+---
+
+## Phase 4 – Begehungsprotokoll (PDF, E-Mail, UI)
+
+### APIs (`/api/begehungen/[id]/…`)
+
+- `POST …/upload-foto` – Multipart `file`, optional `role`: `overview` (setzt `uebersichtFoto`) oder `mangel` (nur Datei-URL, ohne Übersichtsfoto zu überschreiben). Ablage unter `public/uploads/begehungen/{id}/`.
+- `POST …/add-mangel` – analog zu Projekt-Mängel-API.
+- `PUT …/verteiler` – JSON `{ entries: [{ name, email, gewerk?, send? }] }`.
+- `POST …/generate-pdf` – `@react-pdf/renderer`, zweispaltige Mängelzeilen (Text / Bild), Speicherung `public/protokolle/begehung-{id}.pdf`, Update `protokollPdf`.
+- `POST …/send` – Versand per `sendTransactionalEmail` inkl. PDF-Anhang; `EMAIL_SERVER` (nodemailer-SMTP-String) oder `RESEND_API_KEY`; `EMAIL_FROM` / `EMAIL_MOCK`.
+
+### UI
+
+- Seite `/begehungen/[id]/protokoll` mit Upload, Mängel-Modal, Verteiler (inkl. Projektbeteiligte), PDF- und Versand-Buttons.
+- Projekt-Tab „Begehungen“: Link **Protokoll**.
+
+### Daten / Seed
+
+- Textbaustein „Abschluss Protokoll“ (`kategorie: mangel`, Platzhalter `{{projektname}}`).
+
+### Tests
+
+- `e2e/phase4.spec.ts` – Upload, Mangel, Verteiler, PDF (%PDF + Text „Mangel“ via `pdf-parse`), Versand (Mock).
+- Playwright `webServer.env`: `EMAIL_MOCK=1`.

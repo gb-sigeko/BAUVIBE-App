@@ -40,6 +40,7 @@ export default defineConfig({
       ...process.env,
       // Muss zum Playwright-Port passen, sonst schlagen Callback/CSRF und Cookies fehl.
       NEXTAUTH_URL: "http://localhost:3005",
+      EMAIL_MOCK: "1",
     },
   },
 });

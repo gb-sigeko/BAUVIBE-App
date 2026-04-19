@@ -172,6 +172,15 @@ async function main() {
     data: { affectedProjectIds: [p1.id] },
   });
 
+  await prisma.textbaustein.create({
+    data: {
+      name: "Abschluss Protokoll",
+      kategorie: "mangel",
+      inhalt:
+        "Hiermit dokumentieren wir die festgestellten Punkte am Projekt {{projektname}}. Bitte um Kenntnisnahme und Umsetzung der Maßnahmen.",
+    },
+  });
+
   const today = new Date();
   const iso = isoWeekAndYear(today);
   const next = nextIsoWeek(iso.year, iso.week);
