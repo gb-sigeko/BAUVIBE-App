@@ -63,3 +63,31 @@ Kurzdokumentation der Umsetzung auf Branch `feature/phasen-3-5`.
 
 - `e2e/phase4.spec.ts` – Upload, Mangel, Verteiler, PDF (%PDF + Text „Mangel“ via `pdf-parse`), Versand (Mock).
 - Playwright `webServer.env`: `EMAIL_MOCK=1`.
+
+---
+
+## Phase 5 – Tourenplanung
+
+### Datenmodell
+
+- `Tour`: `isoYear`, `isoWeek`, optional `date`, `employeeId`, `region`, `sortOrder` (JSON-Array von Projekt-IDs), `status`, `conflictFlag`, `notes`; `PlanungEntry.tourId` optional mit `onDelete: SetNull`.
+
+### APIs
+
+- `GET/POST /api/tours` (Query `isoYear`, `isoWeek`, optional `employeeId`).
+- `PUT/DELETE /api/tours/[id]` – u. a. `sortOrder` aktualisieren.
+- `POST /api/tours/auto-bundle` – Platzhalter (501).
+
+### Logik
+
+- `applyKrankVertretungForHorizon`: nach Umbuchung von Planungseinträgen werden Touren mit gleichem `employeeId` auf den Vertreter umgestellt, sofern die Tour über betroffene Projekte im `sortOrder` abdeckbar ist.
+
+### UI
+
+- Wochenplanung: Tour-Kürzel (`Tour xxxxxx`), Hervorhebung bei mehreren Einträgen derselben Tour, Dropdown **Zu Tour** pro Zelle.
+- Seite `/touren`: Touren je KW, Drag & Drop zur Änderung von `sortOrder`.
+- Navigation: Eintrag **Touren** (Rollen wie Planung).
+
+### Tests
+
+- `e2e/phase5.spec.ts`: zwei Projekte einer KW einer Tour zuordnen → Tour-ID in beiden Rasterzellen; Reihenfolge per `PUT /api/tours/[id]` (wie nach DnD im Client) → Reload `/touren` zeigt neue Nummerierung; `GET /api/tours` liefert vertauschte `sortOrder`.

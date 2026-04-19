@@ -187,6 +187,7 @@ model Employee {
   coveringFor       Substitute[]   @relation("SubstitutionDelegate")
   coveredBy         Substitute[]   @relation("SubstitutionCovered")
   planEntries       PlanungEntry[]
+  tours             Tour[]
   tasks             Task[]         @relation("TaskAssignee")
   offersFreigegeben Offer[]       @relation("OfferFreigegeben")
   responsibleFor   Project[]     @relation("ProjectResponsible")
@@ -504,9 +505,30 @@ model PlanungEntry {
   isCompletedForContract Boolean              @default(false)
   specialCode            SpecialCode          @default(NONE)
   tourId                 String?
+  tour                   Tour?                @relation(fields: [tourId], references: [id], onDelete: SetNull)
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   vorOrtRueckmeldungen   VorOrtRueckmeldung[]
+
+  @@index([isoYear, isoWeek])
+  @@index([employeeId, isoYear, isoWeek])
+}
+
+model Tour {
+  id             String         @id @default(cuid())
+  isoYear        Int
+  isoWeek        Int
+  date           DateTime?
+  employeeId     String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  region         String
+  sortOrder      Json
+  status         String         @default("geplant")
+  conflictFlag   Boolean        @default(false)
+  notes          String?
+  entries        PlanungEntry[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([isoYear, isoWeek])
   @@index([employeeId, isoYear, isoWeek])

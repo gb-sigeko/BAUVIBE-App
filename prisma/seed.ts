@@ -24,6 +24,7 @@ async function main() {
   await prisma.mangel.deleteMany();
   await prisma.vorOrtRueckmeldung.deleteMany();
   await prisma.planungEntry.deleteMany();
+  await prisma.tour.deleteMany();
   await prisma.chronikEntry.deleteMany();
   await prisma.document.deleteMany();
   await prisma.task.deleteMany();

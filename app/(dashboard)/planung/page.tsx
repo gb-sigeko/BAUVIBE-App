@@ -24,8 +24,13 @@ export default async function PlanungPage() {
     where: {
       OR: weeks.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek })),
     },
-    include: { employee: true, _count: { select: { vorOrtRueckmeldungen: true } } },
+    include: { employee: true, tour: true, _count: { select: { vorOrtRueckmeldungen: true } } },
     orderBy: [{ projectId: "asc" }, { isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
+  });
+
+  const toursRaw = await prisma.tour.findMany({
+    where: { OR: weeks.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek })) },
+    select: { id: true, isoYear: true, isoWeek: true, employeeId: true, region: true },
   });
 
   const employees = await prisma.employee.findMany({
@@ -66,6 +71,15 @@ export default async function PlanungPage() {
     feedback: e.feedback,
     conflict: e.conflict,
     vorOrtCount: e._count.vorOrtRueckmeldungen,
+    tourId: e.tourId,
+  }));
+
+  const boardTours = toursRaw.map((t) => ({
+    id: t.id,
+    isoYear: t.isoYear,
+    isoWeek: t.isoWeek,
+    employeeId: t.employeeId,
+    region: t.region,
   }));
 
   return (
@@ -114,7 +128,7 @@ export default async function PlanungPage() {
           <CardDescription>Ziehen Sie eine Karte auf eine andere KW-Spalte, um die Zuordnung zu verschieben.</CardDescription>
         </CardHeader>
         <CardContent>
-          <PlanungBoard projects={boardProjects} weeks={weeks} entries={boardEntries} />
+          <PlanungBoard projects={boardProjects} weeks={weeks} entries={boardEntries} tours={boardTours} />
         </CardContent>
       </Card>
     </div>

@@ -77,4 +77,22 @@ export async function applyKrankVertretungForHorizon(db: PrismaClient, horizon: 
     const k = isoWeekKey(w.isoYear, w.isoWeek);
     if (touchedWeeks.has(k)) await recalcConflictsForWeek(w.isoYear, w.isoWeek);
   }
+
+  const tours = await db.tour.findMany({ where: { OR: orWeeks } });
+  for (const tour of tours) {
+    if (!tour.employeeId) continue;
+    const away = await isEmployeeUnavailableInWeek(db, tour.employeeId, tour.isoYear, tour.isoWeek);
+    if (!away) continue;
+    const order = tour.sortOrder as unknown;
+    const firstProjectId = Array.isArray(order) && typeof order[0] === "string" ? order[0] : null;
+    if (!firstProjectId) continue;
+    const delegateId = await findDelegateForCoveredInWeek(db, {
+      coveredEmployeeId: tour.employeeId,
+      projectId: firstProjectId,
+      isoYear: tour.isoYear,
+      isoWeek: tour.isoWeek,
+    });
+    if (!delegateId || delegateId === tour.employeeId) continue;
+    await db.tour.update({ where: { id: tour.id }, data: { employeeId: delegateId } });
+  }
 }
