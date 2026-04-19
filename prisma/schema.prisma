@@ -21,6 +21,14 @@ enum EmployeeKind {
   EXTERN
 }
 
+/// Rolle im Einsatz (SiGeKo, Büro, GF, Extern) — unabhängig vom Login-`User.role`.
+enum EmployeeJobRole {
+  SIKOGO
+  BUERO
+  GF
+  EXTERN
+}
+
 enum ProjectStatus {
   ACTIVE
   PAUSED
@@ -168,14 +176,18 @@ model Employee {
   shortCode         String         @unique
   displayName       String
   kind              EmployeeKind
+  jobRole           EmployeeJobRole?
   active            Boolean        @default(true)
   region            String?
   weeklyCapacity    Int            @default(5)
+  qualifications    Json?
+  contactInfo       Json?
   user              User?
   availabilities    Availability[]
   coveringFor       Substitute[]   @relation("SubstitutionDelegate")
   coveredBy         Substitute[]   @relation("SubstitutionCovered")
   planEntries       PlanungEntry[]
+  tours             Tour[]
   tasks             Task[]         @relation("TaskAssignee")
   offersFreigegeben Offer[]       @relation("OfferFreigegeben")
   responsibleFor   Project[]     @relation("ProjectResponsible")
@@ -207,6 +219,7 @@ model Substitute {
   startsOn            DateTime
   endsOn              DateTime
   note                String?
+  priority            Int?
   affectedProjectIds  Json      @default("[]")
   coveredEmployee     Employee  @relation("SubstitutionCovered", fields: [coveredEmployeeId], references: [id], onDelete: Cascade)
   delegateEmployee    Employee  @relation("SubstitutionDelegate", fields: [delegateEmployeeId], references: [id], onDelete: Cascade)
@@ -492,9 +505,30 @@ model PlanungEntry {
   isCompletedForContract Boolean              @default(false)
   specialCode            SpecialCode          @default(NONE)
   tourId                 String?
+  tour                   Tour?                @relation(fields: [tourId], references: [id], onDelete: SetNull)
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
   vorOrtRueckmeldungen   VorOrtRueckmeldung[]
+
+  @@index([isoYear, isoWeek])
+  @@index([employeeId, isoYear, isoWeek])
+}
+
+model Tour {
+  id             String         @id @default(cuid())
+  isoYear        Int
+  isoWeek        Int
+  date           DateTime?
+  employeeId     String
+  employee       Employee       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  region         String
+  sortOrder      Json
+  status         String         @default("geplant")
+  conflictFlag   Boolean        @default(false)
+  notes          String?
+  entries        PlanungEntry[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([isoYear, isoWeek])
   @@index([employeeId, isoYear, isoWeek])

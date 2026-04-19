@@ -18,6 +18,7 @@ const updateSchema = z.object({
   planungStatus: z.nativeEnum(PlanungStatus).optional(),
   isCompletedForContract: z.boolean().optional(),
   specialCode: z.nativeEnum(SpecialCode).optional(),
+  tourId: z.string().optional().nullable(),
 });
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
@@ -54,6 +55,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
   }
   if (d.planungStatus !== undefined) data.planungStatus = d.planungStatus;
+  if (d.tourId !== undefined) data.tourId = d.tourId;
   if (d.specialCode !== undefined) data.specialCode = d.specialCode;
 
   const nextStatus = d.planungStatus ?? existing.planungStatus;

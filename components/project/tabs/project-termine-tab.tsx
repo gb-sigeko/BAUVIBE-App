@@ -215,6 +215,7 @@ export function ProjectTermineTab({
             <div className="space-y-2 md:col-span-2">
               <Label>SiGeKo (optional)</Label>
               <select
+                data-testid="fest-termin-employee"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={newEmp}
                 onChange={(e) => setNewEmp(e.target.value)}

@@ -32,7 +32,10 @@ export type PlanungBoardEntry = {
   feedback: string | null;
   conflict: boolean;
   vorOrtCount: number;
+  tourId: string | null;
 };
+
+export type PlanungBoardTour = { id: string; isoYear: number; isoWeek: number; employeeId: string; region: string };
 
 export type PlanungBoardProject = { id: string; code: string; name: string };
 
@@ -62,6 +65,7 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
+      data-testid={`planung-cell-${isoYear}-${isoWeek}`}
       className={cn(
         "min-h-[84px] rounded-md border border-dashed p-1.5 transition-colors",
         isOver ? "bg-muted" : "bg-background",
@@ -72,7 +76,17 @@ function DroppableCell({
   );
 }
 
-function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
+function DraggableChip({
+  entry,
+  toursForWeek,
+  tourHighlight,
+}: {
+  entry: PlanungBoardEntry;
+  toursForWeek: PlanungBoardTour[];
+  tourHighlight: boolean;
+}) {
+  const router = useRouter();
+  const [, startTourAssign] = useTransition();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: entry.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
 
@@ -97,6 +111,7 @@ function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
         isDragging && "opacity-60",
         entry.conflict && "border-amber-500/70",
         entry.planungType === "FEST" && "border-violet-500/50",
+        tourHighlight && "bg-sky-500/10",
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-1">
@@ -128,6 +143,38 @@ function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
         <span className="text-[10px] text-muted-foreground">Vor-Ort: {entry.vorOrtCount}</span>
         <PlanungVorOrtDialog entryId={entry.id} />
       </div>
+      {entry.tourId ? (
+        <div className="mt-0.5 text-[9px] text-muted-foreground" data-testid="planung-tour-id">
+          Tour {entry.tourId.slice(0, 6)}
+        </div>
+      ) : null}
+      {toursForWeek.length ? (
+        <div className="mt-0.5 flex items-center gap-1 text-[9px]" onPointerDown={(e) => e.stopPropagation()}>
+          <span className="text-muted-foreground">Zu Tour</span>
+          <select
+            className="max-w-[80px] rounded border bg-background px-0.5"
+            value={entry.tourId ?? ""}
+            onChange={(ev) => {
+              const v = ev.target.value || null;
+              startTourAssign(async () => {
+                await fetch(`/api/planung/${entry.id}`, {
+                  method: "PUT",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ tourId: v }),
+                });
+                router.refresh();
+              });
+            }}
+          >
+            <option value="">—</option>
+            {toursForWeek.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.id.slice(0, 6)}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
     </button>
   );
 }
@@ -136,6 +183,7 @@ type RowProps = {
   projects: PlanungBoardProject[];
   weeks: PlanungBoardWeek[];
   entriesByProjectWeek: Map<string, PlanungBoardEntry[]>;
+  toursByWeek: Map<string, PlanungBoardTour[]>;
 };
 
 function PlanungRow({
@@ -145,6 +193,7 @@ function PlanungRow({
   projects,
   weeks,
   entriesByProjectWeek,
+  toursByWeek,
 }: {
   index: number;
   style: CSSProperties;
@@ -156,7 +205,13 @@ function PlanungRow({
   }
 
   return (
-    <div {...ariaAttributes} style={style} className="flex border-b bg-background">
+    <div
+      {...ariaAttributes}
+      style={style}
+      className="flex border-b bg-background"
+      data-testid={`planung-row-${p.code}`}
+      data-project-id={p.id}
+    >
       <div
         className="shrink-0 border-r bg-background px-2 py-2 align-top"
         style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}
@@ -167,6 +222,8 @@ function PlanungRow({
       {weeks.map((w) => {
         const key = `${p.id}:${w.isoYear}:${w.isoWeek}`;
         const cellEntries = entriesByProjectWeek.get(key) ?? [];
+        const wk = `${w.isoYear}-${w.isoWeek}`;
+        const cellTours = toursByWeek.get(wk) ?? [];
         return (
           <div
             key={key}
@@ -174,9 +231,11 @@ function PlanungRow({
             style={{ width: COL_WEEK, minWidth: COL_WEEK }}
           >
             <DroppableCell isoYear={w.isoYear} isoWeek={w.isoWeek}>
-              {cellEntries.map((e) => (
-                <DraggableChip key={e.id} entry={e} />
-              ))}
+              {cellEntries.map((e) => {
+                const tourHighlight =
+                  !!e.tourId && cellEntries.some((o) => o.id !== e.id && o.tourId != null && o.tourId === e.tourId);
+                return <DraggableChip key={e.id} entry={e} toursForWeek={cellTours} tourHighlight={tourHighlight} />;
+              })}
             </DroppableCell>
           </div>
         );
@@ -189,14 +248,26 @@ export function PlanungBoard({
   projects,
   weeks,
   entries,
+  tours = [],
 }: {
   projects: PlanungBoardProject[];
   weeks: PlanungBoardWeek[];
   entries: PlanungBoardEntry[];
+  tours?: PlanungBoardTour[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+
+  const toursByWeek = useMemo(() => {
+    const map = new Map<string, PlanungBoardTour[]>();
+    for (const t of tours) {
+      const k = `${t.isoYear}-${t.isoWeek}`;
+      if (!map.has(k)) map.set(k, []);
+      map.get(k)!.push(t);
+    }
+    return map;
+  }, [tours]);
 
   const entriesByProjectWeek = useMemo(() => {
     const map = new Map<string, PlanungBoardEntry[]>();
@@ -212,8 +283,8 @@ export function PlanungBoard({
   }, [entries]);
 
   const rowProps = useMemo<RowProps>(
-    () => ({ projects, weeks, entriesByProjectWeek }),
-    [projects, weeks, entriesByProjectWeek],
+    () => ({ projects, weeks, entriesByProjectWeek, toursByWeek }),
+    [projects, weeks, entriesByProjectWeek, toursByWeek],
   );
 
   const totalWidth = COL_PROJECT + weeks.length * COL_WEEK;

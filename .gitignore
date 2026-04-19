@@ -40,3 +40,7 @@ yarn-error.log*
 
 # lokale Hinweisdateien (keine URLs committen)
 DEINE_SUPABASE_URL.txt
+
+# Begehung: lokale Uploads / generierte PDFs (nicht versionieren)
+public/uploads/begehungen/*/
+public/protokolle/*.pdf

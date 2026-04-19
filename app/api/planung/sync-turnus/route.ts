@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireApiUser, requireWriteRole } from "@/lib/api-helpers";
 import { syncTurnusSuggestions } from "@/lib/turnus-engine";
+import { applyKrankVertretungForHorizon } from "@/lib/vertretung";
 import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
 
 const bodySchema = z
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   const anchor = parsed.data?.anchor ? new Date(parsed.data.anchor) : new Date();
   const weeks = parsed.data?.weeks?.length ? parsed.data.weeks : horizonToIsoWeeks(buildPlanungHorizon(anchor, 12));
 
+  await applyKrankVertretungForHorizon(prisma, weeks);
   await syncTurnusSuggestions(prisma, anchor, weeks);
   return NextResponse.json({ ok: true, weeks: weeks.length });
 }

@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -35,6 +37,7 @@ export default async function MitarbeiterPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Urlaub</TableHead>
                 <TableHead>Vertretung</TableHead>
+                <TableHead className="text-right">Profil</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -69,6 +72,11 @@ export default async function MitarbeiterPage() {
                             )
                             .join(" · ")
                         : "—"}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/mitarbeiter/${e.id}`}>Öffnen</Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

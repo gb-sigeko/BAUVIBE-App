@@ -40,9 +40,12 @@ export function ProjectBegehungenTab({ projectId, rows }: { projectId: string; r
                 <TableCell>
                   {i.protocolMissing ? <Badge variant="destructive">Fehlt</Badge> : <Badge variant="secondary">OK</Badge>}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="space-x-2 text-right">
                   <Link className="text-sm text-primary underline" href={`/projects/${projectId}/begehungen/${i.id}`}>
                     Bearbeiten
+                  </Link>
+                  <Link className="text-sm text-primary underline" href={`/begehungen/${i.id}/protokoll`}>
+                    Protokoll
                   </Link>
                 </TableCell>
               </TableRow>
