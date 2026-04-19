@@ -1,19 +1,51 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CreateContactForm, CreateOrganizationForm } from "@/components/kontakte/kontakte-forms";
+import { KontakteSearchBar } from "@/components/kontakte/kontakte-search-bar";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function KontaktePage() {
-  const [organizations, contacts] = await Promise.all([
+export default async function KontaktePage({ searchParams }: { searchParams: { q?: string; contact?: string } }) {
+  const q = searchParams.q?.trim() ?? "";
+  const highlightId = searchParams.contact;
+
+  const [orgsForForms, organizations, contacts] = await Promise.all([
     prisma.organization.findMany({
       where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.organization.findMany({
+      where: {
+        active: true,
+        ...(q
+          ? {
+              OR: [
+                { name: { contains: q, mode: "insensitive" } },
+                { address: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
       include: { _count: { select: { contacts: true } } },
       orderBy: { name: "asc" },
     }),
     prisma.contactPerson.findMany({
-      where: { active: true },
+      where: {
+        active: true,
+        ...(q
+          ? {
+              OR: [
+                { name: { contains: q, mode: "insensitive" } },
+                { email: { contains: q, mode: "insensitive" } },
+                { phone: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+      },
       include: { organization: true },
       orderBy: { name: "asc" },
     }),
@@ -27,6 +59,10 @@ export default async function KontaktePage() {
           Organisationen und Ansprechpartner für Büro und Projektakten. Daten werden über dieselben Tabellen wie in den Projekt-Tabs geführt.
         </p>
       </div>
+
+      <Suspense fallback={<div className="text-sm text-muted-foreground">Suche lädt…</div>}>
+        <KontakteSearchBar initialQ={q} />
+      </Suspense>
 
       <Card>
         <CardHeader>
@@ -44,7 +80,7 @@ export default async function KontaktePage() {
           <CardDescription>Optional einer Organisation zuordnen.</CardDescription>
         </CardHeader>
         <CardContent>
-          <CreateContactForm organizations={organizations.map((o) => ({ id: o.id, name: o.name }))} />
+          <CreateContactForm organizations={orgsForForms} />
         </CardContent>
       </Card>
 
@@ -95,7 +131,11 @@ export default async function KontaktePage() {
             </TableHeader>
             <TableBody>
               {contacts.map((c) => (
-                <TableRow key={c.id}>
+                <TableRow
+                  key={c.id}
+                  className={cn(highlightId === c.id && "bg-muted ring-2 ring-primary/40")}
+                  data-contact-id={c.id}
+                >
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.organization?.name ?? "—"}</TableCell>
                   <TableCell>{c.functionTitle ?? "—"}</TableCell>

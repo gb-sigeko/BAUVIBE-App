@@ -4,13 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { assertProject, requireApiUser, requireWriteRole } from "@/lib/api-helpers";
 
 const createSchema = z.object({
+  contactPersonId: z.string().min(1),
   organizationId: z.string().optional().nullable(),
-  contactPersonId: z.string().optional().nullable(),
-  roleInProject: z.string().min(1),
-  isPrimary: z.boolean().optional(),
-  notes: z.string().optional().nullable(),
+  role: z.string().min(1),
+  isMainContact: z.boolean().optional(),
   validFrom: z.string().min(1).optional().nullable(),
-  validTo: z.string().min(1).optional().nullable(),
+  validUntil: z.string().min(1).optional().nullable(),
+  notes: z.string().optional().nullable(),
 });
 
 export async function GET(_req: Request, { params }: { params: { projectId: string } }) {
@@ -41,9 +41,15 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
   const parsed = createSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
-  const isPrimary = parsed.data.isPrimary ?? false;
+  const person = await prisma.contactPerson.findFirst({
+    where: { id: parsed.data.contactPersonId, active: true },
+  });
+  if (!person) return NextResponse.json({ error: "Contact not found" }, { status: 404 });
+
+  const organizationId = parsed.data.organizationId ?? person.organizationId ?? undefined;
+  const isPrimary = parsed.data.isMainContact ?? false;
   const validFrom = parsed.data.validFrom ? new Date(parsed.data.validFrom) : undefined;
-  const validTo = parsed.data.validTo ? new Date(parsed.data.validTo) : undefined;
+  const validTo = parsed.data.validUntil ? new Date(parsed.data.validUntil) : undefined;
 
   const row = await prisma.$transaction(async (tx) => {
     if (isPrimary) {
@@ -55,9 +61,9 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
     return tx.projectParticipant.create({
       data: {
         projectId: params.projectId,
-        organizationId: parsed.data.organizationId ?? undefined,
-        contactPersonId: parsed.data.contactPersonId ?? undefined,
-        roleInProject: parsed.data.roleInProject,
+        organizationId,
+        contactPersonId: person.id,
+        roleInProject: parsed.data.role,
         isPrimary,
         notes: parsed.data.notes ?? undefined,
         ...(validFrom ? { validFrom } : {}),
@@ -66,5 +72,6 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
       include: { organization: true, contactPerson: true },
     });
   });
+
   return NextResponse.json(row, { status: 201 });
 }

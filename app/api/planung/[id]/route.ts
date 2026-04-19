@@ -6,12 +6,15 @@ import { prisma } from "@/lib/prisma";
 import { requireApiUser, requireWriteRole } from "@/lib/api-helpers";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { computeIsCompletedForContract } from "@/lib/turnus-engine";
+import { getIsoWeekParts } from "@/lib/utils";
 
 const updateSchema = z.object({
   employeeId: z.string().optional().nullable(),
   isoYear: z.number().int().optional(),
   isoWeek: z.number().int().min(1).max(53).optional(),
   feedback: z.string().optional().nullable(),
+  note: z.string().optional().nullable(),
+  plannedDate: z.string().optional().nullable(),
   planungStatus: z.nativeEnum(PlanungStatus).optional(),
   isCompletedForContract: z.boolean().optional(),
   specialCode: z.nativeEnum(SpecialCode).optional(),
@@ -36,6 +39,20 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (d.isoYear !== undefined) data.isoYear = d.isoYear;
   if (d.isoWeek !== undefined) data.isoWeek = d.isoWeek;
   if (d.feedback !== undefined) data.feedback = d.feedback;
+  if (d.note !== undefined) data.note = d.note;
+  if (d.plannedDate !== undefined) {
+    const dt =
+      d.plannedDate === null || d.plannedDate === "" ? null : new Date(d.plannedDate);
+    if (dt && Number.isNaN(dt.getTime())) {
+      return NextResponse.json({ error: "Invalid plannedDate" }, { status: 400 });
+    }
+    data.plannedDate = dt;
+    if (dt) {
+      const parts = getIsoWeekParts(dt);
+      data.isoYear = parts.isoYear;
+      data.isoWeek = parts.isoWeek;
+    }
+  }
   if (d.planungStatus !== undefined) data.planungStatus = d.planungStatus;
   if (d.specialCode !== undefined) data.specialCode = d.specialCode;
 
@@ -58,7 +75,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     data,
   });
   await recalcConflictsForWeek(row.isoYear, row.isoWeek);
-  if (parsed.data.isoYear != null && parsed.data.isoWeek != null) {
+  if (existing.isoYear !== row.isoYear || existing.isoWeek !== row.isoWeek) {
     await recalcConflictsForWeek(existing.isoYear, existing.isoWeek);
   }
   return NextResponse.json(row);

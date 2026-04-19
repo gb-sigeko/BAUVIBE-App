@@ -54,12 +54,12 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
       <div className="grid gap-3 md:grid-cols-2">
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">Notiz</label>
-          <Textarea value={notiz} onChange={(e) => setNotiz(e.target.value)} rows={3} />
+          <Textarea data-testid="telefonnotiz-text" value={notiz} onChange={(e) => setNotiz(e.target.value)} rows={3} />
         </div>
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">Follow-up (optional, Datum/Zeit lokal)</label>
           <Input type="datetime-local" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
-          <Button type="button" className="mt-2" disabled={busy} onClick={() => void create()}>
+          <Button data-testid="telefonnotiz-save" type="button" className="mt-2" disabled={busy} onClick={() => void create()}>
             Speichern
           </Button>
         </div>

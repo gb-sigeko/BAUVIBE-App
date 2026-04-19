@@ -11,8 +11,6 @@ const createSchema = z.object({
 export async function GET(_req: Request, { params }: { params: { projectId: string } }) {
   const { session, response } = await requireApiUser();
   if (!session) return response!;
-  const forbidden = requireWriteRole(session.user.role);
-  if (forbidden) return forbidden;
 
   const { project, response: pRes } = await assertProject(params.projectId);
   if (!project) return pRes!;
@@ -47,7 +45,7 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
     },
   });
 
-  await prisma.chronicleEntry.create({
+  await prisma.chronikEntry.create({
     data: {
       projectId: params.projectId,
       authorId: session.user.id,
