@@ -5,9 +5,9 @@ import pg from "pg";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient() {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set");
+    throw new Error("DATABASE_URL or TEST_DATABASE_URL is not set");
   }
 
   const pool = new pg.Pool({

@@ -9,6 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "test:kern": "tsx scripts/kernfunktionen-test.ts",
+    "test:automated": "tsx scripts/run-full-test-suite.ts",
+    "test:generate-data": "tsx scripts/generate-test-data.ts",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -59,7 +61,8 @@
     "prisma": "^7.7.0",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.21.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@playwright/test": "^1.52.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

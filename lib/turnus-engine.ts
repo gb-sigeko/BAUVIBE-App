@@ -10,6 +10,7 @@ import {
 } from "@/lib/iso-week";
 import { getIsoWeekParts } from "@/lib/utils";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
+import { isoWeekOverlapsClosedInterval } from "@/lib/planung-week-overlap";
 
 /** Priorität: fester Termin (0) > Vertretung (1) > Turnus (2) > manuell (3). */
 export const PLANUNG_PRIORITY = {
@@ -269,6 +270,14 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
       const { isoYear, isoWeek } = getIsoWeekParts(cursor);
       if (compareIsoWeek({ isoYear, isoWeek }, maxW) > 0) break;
       if (compareIsoWeek({ isoYear, isoWeek }, minW) >= 0 && keys.has(isoWeekKey(isoYear, isoWeek))) {
+        if (
+          p.pauseStartsOn &&
+          p.pauseEndsOn &&
+          isoWeekOverlapsClosedInterval(isoYear, isoWeek, p.pauseStartsOn, p.pauseEndsOn)
+        ) {
+          cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
+          continue;
+        }
         if (festCells.has(festCellKey(p.id, isoYear, isoWeek))) {
           cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
           continue;
@@ -299,7 +308,74 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
     }
   }
 
+  await applyKrankVertretungForHorizon(db, horizon);
+
   for (const w of horizon) {
     await recalcConflictsForWeek(w.isoYear, w.isoWeek);
+  }
+}
+
+/**
+ * Krankheits-Ausfall: Planungseinträge der betroffenen KW auf `Project.substituteEmployeeId` umbuchen
+ * oder Konflikt markieren; Chronik-Eintrag bei erfolgreicher Umbuchung.
+ */
+export async function applyKrankVertretungForHorizon(db: PrismaClient, horizon: HorizonWeek[]) {
+  const kranks = await db.availability.findMany({
+    where: { reason: "KRANKHEIT" },
+    include: { employee: true },
+  });
+  if (!kranks.length) return;
+
+  for (const w of horizon) {
+    for (const av of kranks) {
+      if (!isoWeekOverlapsClosedInterval(w.isoYear, w.isoWeek, av.startsOn, av.endsOn)) continue;
+
+      const entries = await db.planungEntry.findMany({
+        where: {
+          employeeId: av.employeeId,
+          isoYear: w.isoYear,
+          isoWeek: w.isoWeek,
+        },
+        include: { project: { select: { id: true, code: true, substituteEmployeeId: true } } },
+      });
+
+      for (const ent of entries) {
+        const subId = ent.project.substituteEmployeeId;
+        if (subId && subId !== av.employeeId) {
+          const del = await db.employee.findUnique({ where: { id: subId }, select: { shortCode: true } });
+          await db.planungEntry.update({
+            where: { id: ent.id },
+            data: {
+              employeeId: subId,
+              conflict: false,
+              turnusLabel: ent.turnusLabel ? `${ent.turnusLabel} (Vertretung)` : "Vertretung (Krankheit)",
+            },
+          });
+          await db.chronikEntry.create({
+            data: {
+              projectId: ent.projectId,
+              body: `Automatische Vertretung in KW ${w.isoWeek}/${w.isoYear}: ${av.employee.shortCode} → ${del?.shortCode ?? "?"} (Krankheit).`,
+              action: "planung_vertretung_abwesenheit",
+              targetType: "PlanungEntry",
+              targetId: ent.id,
+            },
+          });
+        } else if (!ent.conflict) {
+          await db.planungEntry.update({
+            where: { id: ent.id },
+            data: { conflict: true },
+          });
+          await db.chronikEntry.create({
+            data: {
+              projectId: ent.projectId,
+              body: `Keine Vertretung hinterlegt: ${av.employee.shortCode} ist in KW ${w.isoWeek}/${w.isoYear} krank, Eintrag markiert als Konflikt.`,
+              action: "planung_vertretung_fehlt",
+              targetType: "PlanungEntry",
+              targetId: ent.id,
+            },
+          });
+        }
+      }
+    }
   }
 }

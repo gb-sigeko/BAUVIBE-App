@@ -324,7 +324,7 @@ export function PlanungBoard({
   const gridHeight = Math.min(620, Math.max(rowCount ? ROW_H : 0, rowCount * ROW_H));
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-lg border" data-testid="planung-board">
       <div className="flex border-b bg-muted/40" style={{ width: totalWidth, minWidth: totalWidth }}>
         <div className="shrink-0 px-2 py-2 text-left text-sm font-semibold" style={{ width: COL_PROJECT }}>
           Projekt

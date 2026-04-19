@@ -5,11 +5,19 @@ import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
 import { syncTurnusSuggestions } from "@/lib/turnus-engine";
 
 export const dynamic = "force-dynamic";
+/** Große Raster (z. B. E2E mit ?weeks=45) dürfen länger rechnen. */
+export const maxDuration = 180;
 
-export default async function PlanungPage() {
+type PlanungPageProps = { searchParams?: { weeks?: string } };
+
+export default async function PlanungPage({ searchParams }: PlanungPageProps) {
   const anchor = new Date();
-  const weeks: PlanungBoardWeek[] = buildPlanungHorizon(anchor, 12);
-  await syncTurnusSuggestions(prisma, anchor, horizonToIsoWeeks(weeks));
+  const raw = Number(searchParams?.weeks ?? "12");
+  const weekCount = Number.isFinite(raw) ? Math.min(52, Math.max(4, Math.floor(raw))) : 12;
+  const weeks: PlanungBoardWeek[] = buildPlanungHorizon(anchor, weekCount);
+  if (process.env.SKIP_PLANUNG_SYNC !== "1") {
+    await syncTurnusSuggestions(prisma, anchor, horizonToIsoWeeks(weeks));
+  }
 
   const projects = await prisma.project.findMany({
     where: { status: "ACTIVE" },
