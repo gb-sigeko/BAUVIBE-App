@@ -1,17 +1,19 @@
 "use client";
 
 import type { CSSProperties, ReactElement } from "react";
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { List } from "react-window";
-import { DndContext, DragEndEvent, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
-import { cn } from "@/lib/utils";
+import { Grid } from "react-window";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { PlanungVorOrtDialog } from "@/components/planung-vorort-dialog";
+import { cn } from "@/lib/utils";
 
-const ROW_H = 100;
+const ROW_H = 104;
 const COL_PROJECT = 240;
-const COL_WEEK = 128;
+const COL_WEEK = 130;
 
 export type PlanungBoardEntry = {
   id: string;
@@ -32,53 +34,151 @@ export type PlanungBoardEntry = {
   feedback: string | null;
   conflict: boolean;
   vorOrtCount: number;
+  begehungSollNummer: number | null;
+  begehungIstNummer: number | null;
+  tourId: string | null;
 };
 
 export type PlanungBoardProject = { id: string; code: string; name: string };
 
 export type PlanungBoardWeek = { isoYear: number; isoWeek: number; label: string };
 
-function droppableId(isoYear: number, isoWeek: number) {
-  return `week-${isoYear}-${isoWeek}`;
+function statusAccentClass(status: string) {
+  switch (status) {
+    case "ERLEDIGT":
+      return "border-l-emerald-500";
+    case "NICHT_ERLEDIGT":
+    case "ABGESAGT":
+      return "border-l-red-500";
+    case "RUECKMELDUNG_OFFEN":
+    case "PROTOKOLL_OFFEN":
+      return "border-l-orange-500";
+    case "BESTAETIGT":
+    case "GEPLANT":
+    case "IN_DURCHFUEHRUNG":
+      return "border-l-blue-500";
+    case "VORGESCHLAGEN":
+      return "border-l-slate-400";
+    case "VERTRETUNG_AKTIV":
+      return "border-l-purple-500";
+    default:
+      return "border-l-gray-300";
+  }
 }
 
-function parseDroppableId(id: string) {
-  const m = /^week-(\d+)-(\d+)$/.exec(id);
-  if (!m) return null;
-  return { isoYear: Number(m[1]), isoWeek: Number(m[2]) };
-}
-
-function DroppableCell({
-  isoYear,
-  isoWeek,
-  children,
+function PlanMoveDialog({
+  open,
+  onOpenChange,
+  entry,
+  weeks,
 }: {
-  isoYear: number;
-  isoWeek: number;
-  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  entry: PlanungBoardEntry | null;
+  weeks: PlanungBoardWeek[];
 }) {
-  const id = droppableId(isoYear, isoWeek);
-  const { isOver, setNodeRef } = useDroppable({ id });
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [target, setTarget] = useState("");
+
+  const submit = () => {
+    if (!entry || !target) return;
+    const [y, w] = target.split("-").map(Number);
+    startTransition(async () => {
+      const res = await fetch("/api/planung/move", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ entryId: entry.id, targetIsoYear: y, targetIsoWeek: w }),
+      });
+      if (res.ok) {
+        onOpenChange(false);
+        router.refresh();
+      }
+    });
+  };
+
   return (
-    <div
-      ref={setNodeRef}
-      className={cn(
-        "min-h-[84px] rounded-md border border-dashed p-1.5 transition-colors",
-        isOver ? "bg-muted" : "bg-background",
-      )}
-    >
-      {children}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>KW verschieben</DialogTitle>
+        </DialogHeader>
+        {entry ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Eintrag {entry.employeeShortCode ?? "—"} für Projekt-Zelle neu zuordnen.
+            </p>
+            <div className="space-y-2">
+              <Label>Ziel-KW</Label>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+              >
+                <option value="">Bitte wählen…</option>
+                {weeks.map((wk) => (
+                  <option key={`${wk.isoYear}-${wk.isoWeek}`} value={`${wk.isoYear}-${wk.isoWeek}`}>
+                    {wk.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        ) : null}
+        <DialogFooter>
+          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+            Abbrechen
+          </Button>
+          <Button type="button" disabled={pending || !target} onClick={submit}>
+            Speichern
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FeedbackMini({ entryId }: { entryId: string }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const run = (outcome: "erledigt" | "nicht_erledigt" | "nb" | "ob") => {
+    startTransition(async () => {
+      const res = await fetch(`/api/planung/entries/${entryId}/feedback`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ outcome }),
+      });
+      if (res.ok) router.refresh();
+    });
+  };
+  return (
+    <div className="mt-1 flex flex-wrap gap-0.5">
+      <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" disabled={pending} onClick={() => run("erledigt")}>
+        OK
+      </Button>
+      <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" disabled={pending} onClick={() => run("nicht_erledigt")}>
+        n.e.
+      </Button>
+      <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" disabled={pending} onClick={() => run("nb")}>
+        NB
+      </Button>
+      <Button type="button" variant="outline" size="sm" className="h-6 px-1 text-[9px]" disabled={pending} onClick={() => run("ob")}>
+        OB
+      </Button>
     </div>
   );
 }
 
-function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: entry.id });
-  const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
-
+function EntryCard({
+  entry,
+  onMove,
+}: {
+  entry: PlanungBoardEntry;
+  onMove: (e: PlanungBoardEntry) => void;
+}) {
   const typeLabel =
     entry.planungType === "FEST"
-      ? "Fester Termin"
+      ? "FEST"
       : entry.planungType === "VERTRETUNG"
         ? "Vertretung"
         : entry.planungType === "VERSCHOBEN"
@@ -86,101 +186,100 @@ function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
           : null;
 
   return (
-    <button
-      type="button"
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
+    <div
       className={cn(
-        "mb-1.5 w-full cursor-grab rounded-md border bg-card px-2 py-1 text-left text-xs shadow-sm active:cursor-grabbing",
-        isDragging && "opacity-60",
-        entry.conflict && "border-amber-500/70",
-        entry.planungType === "FEST" && "border-violet-500/50",
+        "mb-1 rounded-md border bg-card px-1.5 py-1 text-left text-[10px] shadow-sm border-l-4",
+        statusAccentClass(entry.planungStatus),
+        entry.conflict && "ring-1 ring-amber-400",
+        entry.planungType === "FEST" && "border-violet-500/40",
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-1">
+      <div className="flex flex-wrap items-center justify-between gap-0.5">
         <span className="font-semibold">{entry.employeeShortCode ?? "—"}</span>
         <div className="flex flex-wrap justify-end gap-0.5">
-          {entry.conflict ? <Badge variant="warning">Konflikt</Badge> : null}
+          {entry.conflict ? <span title="Konflikt">⚠</span> : null}
           {typeLabel ? (
-            <Badge variant="secondary" className="text-[10px]">
+            <Badge variant="secondary" className="px-1 py-0 text-[8px]">
               {typeLabel}
             </Badge>
           ) : null}
           {entry.specialCode !== "NONE" ? (
-            <Badge variant="outline" className="text-[10px]">
+            <Badge variant="outline" className="px-1 py-0 text-[8px]">
               {entry.specialCode}
-            </Badge>
-          ) : null}
-          {entry.isCompletedForContract ? (
-            <Badge variant="secondary" className="text-[10px]">
-              Soll erfüllt
             </Badge>
           ) : null}
         </div>
       </div>
-      <div className="text-[10px] text-muted-foreground">{entry.planungStatus}</div>
-      {entry.turnusLabel ? <div className="text-[11px] text-muted-foreground">Turnus: {entry.turnusLabel}</div> : null}
-      {entry.note ? <div className="line-clamp-2 text-[11px] text-muted-foreground">{entry.note}</div> : null}
-      {entry.feedback ? <div className="text-[11px]">Rückmeldung: {entry.feedback}</div> : null}
-      <div className="mt-1 flex items-center justify-between gap-1" onPointerDown={(e) => e.stopPropagation()}>
-        <span className="text-[10px] text-muted-foreground">Vor-Ort: {entry.vorOrtCount}</span>
+      <div className="text-[9px] text-muted-foreground">{entry.planungStatus}</div>
+      {entry.begehungSollNummer != null || entry.begehungIstNummer != null ? (
+        <div className="text-[9px] text-muted-foreground">
+          Bg. {entry.begehungIstNummer ?? "—"}/{entry.begehungSollNummer ?? "—"}
+        </div>
+      ) : null}
+      {entry.tourId ? <div className="text-[9px] text-violet-700">Tour {entry.tourId}</div> : null}
+      {entry.turnusLabel ? <div className="line-clamp-1 text-[9px] text-muted-foreground">{entry.turnusLabel}</div> : null}
+      {entry.note ? <div className="line-clamp-1 text-[9px] text-muted-foreground">{entry.note}</div> : null}
+      <div className="mt-0.5 flex items-center justify-between gap-0.5">
+        <span className="text-[8px] text-muted-foreground">V-O {entry.vorOrtCount}</span>
         <PlanungVorOrtDialog entryId={entry.id} />
       </div>
-    </button>
+      <div className="mt-0.5 flex gap-0.5">
+        <Button type="button" variant="ghost" size="sm" className="h-6 px-1 text-[9px]" onClick={() => onMove(entry)}>
+          KW
+        </Button>
+      </div>
+      <FeedbackMini entryId={entry.id} />
+    </div>
   );
 }
 
-type RowProps = {
+type CellProps = {
   projects: PlanungBoardProject[];
   weeks: PlanungBoardWeek[];
   entriesByProjectWeek: Map<string, PlanungBoardEntry[]>;
+  onMoveEntry: (e: PlanungBoardEntry) => void;
 };
 
-function PlanungRow({
-  index,
+function PlanGridCell({
+  columnIndex,
+  rowIndex,
   style,
   ariaAttributes,
   projects,
   weeks,
   entriesByProjectWeek,
+  onMoveEntry,
 }: {
-  index: number;
+  columnIndex: number;
+  rowIndex: number;
   style: CSSProperties;
-  ariaAttributes: { "aria-posinset": number; "aria-setsize": number; role: "listitem" };
-} & RowProps): ReactElement {
-  const p = projects[index];
-  if (!p) {
-    return <div {...ariaAttributes} style={style} />;
+  ariaAttributes: { "aria-colindex": number; role: "gridcell" };
+} & CellProps): ReactElement {
+  const p = projects[rowIndex];
+  if (!p) return <div {...ariaAttributes} style={style} />;
+
+  if (columnIndex === 0) {
+    return (
+      <div {...ariaAttributes} style={style} className="box-border flex flex-col justify-center border-b border-r bg-background px-2 py-1">
+        <div className="text-xs font-medium leading-snug">{p.name}</div>
+        <div className="text-[10px] text-muted-foreground">{p.code}</div>
+      </div>
+    );
   }
 
+  const w = weeks[columnIndex - 1];
+  if (!w) return <div {...ariaAttributes} style={style} />;
+
+  const key = `${p.id}:${w.isoYear}:${w.isoWeek}`;
+  const list = entriesByProjectWeek.get(key) ?? [];
+
   return (
-    <div {...ariaAttributes} style={style} className="flex border-b bg-background">
-      <div
-        className="shrink-0 border-r bg-background px-2 py-2 align-top"
-        style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}
-      >
-        <div className="text-sm font-medium leading-snug">{p.name}</div>
-        <div className="text-xs text-muted-foreground">{p.code}</div>
+    <div {...ariaAttributes} style={style} className="box-border overflow-auto border-b border-r bg-background p-1">
+      <div className="flex min-h-[92px] flex-col gap-0.5 rounded border border-dashed border-muted p-0.5">
+        {list.map((e) => (
+          <EntryCard key={e.id} entry={e} onMove={onMoveEntry} />
+        ))}
       </div>
-      {weeks.map((w) => {
-        const key = `${p.id}:${w.isoYear}:${w.isoWeek}`;
-        const cellEntries = entriesByProjectWeek.get(key) ?? [];
-        return (
-          <div
-            key={key}
-            className="shrink-0 border-r p-1 align-top"
-            style={{ width: COL_WEEK, minWidth: COL_WEEK }}
-          >
-            <DroppableCell isoYear={w.isoYear} isoWeek={w.isoWeek}>
-              {cellEntries.map((e) => (
-                <DraggableChip key={e.id} entry={e} />
-              ))}
-            </DroppableCell>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -194,9 +293,7 @@ export function PlanungBoard({
   weeks: PlanungBoardWeek[];
   entries: PlanungBoardEntry[];
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const [moveEntry, setMoveEntry] = useState<PlanungBoardEntry | null>(null);
 
   const entriesByProjectWeek = useMemo(() => {
     const map = new Map<string, PlanungBoardEntry[]>();
@@ -211,74 +308,54 @@ export function PlanungBoard({
     return map;
   }, [entries]);
 
-  const rowProps = useMemo<RowProps>(
-    () => ({ projects, weeks, entriesByProjectWeek }),
+  const cellProps = useMemo<CellProps>(
+    () => ({
+      projects,
+      weeks,
+      entriesByProjectWeek,
+      onMoveEntry: setMoveEntry,
+    }),
     [projects, weeks, entriesByProjectWeek],
   );
 
+  const columnCount = 1 + weeks.length;
+  const rowCount = projects.length;
   const totalWidth = COL_PROJECT + weeks.length * COL_WEEK;
-  const listHeight = Math.min(560, Math.max(projects.length ? ROW_H : 0, projects.length * ROW_H));
-
-  async function onDragEnd(event: DragEndEvent) {
-    const activeId = String(event.active.id);
-    const overId = event.over?.id ? String(event.over.id) : null;
-    if (!overId) return;
-    const target = parseDroppableId(overId);
-    if (!target) return;
-
-    const entry = entries.find((e) => e.id === activeId);
-    if (!entry) return;
-    if (entry.isoYear === target.isoYear && entry.isoWeek === target.isoWeek) return;
-
-    startTransition(async () => {
-      const res = await fetch("/api/planung/move", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          entryId: activeId,
-          targetIsoYear: target.isoYear,
-          targetIsoWeek: target.isoWeek,
-        }),
-      });
-      if (res.ok) router.refresh();
-    });
-  }
+  const gridHeight = Math.min(620, Math.max(rowCount ? ROW_H : 0, rowCount * ROW_H));
 
   return (
-    <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-      <div className="overflow-x-auto rounded-lg border">
-        <div className="flex border-b bg-muted/40" style={{ width: totalWidth, minWidth: totalWidth }}>
-          <div
-            className="shrink-0 px-2 py-2 text-left text-sm font-semibold"
-            style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}
-          >
-            Projekt
-          </div>
-          {weeks.map((w) => (
-            <div
-              key={droppableId(w.isoYear, w.isoWeek)}
-              className="shrink-0 px-1 py-2 text-left text-sm font-semibold leading-tight"
-              style={{ width: COL_WEEK, minWidth: COL_WEEK }}
-            >
-              {w.label}
-            </div>
-          ))}
+    <div className="overflow-x-auto rounded-lg border">
+      <div className="flex border-b bg-muted/40" style={{ width: totalWidth, minWidth: totalWidth }}>
+        <div className="shrink-0 px-2 py-2 text-left text-sm font-semibold" style={{ width: COL_PROJECT }}>
+          Projekt
         </div>
-        {projects.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">Keine aktiven Projekte.</p>
-        ) : (
-          <List
-            defaultHeight={560}
-            overscanCount={5}
-            rowCount={projects.length}
-            rowHeight={ROW_H}
-            rowProps={rowProps}
-            rowComponent={PlanungRow}
-            style={{ height: listHeight, width: totalWidth, minWidth: totalWidth }}
-          />
-        )}
+        {weeks.map((w) => (
+          <div
+            key={`${w.isoYear}-${w.isoWeek}`}
+            className="shrink-0 px-1 py-2 text-left text-sm font-semibold leading-tight"
+            style={{ width: COL_WEEK }}
+          >
+            {w.label}
+          </div>
+        ))}
       </div>
-      {pending ? <p className="mt-2 text-xs text-muted-foreground">Aktualisiere Planung…</p> : null}
-    </DndContext>
+      {projects.length === 0 ? (
+        <p className="p-4 text-sm text-muted-foreground">Keine aktiven Projekte.</p>
+      ) : (
+        <Grid
+          cellComponent={PlanGridCell}
+          cellProps={cellProps}
+          columnCount={columnCount}
+          columnWidth={(index: number) => (index === 0 ? COL_PROJECT : COL_WEEK)}
+          defaultHeight={gridHeight}
+          defaultWidth={totalWidth}
+          rowCount={rowCount}
+          rowHeight={ROW_H}
+          overscanCount={2}
+          style={{ height: gridHeight, width: totalWidth, minWidth: totalWidth }}
+        />
+      )}
+      <PlanMoveDialog open={moveEntry != null} onOpenChange={(o) => !o && setMoveEntry(null)} entry={moveEntry} weeks={weeks} />
+    </div>
   );
 }

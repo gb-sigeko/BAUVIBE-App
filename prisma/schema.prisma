@@ -246,9 +246,27 @@ model Project {
   vorankuendigungen      Vorankuendigung[]
   telefonnotizen         Telefonnotiz[]
   projectParticipants    ProjectParticipant[]
+  projectContacts        ProjectContact[]
   communications         Communication[]
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @updatedAt
+}
+
+/// Projektbeteiligte direkt aus der Kontaktpersonen-Datenbank (laut Spez „Projektkontakt-Zuordnung“).
+model ProjectContact {
+  id              String        @id @default(cuid())
+  projectId       String
+  project         Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contactPersonId String
+  contactPerson   ContactPerson @relation(fields: [contactPersonId], references: [id], onDelete: Cascade)
+  role            String
+  isMainContact   Boolean       @default(false)
+  validFrom       DateTime      @default(now())
+  validTo         DateTime?
+  notes           String?
+
+  @@index([projectId])
+  @@index([contactPersonId])
 }
 
 model Organization {
@@ -277,6 +295,7 @@ model ContactPerson {
   phone           String?
   active          Boolean              @default(true)
   participants    ProjectParticipant[]
+  projectContacts ProjectContact[]
   communications  Communication[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt

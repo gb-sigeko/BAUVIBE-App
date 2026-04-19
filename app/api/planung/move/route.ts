@@ -3,6 +3,9 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
+import type { Prisma } from "@/generated/prisma/client";
+import { appendChronikEntry } from "@/lib/chronik";
+import { syncProjectCompletedBegehungenCount } from "@/lib/planung-contract-sync";
 
 const bodySchema = z.object({
   entryId: z.string(),
@@ -35,8 +38,22 @@ export async function POST(req: Request) {
     },
   });
 
+  await appendChronikEntry({
+    projectId: entry.projectId,
+    authorId: session.user.id,
+    body: `Planung verschoben: KW ${oldWeek}/${oldYear} → KW ${parsed.data.targetIsoWeek}/${parsed.data.targetIsoYear}`,
+    action: "planung_moved",
+    targetType: "PlanungEntry",
+    targetId: entry.id,
+    details: {
+      from: { isoYear: oldYear, isoWeek: oldWeek },
+      to: { isoYear: parsed.data.targetIsoYear, isoWeek: parsed.data.targetIsoWeek },
+    } as Prisma.InputJsonValue,
+  });
+
   await recalcConflictsForWeek(oldYear, oldWeek);
   await recalcConflictsForWeek(parsed.data.targetIsoYear, parsed.data.targetIsoWeek);
+  await syncProjectCompletedBegehungenCount(prisma, entry.projectId);
 
   return NextResponse.json({ ok: true });
 }

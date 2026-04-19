@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireApiUser, requireWriteRole } from "@/lib/api-helpers";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { computeIsCompletedForContract } from "@/lib/turnus-engine";
+import { syncProjectCompletedBegehungenCount } from "@/lib/planung-contract-sync";
 
 const updateSchema = z.object({
   employeeId: z.string().optional().nullable(),
@@ -61,6 +62,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (parsed.data.isoYear != null && parsed.data.isoWeek != null) {
     await recalcConflictsForWeek(existing.isoYear, existing.isoWeek);
   }
+  await syncProjectCompletedBegehungenCount(prisma, row.projectId);
   return NextResponse.json(row);
 }
 

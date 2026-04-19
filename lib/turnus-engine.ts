@@ -1,6 +1,13 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { PlanungSource, PlanungStatus, PlanungType, SpecialCode, Turnus } from "@/generated/prisma/client";
-import { addIsoWeeks, compareIsoWeek, isIsoWeekBefore, isoWeekKey, mondayUtcOfIsoWeek } from "@/lib/iso-week";
+import {
+  addIsoWeeks,
+  compareIsoWeek,
+  horizonKeySet,
+  isIsoWeekBefore,
+  isoWeekKey,
+  mondayUtcOfIsoWeek,
+} from "@/lib/iso-week";
 import { getIsoWeekParts } from "@/lib/utils";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 
@@ -35,8 +42,8 @@ export function computeIsCompletedForContract(input: {
 
 export type HorizonWeek = { isoYear: number; isoWeek: number };
 
-function horizonKeySet(weeks: HorizonWeek[]) {
-  return new Set(weeks.map((w) => isoWeekKey(w.isoYear, w.isoWeek)));
+function festCellKey(projectId: string, isoYear: number, isoWeek: number) {
+  return `${projectId}:${isoWeekKey(isoYear, isoWeek)}`;
 }
 
 function weekInSubstitute(sub: { startsOn: Date; endsOn: Date }, isoYear: number, isoWeek: number) {
@@ -154,6 +161,15 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
   const minW = horizon.reduce((a, b) => (compareIsoWeek(a, b) < 0 ? a : b));
   const maxW = horizon.reduce((a, b) => (compareIsoWeek(a, b) > 0 ? a : b));
 
+  const festRows = await db.planungEntry.findMany({
+    where: {
+      planungType: "FEST",
+      OR: horizon.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek })),
+    },
+    select: { projectId: true, isoYear: true, isoWeek: true },
+  });
+  const festCells = new Set(festRows.map((r) => festCellKey(r.projectId, r.isoYear, r.isoWeek)));
+
   const projects = await db.project.findMany({
     where: { status: "ACTIVE", turnus: { not: null } },
     include: { responsibleEmployee: true },
@@ -210,15 +226,19 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
       const { isoYear, isoWeek } = getIsoWeekParts(cursor);
       if (compareIsoWeek({ isoYear, isoWeek }, maxW) > 0) break;
       if (compareIsoWeek({ isoYear, isoWeek }, minW) >= 0 && keys.has(isoWeekKey(isoYear, isoWeek))) {
-        const blocksTurnus = await db.planungEntry.count({
+        if (festCells.has(festCellKey(p.id, isoYear, isoWeek))) {
+          cursor.setUTCDate(cursor.getUTCDate() + interval * 7);
+          continue;
+        }
+        const blocksHigher = await db.planungEntry.count({
           where: {
             projectId: p.id,
             isoYear,
             isoWeek,
-            OR: [{ planungType: "FEST" }, { priority: { lt: PLANUNG_PRIORITY.TURNUS } }],
+            priority: { lt: PLANUNG_PRIORITY.TURNUS },
           },
         });
-        if (blocksTurnus === 0) {
+        if (blocksHigher === 0) {
           await createIfEmpty(db, {
             projectId: p.id,
             isoYear,

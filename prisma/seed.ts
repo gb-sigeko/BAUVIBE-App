@@ -133,6 +133,23 @@ async function main() {
     },
   });
 
+  await prisma.projectContact.create({
+    data: {
+      projectId: p1.id,
+      contactPersonId: contact.id,
+      role: "Bauherr",
+      isMainContact: true,
+    },
+  });
+
+  await prisma.textbaustein.create({
+    data: {
+      name: "Abschlusssatz Protokoll",
+      kategorie: "Abschluss",
+      inhalt: "Die aufgeführten Mängel sind zeitnah zu beseitigen. Für die Unterstützung bedanken wir uns.",
+    },
+  });
+
   await prisma.communication.create({
     data: {
       projectId: p1.id,

@@ -32,3 +32,9 @@ export function isIsoWeekBefore(
 export function isoWeekKey(y: number, w: number) {
   return `${y}-${w}`;
 }
+
+export type HorizonWeekLite = { isoYear: number; isoWeek: number };
+
+export function horizonKeySet(weeks: HorizonWeekLite[]) {
+  return new Set(weeks.map((w) => isoWeekKey(w.isoYear, w.isoWeek)));
+}

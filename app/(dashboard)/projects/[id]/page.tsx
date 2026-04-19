@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { OffersSection } from "@/components/project/offers-section";
 import { VorankSection } from "@/components/project/vorank-section";
 import { TelefonnotizenSection } from "@/components/project/telefonnotizen-section";
-import { AddCommunicationForm, AddParticipantForm } from "@/components/project/project-stakeholders-forms";
+import { AddCommunicationForm } from "@/components/project/project-stakeholders-forms";
+import { AddProjectContactForm, RemoveProjectContactButton } from "@/components/project/project-contact-forms";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +28,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         offers: { orderBy: { createdAt: "desc" }, include: { freigegebenVon: { select: { displayName: true } } } },
         vorankuendigungen: { orderBy: { createdAt: "desc" } },
         telefonnotizen: { orderBy: { erfasstAm: "desc" } },
-        projectParticipants: {
-          orderBy: [{ isPrimary: "desc" }, { validFrom: "desc" }],
-          include: { organization: true, contactPerson: true },
+        projectContacts: {
+          orderBy: [{ isMainContact: "desc" }, { validFrom: "desc" }],
+          include: { contactPerson: { include: { organization: true } } },
         },
         communications: {
           orderBy: { occurredAt: "desc" },
@@ -138,7 +139,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                       <TableCell>
                         {i.protocolMissing ? <Badge variant="destructive">Fehlt</Badge> : <Badge variant="secondary">OK</Badge>}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right space-x-3">
+                        <Link className="text-sm text-primary underline" href={`/begehungen/${i.id}/protokoll`}>
+                          Protokoll
+                        </Link>
                         <Link className="text-sm text-primary underline" href={`/projects/${params.id}/begehungen/${i.id}`}>
                           Bearbeiten
                         </Link>
@@ -304,34 +308,36 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <Card>
             <CardHeader>
               <CardTitle>Beteiligte</CardTitle>
-              <CardDescription>Rollen im Projekt, verknüpft mit Organisationen und Kontakten aus der Datenbank.</CardDescription>
+              <CardDescription>
+                Projektkontakte (`ProjectContact`): Personen aus der Kontaktdatenbank mit Rolle und Kennzeichen Hauptkontakt.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Rolle</TableHead>
-                    <TableHead>Organisation</TableHead>
                     <TableHead>Kontakt</TableHead>
-                    <TableHead>Primär</TableHead>
+                    <TableHead>Organisation</TableHead>
+                    <TableHead>Haupt</TableHead>
+                    <TableHead className="text-right">Aktion</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {project.projectParticipants.map((pp) => (
-                    <TableRow key={pp.id}>
-                      <TableCell className="font-medium">{pp.roleInProject}</TableCell>
-                      <TableCell>{pp.organization?.name ?? "—"}</TableCell>
-                      <TableCell>{pp.contactPerson?.name ?? "—"}</TableCell>
-                      <TableCell>{pp.isPrimary ? <Badge variant="secondary">Ja</Badge> : "—"}</TableCell>
+                  {project.projectContacts.map((pc) => (
+                    <TableRow key={pc.id}>
+                      <TableCell className="font-medium">{pc.role}</TableCell>
+                      <TableCell>{pc.contactPerson.name}</TableCell>
+                      <TableCell>{pc.contactPerson.organization?.name ?? "—"}</TableCell>
+                      <TableCell>{pc.isMainContact ? <Badge variant="secondary">Ja</Badge> : "—"}</TableCell>
+                      <TableCell className="text-right">
+                        <RemoveProjectContactButton projectId={params.id} linkId={pc.id} />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-              <AddParticipantForm
-                projectId={params.id}
-                organizations={organizations.map((o) => ({ id: o.id, name: o.name }))}
-                contacts={contacts}
-              />
+              <AddProjectContactForm projectId={params.id} contacts={contacts} />
             </CardContent>
           </Card>
         </TabsContent>

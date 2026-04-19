@@ -45,6 +45,9 @@ export default async function PlanungPage() {
     feedback: e.feedback,
     conflict: e.conflict,
     vorOrtCount: e._count.vorOrtRueckmeldungen,
+    begehungSollNummer: e.begehungSollNummer,
+    begehungIstNummer: e.begehungIstNummer,
+    tourId: e.tourId,
   }));
 
   return (
@@ -52,14 +55,14 @@ export default async function PlanungPage() {
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Wochenplanung</h1>
         <p className="text-muted-foreground">
-          Projektzeilen, KW-Spalten, Drag &amp; Drop zwischen Wochen, Turnus- und Rückmeldefelder. Konflikte werden automatisch markiert.
+          Virtualisiertes Raster (KW × Projekte), Statusfarben, Konflikt-Hinweis, Begehungsnummern, Turnus-Sync und strukturierte Rückmeldungen (inkl. Roll-Forward).
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Planungsraster</CardTitle>
-          <CardDescription>Ziehen Sie eine Karte auf eine andere KW-Spalte, um die Zuordnung zu verschieben.</CardDescription>
+          <CardDescription>KW-Verschiebung pro Eintrag über den Button „KW“; schnelle Rückmeldungen über OK / n.e. / NB / OB.</CardDescription>
         </CardHeader>
         <CardContent>
           <PlanungBoard projects={boardProjects} weeks={weeks} entries={boardEntries} />
