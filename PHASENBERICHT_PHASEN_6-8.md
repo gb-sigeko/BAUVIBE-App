@@ -18,6 +18,9 @@
 - **Arbeitskorb:** Sektion „Vor-Ort-Rückmeldungen“ mit Link zur Projektakte Tab Termine.
 - **Tests:** `e2e/phase7.spec.ts` (Extern → Fee-Arbeitskorb).
 
-## Phase 8
+## Phase 8 – Dashboards & Exporte
 
-_(wird nach Umsetzung ergänzt)_
+- **GF-Dashboard:** Auslastung nächste ISO-Woche = geplante Planungsslots (ohne erledigt/abgesagt/…) ÷ Summe `weeklyCapacity` aktiver Mitarbeiter; kritische Mängel = Aufgaben `CRITICAL` + `OVERDUE`; Soll/Ist-Begehungen aggregiert über aktive Projekte; Tabelle kritischer Projekte (wie Arbeitskorb); Soll/Ist-Stunden je Projekt unverändert als Referenz.
+- **Fee-Startseite:** Kacheln Planung / Arbeitskorb / Projekte / Mitarbeiter; Widgets „Heute fällige Rückmeldungen“ (Top-3-Aufgaben), „Turnusvorschläge nächste Woche“ (`VORGESCHLAGEN`), „Letzte Projektaktivitäten“ (Chronik, letzte 5).
+- **Exporte:** `GET /api/export/wochenliste?isoYear=&kw=&format=csv|pdf`, `GET /api/export/projekte?format=csv|pdf`, `GET /api/export/aufgaben?status=offen&format=csv` (nur CSV). CSV mit UTF-8-BOM, Trennzeichen `;`. PDFs via `@react-pdf/renderer`. UI: Export-Balken auf Planung, Projekten und Arbeitskorb.
+- **Tests:** `e2e/phase8.spec.ts` prüft CSV-Header und PDF-Signatur.

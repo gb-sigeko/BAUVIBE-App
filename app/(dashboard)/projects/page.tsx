@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { ProjekteExportBar } from "@/components/export/projekte-export-bar";
 
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({
@@ -15,9 +16,12 @@ export default async function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Projekte</h1>
-        <p className="text-muted-foreground">Projektakte mit Schnellüberblick.</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Projekte</h1>
+          <p className="text-muted-foreground">Projektakte mit Schnellüberblick.</p>
+        </div>
+        <ProjekteExportBar />
       </div>
 
       <Card>

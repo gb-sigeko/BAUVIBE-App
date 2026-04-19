@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PlanungBoard, type PlanungBoardEntry, type PlanungBoardProject, type PlanungBoardWeek } from "@/components/planung-board";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { WochenlisteExportBar } from "@/components/export/wochenliste-export-bar";
 import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
 import { syncTurnusSuggestions } from "@/lib/turnus-engine";
 import { applyKrankVertretungForHorizon } from "@/lib/vertretung";
@@ -90,6 +91,16 @@ export default async function PlanungPage() {
           Projektzeilen, KW-Spalten, Drag &amp; Drop zwischen Wochen, Turnus- und Rückmeldefelder. Konflikte werden automatisch markiert.
         </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Export Wochenliste</CardTitle>
+          <CardDescription>CSV oder PDF für eine ausgewählte Kalenderwoche.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <WochenlisteExportBar weeks={weeks.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek }))} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

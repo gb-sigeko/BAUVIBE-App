@@ -32,3 +32,14 @@ export function isIsoWeekBefore(
 export function isoWeekKey(y: number, w: number) {
   return `${y}-${w}`;
 }
+
+export function addDays(d: Date, days: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+
+/** ISO-Kalenderwoche des Datums \`anchor + offsetDays\` (z. B. +7 für „nächste“ Woche). */
+export function isoWeekForOffset(anchor: Date, offsetDays: number) {
+  return getIsoWeekParts(addDays(anchor, offsetDays));
+}

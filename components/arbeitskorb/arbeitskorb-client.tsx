@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AufgabenExportBar } from "@/components/export/aufgaben-export-bar";
 
 export type TaskRow = {
   id: string;
@@ -141,12 +142,15 @@ export function ArbeitskorbClient({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
-        <p className="text-muted-foreground">
-          Heute fällig, überfällig, Rückmeldungen in der Planung, fehlende Unterlagen und Protokolle, Wiedervorlagen, kritische
-          Projekte.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
+          <p className="text-muted-foreground">
+            Heute fällig, überfällig, Rückmeldungen in der Planung, fehlende Unterlagen und Protokolle, Wiedervorlagen, kritische
+            Projekte.
+          </p>
+        </div>
+        <AufgabenExportBar />
       </div>
 
       <Card>
