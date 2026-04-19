@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "dokument": "recherche_erweitert_bg_bau.json",
+    "projekt": "BAUVIBE",
+    "stand_recherche": "2026-04-19",
+    "hinweis": "standardisierte Hilfe auf Basis von AI-Recherche – keine rechtsverbindliche Auskunft. BG-BAU-Medien/Handlungshilfen sind teils HTML-Spiegelungen; verbindliche Fassungen über DGUV Publikationen/Normenausgaben beziehen.",
+    "fokus": [
+      "BG BAU Branchenregeln und Praxismedien",
+      "DGUV Vorschriften/Regeln/Grundsätze (baunahe Auswahl)",
+      "DIN/EN-Cluster für typische Baustellenrisiken",
+      "VDE FNN / VDE-AR-N (Netznahe Bauarbeiten, Schnittstelle Tiefbau/Freileitung)"
+    ]
+  },
+  "bg_bau_sammelpunkte": {
+    "startseiten": [
+      {
+        "titel": "BG BAU – Sicherheit und Gesundheit (Themenportal)",
+        "url": "https://www.bgbau.de/themen/sicherheit-und-gesundheit",
+        "nutzen_fuer_bauvibe": "Themencluster für UI-Navigation (Hitze, Mobilität, Abbruch, Reinigung, …)."
+      },
+      {
+        "titel": "BG BAU – Vorschriften und Regeln (DGUV/ASR/RAB Spiegel)",
+        "url": "https://www.bgbau.de/themen/sicherheit-und-gesundheit/vorschriften-und-regeln",
+        "nutzen_fuer_bauvibe": "Deep Links in Kontext-Hilfen zu Mängeln."
+      },
+      {
+        "titel": "BG BAU Medien / Handlungshilfen (HTML-Auszüge)",
+        "url": "https://www.bgbau-medien.de/handlungshilfen_gb/",
+        "nutzen_fuer_bauvibe": "Strukturierung von Checklistenpunkten nach Kapiteln der Regelwerke."
+      }
+    ],
+    "praxisreihen_archetypen": [
+      {
+        "reihe": "Kompendium Arbeitsschutz / Wegweiser",
+        "nutzen": "Glossar und „Warum-Pflicht“-Texte im Arbeitskorb",
+        "suchhinweis": "Site-Suche bgbau.de nach „Kompendium“, „Wegweiser\""
+      },
+      {
+        "reihe": "Branchenregeln (Rohbau, Abbruch, Tiefbau, Gebäudereinigung, Betonindustrie …)",
+        "nutzen": "Gewerk- und phasenbasierte Checklisten-Templates",
+        "mapping_bauvibe": "checklist.template_id = branche + phase (rohbau|ausbau|abbruch|tiefbau|…)"
+      },
+      {
+        "reihe": "Checklisten (Mobilität, Hitzeaktionsplan, Aufräumarbeiten …)",
+        "nutzen": "Direkt importierbare Prüfpunkte als JSON-Items",
+        "mapping_bauvibe": "jeder Punkt: {text, tags[], quelle_url, rechtliche_einordnung_kurz}"
+      }
+    ]
+  },
+  "dguv_regelwerk_baunahe": [
+    {
+      "kuerzel": "DGUV Vorschrift 1",
+      "titel": "Prinzipien der Prävention (übergeordnete Systematik)",
+      "nutzen": "Begründungslayer für „organisatorische Maßnahmen“ in Mängeltexten",
+      "url": "https://publikationen.dguv.de/regelwerk/vorschriften/02094/dguv-vorschrift-1-prinzipien-der-praevention/1",
+      "bemerkung": "Exakte Paragrafen/Anlagen im PDF der DGUV prüfen."
+    },
+    {
+      "kuerzel": "DGUV Vorschrift 38",
+      "titel": "Bauarbeiten (Unfallverhütungsvorschrift der DGUV, baurelevant)",
+      "nutzen": "Hochfrequente technische Pflichtfelder in Begehungen (Störungen, Strom, Steigtechnik – je nach Kapitel im Original)",
+      "url": "https://publikationen.dguv.de/regelwerk/vorschriften/01562/dguv-vorschrift-38-bauarbeiten/1",
+      "bemerkung": "Für Mängeltexte stets konkretes Kapitel/Unterabschnitt aus Vorschrift zitieren, nicht pauschal „DGUV V38\"."
+    },
+    {
+      "kuerzel": "DGUV Regel 101-004",
+      "titel": "Bauarbeiten in kontaminierten Bereichen (früher BGR 128)",
+      "nutzen": "Sanierungs-/Altstandort-Baustellen; Anzeigefristen und Gefährdungslogik aus Regelwerk ableiten",
+      "url": "https://www.bgbau-medien.de/handlungshilfen_gb/daten/dguv/101_004/inhalt.HTM",
+      "korrektur": "Nicht mit „allgemeiner Baustellenregel\" verwechseln; Anwendung nur bei kontaminierten/kritischen Altlast-Konstellationen."
+    },
+    {
+      "kuerzel": "DGUV Regel 101-011",
+      "titel": "Verwendung von Schutznetzen (Sicherheitsnetzen)",
+      "nutzen": "Fassaden-/Dacharbeiten, Fangnetze: Montage, Prüfprotokolle, Anhänge",
+      "url": "https://publikationen.dguv.de/regelwerk/regeln/0983/dguv-regel-101-011-verwendung-von-schutznetzen-sicherheitsnetzen/1",
+      "bemerkung": "Stand/Ausgabe im PDF prüfen (Regelwerke werden überarbeitet)."
+    },
+    {
+      "kuerzel": "DGUV Grundsatz 301-004",
+      "titel": "Qualifizierung von Personen für die Errichtung von Schutz- und Arbeitsplattformnetzen sowie Randsicherungen",
+      "nutzen": "Qualifikationsnachweise/Subunternehmer-Check bei Netzmontagen",
+      "url": "https://www.bgbau-medien.de/handlungshilfen_gb/daten/dguv/301_004/titel.htm",
+      "korrektur": "Nicht mit „Gefährdungsbeurteilung\" verwechseln; GefB primär ArbSchG/DGUV V1/BG-BAU-Handlungshilfen."
+    }
+  ],
+  "din_en_cluster": [
+    {
+      "norm": "DIN EN 39",
+      "thema": "Rohr aus Stahl als Gerüstbaustoff – Anforderungen",
+      "checkliste_tags": [
+        "geruest",
+        "materialpruefung"
+      ]
+    },
+    {
+      "norm": "DIN EN 280",
+      "thema": "Mobile Hubarbeitsbühnen",
+      "checkliste_tags": [
+        "hubarbeitsbuehne",
+        "fahrzeug"
+      ]
+    },
+    {
+      "norm": "DIN EN 1004-1/-2",
+      "thema": "Tritt- und Arbeitsböcke (Teile 1/2)",
+      "checkliste_tags": [
+        "kleingeruest",
+        "begehung"
+      ]
+    },
+    {
+      "norm": "DIN EN 1263-1 / -2",
+      "thema": "Sicherheitsnetze (Anforderungen/Prüfungen)",
+      "checkliste_tags": [
+        "schutznetz",
+        "absturz"
+      ]
+    },
+    {
+      "norm": "DIN EN 4420-1",
+      "thema": "Arbeits- und Schutzgerüste – Teil 1: Leistungsanforderungen",
+      "checkliste_tags": [
+        "geruest",
+        "absturz"
+      ]
+    },
+    {
+      "norm": "DIN EN 1961",
+      "thema": "Fangnetze/Personenauffangeinrichtungen (Netzsysteme; Begriff je nach Ausgabe prüfen)",
+      "checkliste_tags": [
+        "fangnetz",
+        "dacharbeiten"
+      ],
+      "bemerkung": "Exakte Geltungsbezeichnung und aktuelle Ausgabe in Beuth/DIN-Suche verifizieren."
+    }
+  ],
+  "vde_fn_netzbetrieb": {
+    "thema": "Arbeitsschutz im Netzbetrieb / Freileitungsbaustellen",
+    "url": "https://www.vde.com/de/fnn/arbeitsgebiete/netzbetrieb-sicherheit/sicherheit/arbeitsschutz",
+    "ergaenzende_normative_hinweise": [
+      {
+        "dokument": "VDE-AR-N 4224 (Hinweis zu Arbeiten im Bereich von Netzanlagen)",
+        "url": "https://www.vde.com/de/fnn/arbeitsgebiete/netzbetrieb-sicherheit/sicherheit/vde-ar-n-4224",
+        "nutzen": "Checklistenpunkte für Schnittstelle Energieanlagen/Tiefbau (Sichtabstand, Zonen, Qualifikationen – im Original prüfen)."
+      }
+    ]
+  },
+  "gefaehrdungsarten_baustelle": [
+    {
+      "id": "G-ABSTURZ",
+      "bezeichnung": "Absturz und Sturz durch Unebenheiten",
+      "typische_regelwerke": [
+        "DGUV Vorschrift 38",
+        "DGUV Regel 101-011",
+        "DIN EN 4420-1",
+        "DIN EN 1961",
+        "DIN EN 1263-1/2"
+      ],
+      "mangelbeispiele": [
+        "Fehlende/unzureichende Absturzsicherung an Gebäudekante trotz Anschlagpunkt oberhalb 2 m (Einordnung nach DGUV V38 und technische Regeln – Details vor Ort).",
+        "Schutznetz ohne nachweisbare Prüfung/Montageanweisung (DGUV Regel 101-011)."
+      ]
+    },
+    {
+      "id": "G-STROM",
+      "bezeichnung": "Elektrische Gefährdung (Baustrom, Fremdanlagen, Freileitung)",
+      "typische_regelwerke": [
+        "DGUV Vorschrift 3 (Betriebssicherheit elektrische Anlagen – soweit einschlägig)",
+        "VDE-Regelwerk je nach Arbeitssituation",
+        "VDE FNN/VDE-AR-N 4224 bei Netznähe"
+      ],
+      "mangelbeispiele": [
+        "Unzureichende Kennzeichnung/Sperrung elektrisch gefährdeter Bereiche in Schnittstelle Netzbetrieb."
+      ]
+    },
+    {
+      "id": "G-STOFF",
+      "bezeichnung": "Gefahrstoffe / Staub / chemische Exposition",
+      "typische_regelwerke": [
+        "GefStoffV",
+        "TRGS (je nach Stoff)",
+        "DGUV Regel 101-004 bei kontaminierten Bereichen"
+      ],
+      "mangelbeispiele": [
+        "Entstaubungs-/Absaugkonzept fehlt bei silikotisch relevanten Tätigkeiten (Detailnachweis erforderlich)."
+      ]
+    },
+    {
+      "id": "G-VERKEHR",
+      "bezeichnung": "Fahrzeug-/Kranverkehr, Lieferverkehr, Fußgängerführung",
+      "typische_regelwerke": [
+        "BaustellV § 2/§ 5 (Wechselwirkungen/Organisation)",
+        "ASR A2.1 (Wege/Flächen)"
+      ],
+      "mangelbeispiele": [
+        "Gemeinsame Verkehrswege ohne Trennung/Regelung zwischen Fußgängern und Fahrzeugen."
+      ]
+    },
+    {
+      "id": "G-PSYCHO",
+      "bezeichnung": "Belastung (Hitze, Lärm, Schicht, psychische Beanspruchung)",
+      "typische_regelwerke": [
+        "ArbSchG/ArbStättV/ASR je nach Innen/Außen",
+        "BG-BAU-Praxisleitfäden (z. B. Hitzeaktionsplan)"
+      ],
+      "mangelbeispiele": [
+        "Keine organisatorischen Maßnahmen bei extremer Wärmebelastung (Betriebsinterner Hitzeaktionsplan – falls gefordert/empfohlen)."
+      ]
+    }
+  ],
+  "checklisten_vorlage": [
+    {
+      "id": "CHK-PHASE-PLANUNG",
+      "phase": "Planung",
+      "items": [
+        {
+          "text": "Schwellenwerte BaustellV § 2 Abs. 2 (Vorankündigung) rechnerisch dokumentiert",
+          "recht": "BaustellV § 2 Abs. 2",
+          "tags": [
+            "vorankuendigung"
+          ]
+        },
+        {
+          "text": "SiGe-Plan-Pflicht geprüft (Mehr-Arbeitgeber + (Vorankündigung ODER Anhang II))",
+          "recht": "BaustellV § 2 Abs. 3",
+          "tags": [
+            "sigeplan"
+          ]
+        },
+        {
+          "text": "Unterlage für spätere Arbeiten angelegt/Versioniert",
+          "recht": "BaustellV § 3 Abs. 2 Nr. 3",
+          "tags": [
+            "unterlage_spaetere_arbeiten"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CHK-PHASE-AUSFUEHRUNG",
+      "phase": "Ausführung",
+      "items": [
+        {
+          "text": "Wechselwirkungen zwischen parallelen Gewerken adressiert (Kran, Transport, Schweißen)",
+          "recht": "BaustellV § 5 Abs. 1 Nr. 5; § 3 Abs. 3",
+          "tags": [
+            "schnittstellen"
+          ]
+        },
+        {
+          "text": "Beschäftigte über einschlägige Schutzmaßnahmen informiert (verständlich)",
+          "recht": "BaustellV § 5 Abs. 2",
+          "tags": [
+            "unterrichtung"
+          ]
+        },
+        {
+          "text": "Unternehmer o.B. eingebunden (SiGe-Plan/Koordinatorhinweise)",
+          "recht": "BaustellV § 6",
+          "tags": [
+            "subunternehmer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CHK-GEWERK-GERUEST",
+      "gewerk": "Gerüst/Arbeitsplattform/Schutznetz",
+      "items": [
+        {
+          "text": "Gerüstsystem entspricht geforderter Normkonfiguration und Abnahme/Prüfprotokoll vorhanden",
+          "recht": "DIN EN 4420-1; DGUV V38 (konkretes Kapitel im Original)",
+          "tags": [
+            "geruest"
+          ]
+        },
+        {
+          "text": "Schutznetz: Montageanweisung/Prüfprotokoll (Muster aus Regelwerk) vorhanden",
+          "recht": "DGUV Regel 101-011",
+          "tags": [
+            "schutznetz"
+          ]
+        },
+        {
+          "text": "Netzmontage: Qualifikation gemäß DGUV G 301-004 nachweisbar",
+          "recht": "DGUV Grundsatz 301-004",
+          "tags": [
+            "qualifikation"
+          ]
+        }
+      ]
+    }
+  ],
+  "zustaendigkeiten_kurz": [
+    {
+      "rolle": "Bauherr / Auftraggeber",
+      "kern": "Beauftragung/Steuerung der BaustellV-Maßnahmen (§ 4); bleibt verantwortlich trotz Koordinatorbestellung (§ 3 Abs. 1a).",
+      "recht": "BaustellV §§ 3–4"
+    },
+    {
+      "rolle": "Koordinator (Planung/Ausführung)",
+      "kern": "Koordination, SiGe-Plan, Unterlage spätere Arbeiten, Zusammenarbeit/Überwachung je nach Phase.",
+      "recht": "BaustellV § 3"
+    },
+    {
+      "rolle": "Arbeitgeber (ausführende Firmen)",
+      "kern": "Umsetzung Arbeitsschutzmaßnahmen, Zusammenarbeit, Unterrichtung Beschäftigter.",
+      "recht": "BaustellV § 5"
+    },
+    {
+      "rolle": "Unternehmer ohne Beschäftigte",
+      "kern": "Einhaltung Arbeitsschutzvorschriften; Koordinator/SiGe-Plan beachten.",
+      "recht": "BaustellV § 6"
+    }
+  ]
+}
