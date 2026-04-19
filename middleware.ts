@@ -53,7 +53,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/api/export/")) {
+  if (pathname === "/api/export" || pathname.startsWith("/api/export/")) {
     if (!EXPORT_ROLES.has(role)) {
       return jsonForbidden();
     }
