@@ -20,10 +20,11 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+  await prisma.protokoll.deleteMany();
   await prisma.mangel.deleteMany();
   await prisma.vorOrtRueckmeldung.deleteMany();
   await prisma.planungEntry.deleteMany();
-  await prisma.chronicleEntry.deleteMany();
+  await prisma.chronikEntry.deleteMany();
   await prisma.document.deleteMany();
   await prisma.task.deleteMany();
   await prisma.offer.deleteMany();
@@ -31,10 +32,12 @@ async function main() {
   await prisma.telefonnotiz.deleteMany();
   await prisma.begehung.deleteMany();
   await prisma.textbaustein.deleteMany();
-  await prisma.substitution.deleteMany();
-  await prisma.holiday.deleteMany();
+  await prisma.substitute.deleteMany();
+  await prisma.availability.deleteMany();
   await prisma.user.deleteMany();
   await prisma.project.deleteMany();
+  await prisma.contactPerson.deleteMany();
+  await prisma.organization.deleteMany();
   await prisma.employee.deleteMany();
 
   const passwordHash = await bcrypt.hash("Bauvibe2026!", 10);
@@ -52,7 +55,7 @@ async function main() {
   });
 
   const users = [
-    { email: "admin@bauvibe.local", role: "ADMIN" as const, name: "Admin", employeeId: null as string | null },
+    { email: "admin@bauvibe.de", role: "ADMIN" as const, name: "Admin", employeeId: null as string | null },
     { email: "fee@bauvibe.local", role: "BUERO" as const, name: "Fee Büro", employeeId: null },
     { email: "sikogo@bauvibe.local", role: "SIKOGO" as const, name: "SiGeKo Leitung", employeeId: e1.id },
     { email: "gf@bauvibe.local", role: "GF" as const, name: "Geschäftsführung", employeeId: null },
@@ -81,6 +84,11 @@ async function main() {
       description: "SiGeKo Begleitung Rohbau bis Abnahme",
       targetHours: 420,
       actualHours: 180,
+      turnus: "W2",
+      contractualBegehungen: 30,
+      completedBegehungen: 12,
+      responsibleEmployeeId: e1.id,
+      substituteEmployeeId: e2.id,
     },
   });
 
@@ -94,26 +102,73 @@ async function main() {
       description: "Koordination Fremdfirmen, wiederkehrende Begehungen",
       targetHours: 260,
       actualHours: 120,
+      turnus: "W",
+      contractualBegehungen: 20,
+      completedBegehungen: 8,
+      responsibleEmployeeId: e2.id,
     },
   });
 
-  await prisma.holiday.create({
+  const org = await prisma.organization.create({
+    data: { name: "LogiBuild GmbH", legalForm: "GmbH", address: "Hamburg", active: true },
+  });
+
+  const contact = await prisma.contactPerson.create({
+    data: {
+      organizationId: org.id,
+      name: "Alex Beispiel",
+      functionTitle: "Bauleitung",
+      email: "alex@logibuild.example",
+      phone: "+49 40 000000",
+    },
+  });
+
+  await prisma.projectParticipant.create({
+    data: {
+      projectId: p1.id,
+      organizationId: org.id,
+      contactPersonId: contact.id,
+      roleInProject: "Bauherr",
+      isPrimary: true,
+    },
+  });
+
+  await prisma.communication.create({
+    data: {
+      projectId: p1.id,
+      organizationId: org.id,
+      contactPersonId: contact.id,
+      kind: "PHONE",
+      subject: "Kickoff SiGeKo",
+      body: "Telefonat zu Zugangswegen und Unterlagen für die erste Begehung.",
+      responsibleEmployeeId: e1.id,
+    },
+  });
+
+  await prisma.availability.create({
     data: {
       employeeId: e1.id,
       startsOn: new Date("2026-05-01"),
       endsOn: new Date("2026-05-10"),
       note: "Urlaub",
+      reason: "URLAUB",
     },
   });
 
-  await prisma.substitution.create({
+  const sub = await prisma.substitute.create({
     data: {
       coveredEmployeeId: e1.id,
       delegateEmployeeId: e2.id,
       startsOn: new Date("2026-05-01"),
       endsOn: new Date("2026-05-10"),
       note: "Vertretung während Urlaub",
+      affectedProjectIds: [],
     },
+  });
+
+  await prisma.substitute.update({
+    where: { id: sub.id },
+    data: { affectedProjectIds: [p1.id] },
   });
 
   const today = new Date();
@@ -128,12 +183,18 @@ async function main() {
         title: "Sicherheitsbegehung Rohbau",
         notes: "Schutzgeländer EG teilweise fehlend",
         protocolMissing: true,
+        employeeId: e1.id,
+        laufendeNr: 1,
+        begehungStatus: "DURCHGEFUEHRT",
       },
       {
         projectId: p2.id,
         date: addDays(today, 3),
         title: "Absturzsicherung Prüfung",
         protocolMissing: false,
+        employeeId: e1.id,
+        laufendeNr: 1,
+        begehungStatus: "GEPLANT",
       },
     ],
   });
@@ -147,6 +208,8 @@ async function main() {
         dueDate: today,
         assigneeId: e1.id,
         protocolMissing: false,
+        priority: "HIGH",
+        isMangel: true,
       },
       {
         projectId: p2.id,
@@ -155,18 +218,19 @@ async function main() {
         dueDate: addDays(today, -5),
         assigneeId: e2.id,
         protocolMissing: true,
+        priority: "CRITICAL",
       },
     ],
   });
 
   await prisma.document.createMany({
     data: [
-      { projectId: p1.id, name: "SiGeKo-Plan.pdf", url: "#" },
-      { projectId: p1.id, name: "Gefährdungsbeurteilung.docx", url: "#" },
+      { projectId: p1.id, name: "SiGeKo-Plan.pdf", url: "#", docType: "PLAN", docStatus: "VORHANDEN" },
+      { projectId: p1.id, name: "Gefährdungsbeurteilung.docx", url: "#", docType: "GBU", docStatus: "VORHANDEN" },
     ],
   });
 
-  await prisma.chronicleEntry.create({
+  await prisma.chronikEntry.create({
     data: {
       projectId: p1.id,
       body: "Kickoff mit Bauleitung, Zugangswege geklärt.",
@@ -185,6 +249,23 @@ async function main() {
         note: "Baustelle 3× / Woche",
         feedback: "OK",
         conflict: false,
+        planungStatus: "GEPLANT",
+        planungSource: "TURNUS",
+        begehungSollNummer: 13,
+        begehungIstNummer: 12,
+      },
+      {
+        projectId: p1.id,
+        isoYear: next.year,
+        isoWeek: next.week,
+        sortOrder: 0,
+        employeeId: e1.id,
+        planungType: "FEST",
+        planungStatus: "BESTAETIGT",
+        planungSource: "SONDERTERMIN",
+        priority: 0,
+        note: "Behörden-Termin (Demo fester Termin)",
+        conflict: false,
       },
       {
         projectId: p2.id,
@@ -196,17 +277,22 @@ async function main() {
         note: "Überlappung testen",
         feedback: "",
         conflict: false,
+        planungStatus: "RUECKMELDUNG_OFFEN",
+        planungSource: "TURNUS",
       },
       {
         projectId: p1.id,
         isoYear: next.year,
         isoWeek: next.week,
-        sortOrder: 0,
+        sortOrder: 1,
         employeeId: eExt.id,
         turnusLabel: "",
         note: "Externe Unterstützung",
         feedback: "",
         conflict: false,
+        planungStatus: "VORGESCHLAGEN",
+        planungSource: "MANUELL",
+        priority: 3,
       },
     ],
   });

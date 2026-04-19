@@ -1,11 +1,17 @@
 "use client";
 
+import type { CSSProperties, ReactElement } from "react";
 import { useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { List } from "react-window";
 import { DndContext, DragEndEvent, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { PlanungVorOrtDialog } from "@/components/planung-vorort-dialog";
+
+const ROW_H = 100;
+const COL_PROJECT = 240;
+const COL_WEEK = 128;
 
 export type PlanungBoardEntry = {
   id: string;
@@ -15,6 +21,12 @@ export type PlanungBoardEntry = {
   sortOrder: number;
   employeeId: string | null;
   employeeShortCode: string | null;
+  planungType: string;
+  planungStatus: string;
+  planungSource: string;
+  priority: number;
+  specialCode: string;
+  isCompletedForContract: boolean;
   turnusLabel: string | null;
   note: string | null;
   feedback: string | null;
@@ -50,7 +62,10 @@ function DroppableCell({
   return (
     <div
       ref={setNodeRef}
-      className={cn("min-h-[72px] rounded-md border border-dashed p-2 transition-colors", isOver ? "bg-muted" : "bg-background")}
+      className={cn(
+        "min-h-[84px] rounded-md border border-dashed p-1.5 transition-colors",
+        isOver ? "bg-muted" : "bg-background",
+      )}
     >
       {children}
     </div>
@@ -61,6 +76,15 @@ function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: entry.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
 
+  const typeLabel =
+    entry.planungType === "FEST"
+      ? "Fester Termin"
+      : entry.planungType === "VERTRETUNG"
+        ? "Vertretung"
+        : entry.planungType === "VERSCHOBEN"
+          ? "Verschoben"
+          : null;
+
   return (
     <button
       type="button"
@@ -69,23 +93,95 @@ function DraggableChip({ entry }: { entry: PlanungBoardEntry }) {
       {...listeners}
       {...attributes}
       className={cn(
-        "mb-2 w-full cursor-grab rounded-md border bg-card px-2 py-1 text-left text-xs shadow-sm active:cursor-grabbing",
+        "mb-1.5 w-full cursor-grab rounded-md border bg-card px-2 py-1 text-left text-xs shadow-sm active:cursor-grabbing",
         isDragging && "opacity-60",
         entry.conflict && "border-amber-500/70",
+        entry.planungType === "FEST" && "border-violet-500/50",
       )}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <span className="font-semibold">{entry.employeeShortCode ?? "—"}</span>
-        {entry.conflict ? <Badge variant="warning">Konflikt</Badge> : null}
+        <div className="flex flex-wrap justify-end gap-0.5">
+          {entry.conflict ? <Badge variant="warning">Konflikt</Badge> : null}
+          {typeLabel ? (
+            <Badge variant="secondary" className="text-[10px]">
+              {typeLabel}
+            </Badge>
+          ) : null}
+          {entry.specialCode !== "NONE" ? (
+            <Badge variant="outline" className="text-[10px]">
+              {entry.specialCode}
+            </Badge>
+          ) : null}
+          {entry.isCompletedForContract ? (
+            <Badge variant="secondary" className="text-[10px]">
+              Soll erfüllt
+            </Badge>
+          ) : null}
+        </div>
       </div>
+      <div className="text-[10px] text-muted-foreground">{entry.planungStatus}</div>
       {entry.turnusLabel ? <div className="text-[11px] text-muted-foreground">Turnus: {entry.turnusLabel}</div> : null}
-      {entry.note ? <div className="text-[11px] text-muted-foreground line-clamp-2">{entry.note}</div> : null}
+      {entry.note ? <div className="line-clamp-2 text-[11px] text-muted-foreground">{entry.note}</div> : null}
       {entry.feedback ? <div className="text-[11px]">Rückmeldung: {entry.feedback}</div> : null}
       <div className="mt-1 flex items-center justify-between gap-1" onPointerDown={(e) => e.stopPropagation()}>
         <span className="text-[10px] text-muted-foreground">Vor-Ort: {entry.vorOrtCount}</span>
         <PlanungVorOrtDialog entryId={entry.id} />
       </div>
     </button>
+  );
+}
+
+type RowProps = {
+  projects: PlanungBoardProject[];
+  weeks: PlanungBoardWeek[];
+  entriesByProjectWeek: Map<string, PlanungBoardEntry[]>;
+};
+
+function PlanungRow({
+  index,
+  style,
+  ariaAttributes,
+  projects,
+  weeks,
+  entriesByProjectWeek,
+}: {
+  index: number;
+  style: CSSProperties;
+  ariaAttributes: { "aria-posinset": number; "aria-setsize": number; role: "listitem" };
+} & RowProps): ReactElement {
+  const p = projects[index];
+  if (!p) {
+    return <div {...ariaAttributes} style={style} />;
+  }
+
+  return (
+    <div {...ariaAttributes} style={style} className="flex border-b bg-background">
+      <div
+        className="shrink-0 border-r bg-background px-2 py-2 align-top"
+        style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}
+      >
+        <div className="text-sm font-medium leading-snug">{p.name}</div>
+        <div className="text-xs text-muted-foreground">{p.code}</div>
+      </div>
+      {weeks.map((w) => {
+        const key = `${p.id}:${w.isoYear}:${w.isoWeek}`;
+        const cellEntries = entriesByProjectWeek.get(key) ?? [];
+        return (
+          <div
+            key={key}
+            className="shrink-0 border-r p-1 align-top"
+            style={{ width: COL_WEEK, minWidth: COL_WEEK }}
+          >
+            <DroppableCell isoYear={w.isoYear} isoWeek={w.isoWeek}>
+              {cellEntries.map((e) => (
+                <DraggableChip key={e.id} entry={e} />
+              ))}
+            </DroppableCell>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -115,6 +211,14 @@ export function PlanungBoard({
     return map;
   }, [entries]);
 
+  const rowProps = useMemo<RowProps>(
+    () => ({ projects, weeks, entriesByProjectWeek }),
+    [projects, weeks, entriesByProjectWeek],
+  );
+
+  const totalWidth = COL_PROJECT + weeks.length * COL_WEEK;
+  const listHeight = Math.min(560, Math.max(projects.length ? ROW_H : 0, projects.length * ROW_H));
+
   async function onDragEnd(event: DragEndEvent) {
     const activeId = String(event.active.id);
     const overId = event.over?.id ? String(event.over.id) : null;
@@ -143,41 +247,36 @@ export function PlanungBoard({
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd}>
       <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full min-w-[900px] text-sm">
-          <thead>
-            <tr className="border-b bg-muted/40">
-              <th className="sticky left-0 z-10 bg-muted/40 px-3 py-2 text-left font-semibold">Projekt</th>
-              {weeks.map((w) => (
-                <th key={droppableId(w.isoYear, w.isoWeek)} className="px-2 py-2 text-left font-semibold">
-                  {w.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p) => (
-              <tr key={p.id} className="border-b last:border-0">
-                <td className="sticky left-0 z-10 bg-background px-3 py-2 align-top">
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">{p.code}</div>
-                </td>
-                {weeks.map((w) => {
-                  const key = `${p.id}:${w.isoYear}:${w.isoWeek}`;
-                  const cellEntries = entriesByProjectWeek.get(key) ?? [];
-                  return (
-                    <td key={key} className="align-top p-2">
-                      <DroppableCell isoYear={w.isoYear} isoWeek={w.isoWeek}>
-                        {cellEntries.map((e) => (
-                          <DraggableChip key={e.id} entry={e} />
-                        ))}
-                      </DroppableCell>
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="flex border-b bg-muted/40" style={{ width: totalWidth, minWidth: totalWidth }}>
+          <div
+            className="shrink-0 px-2 py-2 text-left text-sm font-semibold"
+            style={{ width: COL_PROJECT, minWidth: COL_PROJECT }}
+          >
+            Projekt
+          </div>
+          {weeks.map((w) => (
+            <div
+              key={droppableId(w.isoYear, w.isoWeek)}
+              className="shrink-0 px-1 py-2 text-left text-sm font-semibold leading-tight"
+              style={{ width: COL_WEEK, minWidth: COL_WEEK }}
+            >
+              {w.label}
+            </div>
+          ))}
+        </div>
+        {projects.length === 0 ? (
+          <p className="p-4 text-sm text-muted-foreground">Keine aktiven Projekte.</p>
+        ) : (
+          <List
+            defaultHeight={560}
+            overscanCount={5}
+            rowCount={projects.length}
+            rowHeight={ROW_H}
+            rowProps={rowProps}
+            rowComponent={PlanungRow}
+            style={{ height: listHeight, width: totalWidth, minWidth: totalWidth }}
+          />
+        )}
       </div>
       {pending ? <p className="mt-2 text-xs text-muted-foreground">Aktualisiere Planung…</p> : null}
     </DndContext>

@@ -15,6 +15,7 @@ enum Role {
   GF
 }
 
+/// Spezifikation: EmployeeType (INTERN/EXTERN)
 enum EmployeeKind {
   INTERN
   EXTERN
@@ -24,6 +25,7 @@ enum ProjectStatus {
   ACTIVE
   PAUSED
   DONE
+  ARCHIVED
 }
 
 enum TaskStatus {
@@ -31,6 +33,25 @@ enum TaskStatus {
   IN_PROGRESS
   DONE
   BLOCKED
+  DEFERRED
+  CANCELLED
+  ESCALATED
+  OVERDUE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskSource {
+  MANUAL
+  INSPECTION
+  COMMUNICATION
+  DOCUMENT
+  QA
 }
 
 enum OfferStatus {
@@ -46,17 +67,100 @@ enum VKStatus {
   VERSENDET   @map("versendet")
 }
 
+enum Turnus {
+  W
+  W2
+  W3
+  ABRUF
+}
+
+enum AvailabilityReason {
+  URLAUB
+  KRANKHEIT
+  FORTBILDUNG
+  BLOCKIERT
+  FREI
+}
+
+enum PlanungStatus {
+  VORGESCHLAGEN
+  GEPLANT
+  BESTAETIGT
+  IN_DURCHFUEHRUNG
+  ERLEDIGT
+  NICHT_ERLEDIGT
+  VERSCHOBEN
+  PAUSIERT
+  ABGESAGT
+  VERTRETUNG_AKTIV
+  RUECKMELDUNG_OFFEN
+  PROTOKOLL_OFFEN
+  NACHARBEIT_ERFORDERLICH
+}
+
+enum PlanungType {
+  REGULAER
+  FEST
+  VERSCHOBEN
+  VERTRETUNG
+  ABRUF
+}
+
+enum PlanungSource {
+  TURNUS
+  MANUELL
+  RUECKLAUF
+  STARTGESPRAECH
+  SONDERTERMIN
+}
+
+enum SpecialCode {
+  NB
+  OB
+  NONE
+}
+
+enum BegehungStatus {
+  GEPLANT
+  DURCHGEFUEHRT
+  NICHT_DURCHGEFUEHRT
+  NACHZUARBEITEN
+  STORNIERT
+}
+
+enum ProtokollStatus {
+  OFFEN
+  HOCHGELADEN
+  GEPRUEFT
+  FREIGEGEBEN
+}
+
+enum DocumentStatus {
+  VORHANDEN
+  FREIGEGEBEN
+  ERSETZT
+  FEHLT
+}
+
+enum CommunicationKind {
+  EMAIL
+  PHONE
+  MEETING
+  LETTER
+  NOTE
+}
+
 model User {
-  id             String           @id @default(cuid())
-  email          String           @unique
+  id             String         @id @default(cuid())
+  email          String         @unique
   passwordHash   String
   name           String?
-  role           Role             @default(BUERO)
-  employeeId     String?          @unique
-  employee       Employee?        @relation(fields: [employeeId], references: [id])
-  chronicleNotes ChronicleEntry[] @relation("ChronicleAuthor")
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  role           Role           @default(BUERO)
+  employeeId     String?        @unique
+  employee       Employee?      @relation(fields: [employeeId], references: [id])
+  chronikAuthored ChronikEntry[] @relation("ChronikAuthor")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Employee {
@@ -65,103 +169,214 @@ model Employee {
   displayName       String
   kind              EmployeeKind
   active            Boolean        @default(true)
+  region            String?
+  weeklyCapacity    Int            @default(5)
   user              User?
-  holidays          Holiday[]
-  coveringFor       Substitution[] @relation("SubstitutionDelegate")
-  coveredBy         Substitution[] @relation("SubstitutionCovered")
+  availabilities    Availability[]
+  coveringFor       Substitute[]   @relation("SubstitutionDelegate")
+  coveredBy         Substitute[]   @relation("SubstitutionCovered")
   planEntries       PlanungEntry[]
   tasks             Task[]         @relation("TaskAssignee")
-  offersFreigegeben Offer[]        @relation("OfferFreigegeben")
+  offersFreigegeben Offer[]       @relation("OfferFreigegeben")
+  responsibleFor   Project[]     @relation("ProjectResponsible")
+  substituteFor    Project[]     @relation("ProjectSubstitute")
+  begehungen        Begehung[]
+  communicationsResponsible Communication[] @relation("CommunicationResponsible")
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 }
 
-model Holiday {
-  id         String   @id @default(cuid())
+/// Spez: Availability (physische Tabelle „Holiday“)
+model Availability {
+  id         String             @id @default(cuid())
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   startsOn   DateTime
   endsOn     DateTime
+  reason     AvailabilityReason @default(URLAUB)
   note       String?
+
+  @@map("Holiday")
 }
 
-model Substitution {
-  id                 String   @id @default(cuid())
-  coveredEmployeeId  String
-  delegateEmployeeId String
-  startsOn           DateTime
-  endsOn             DateTime
-  note               String?
-  coveredEmployee    Employee @relation("SubstitutionCovered", fields: [coveredEmployeeId], references: [id], onDelete: Cascade)
-  delegateEmployee   Employee @relation("SubstitutionDelegate", fields: [delegateEmployeeId], references: [id], onDelete: Cascade)
+/// Spez: Substitute
+model Substitute {
+  id                  String    @id @default(cuid())
+  coveredEmployeeId   String
+  delegateEmployeeId  String
+  startsOn            DateTime
+  endsOn              DateTime
+  note                String?
+  affectedProjectIds  Json      @default("[]")
+  coveredEmployee     Employee  @relation("SubstitutionCovered", fields: [coveredEmployeeId], references: [id], onDelete: Cascade)
+  delegateEmployee    Employee  @relation("SubstitutionDelegate", fields: [delegateEmployeeId], references: [id], onDelete: Cascade)
+
+  @@map("Substitution")
 }
 
 model Project {
-  id                String            @id @default(cuid())
-  code              String            @unique
-  name              String
-  client            String?
-  siteAddress       String?
-  status            ProjectStatus     @default(ACTIVE)
-  description       String?
-  targetHours       Int?
-  actualHours       Int?
-  begehungen        Begehung[]
-  tasks             Task[]
-  documents         Document[]
-  chronicle         ChronicleEntry[]
-  planEntries       PlanungEntry[]
-  offers            Offer[]
-  vorankuendigungen Vorankuendigung[]
-  telefonnotizen    Telefonnotiz[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  tenantId               String            @default("default")
+  code                   String            @unique
+  name                   String
+  client                 String?
+  siteAddress            String?
+  status                 ProjectStatus     @default(ACTIVE)
+  description            String?
+  targetHours            Int?
+  actualHours            Int?
+  startDate              DateTime?
+  endDate                DateTime?
+  turnus                 Turnus?
+  contractualBegehungen  Int?
+  completedBegehungen    Int               @default(0)
+  responsibleEmployeeId String?
+  substituteEmployeeId   String?
+  responsibleEmployee    Employee?       @relation("ProjectResponsible", fields: [responsibleEmployeeId], references: [id])
+  substituteEmployee     Employee?       @relation("ProjectSubstitute", fields: [substituteEmployeeId], references: [id])
+  pauseStartsOn          DateTime?
+  pauseEndsOn            DateTime?
+  pauseReason            String?
+  begehungen             Begehung[]
+  tasks                  Task[]
+  documents              Document[]
+  chronikEntries         ChronikEntry[]
+  planEntries            PlanungEntry[]
+  offers                 Offer[]
+  vorankuendigungen      Vorankuendigung[]
+  telefonnotizen         Telefonnotiz[]
+  projectParticipants    ProjectParticipant[]
+  communications         Communication[]
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+}
+
+model Organization {
+  id             String               @id @default(cuid())
+  tenantId       String               @default("default")
+  name           String
+  legalForm      String?
+  address        String?
+  notes          String?
+  industry       String?
+  active         Boolean              @default(true)
+  contacts       ContactPerson[]
+  participants   ProjectParticipant[]
+  communications Communication[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model ContactPerson {
+  id              String               @id @default(cuid())
+  organizationId  String?
+  organization    Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  name            String
+  functionTitle   String?
+  email           String?
+  phone           String?
+  active          Boolean              @default(true)
+  participants    ProjectParticipant[]
+  communications  Communication[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model ProjectParticipant {
+  id               String          @id @default(cuid())
+  projectId        String
+  project          Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organizationId   String?
+  organization     Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  contactPersonId  String?
+  contactPerson    ContactPerson?  @relation(fields: [contactPersonId], references: [id], onDelete: SetNull)
+  roleInProject    String
+  isPrimary        Boolean         @default(false)
+  validFrom        DateTime        @default(now())
+  validTo          DateTime?
+  notes            String?
+
+  @@index([projectId])
+}
+
+model Communication {
+  id                    String             @id @default(cuid())
+  projectId             String
+  project               Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organizationId      String?
+  organization        Organization?      @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  contactPersonId       String?
+  contactPerson         ContactPerson?     @relation(fields: [contactPersonId], references: [id], onDelete: SetNull)
+  kind                  CommunicationKind
+  occurredAt            DateTime           @default(now())
+  subject               String?
+  body                  String
+  status                String             @default("offen")
+  followUp              DateTime?
+  responsibleEmployeeId String?
+  responsibleEmployee   Employee?          @relation("CommunicationResponsible", fields: [responsibleEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
 }
 
 /// Persistiert als Tabelle "Inspection" (Legacy-Name).
 model Begehung {
-  id               String    @id @default(cuid())
-  projectId        String
-  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  date             DateTime
-  title            String?
-  notes            String?
-  protocolMissing  Boolean   @default(false)
-  uebersichtFoto   String?
-  protokollPdf     String?
-  textbausteine    Json?
-  verteiler        Json      @default("[]")
-  versendetAm      DateTime?
-  mangels          Mangel[]
+  id              String          @id @default(cuid())
+  projectId       String
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date            DateTime
+  title           String?
+  notes           String?
+  protocolMissing Boolean         @default(false)
+  uebersichtFoto  String?
+  protokollPdf    String?
+  textbausteine   Json?
+  verteiler       Json            @default("[]")
+  versendetAm     DateTime?
+  employeeId      String?
+  employee        Employee?       @relation(fields: [employeeId], references: [id])
+  laufendeNr      Int?
+  begehungStatus  BegehungStatus  @default(GEPLANT)
+  mangels         Mangel[]
+  protokolle      Protokoll[]
 
   @@map("Inspection")
 }
 
+model Protokoll {
+  id         String          @id @default(cuid())
+  begehungId String
+  begehung   Begehung        @relation(fields: [begehungId], references: [id], onDelete: Cascade)
+  filename   String
+  uploadDate DateTime        @default(now())
+  status     ProtokollStatus @default(OFFEN)
+}
+
 model Mangel {
-  id               String      @id @default(cuid())
-  begehungId       String
-  begehung         Begehung    @relation(fields: [begehungId], references: [id], onDelete: Cascade)
-  fotoUrl          String
-  beschreibung     String
-  regel            String?
-  textbausteinId   String?
-  textbaustein     Textbaustein? @relation(fields: [textbausteinId], references: [id], onDelete: SetNull)
-  createdAt        DateTime    @default(now())
+  id             String        @id @default(cuid())
+  begehungId     String
+  begehung       Begehung      @relation(fields: [begehungId], references: [id], onDelete: Cascade)
+  fotoUrl        String
+  beschreibung   String
+  regel          String?
+  textbausteinId String?
+  textbaustein   Textbaustein? @relation(fields: [textbausteinId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
 }
 
 model Offer {
-  id                 String      @id @default(cuid())
-  projectId          String
-  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  emailInput         String
-  kalkulation        Json
-  status             OfferStatus @default(ENTWURF)
-  freigegebenVonId   String?
-  freigegebenVon     Employee?   @relation("OfferFreigegeben", fields: [freigegebenVonId], references: [id], onDelete: SetNull)
-  freigabeAm         DateTime?
-  pdfUrl             String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  projectId        String
+  project          Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  emailInput       String
+  kalkulation      Json
+  status           OfferStatus @default(ENTWURF)
+  freigegebenVonId String?
+  freigegebenVon   Employee?   @relation("OfferFreigegeben", fields: [freigegebenVonId], references: [id], onDelete: SetNull)
+  freigabeAm       DateTime?
+  pdfUrl           String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model Vorankuendigung {
@@ -186,77 +401,100 @@ model Textbaustein {
 }
 
 model Telefonnotiz {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   projectId  String
-  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   notiz      String
   erfasstVon String
-  erfasstAm  DateTime  @default(now())
-  erledigt   Boolean   @default(false)
+  erfasstAm  DateTime @default(now())
+  erledigt   Boolean  @default(false)
   followUp   DateTime?
 }
 
 model VorOrtRueckmeldung {
-  id              String       @id @default(cuid())
-  planungId       String
-  planung         PlanungEntry @relation(fields: [planungId], references: [id], onDelete: Cascade)
-  aushangOk       Boolean?
-  werbungOk       Boolean?
-  unterbrechung   String?
-  rueckmeldung    String
-  gemeldetAm      DateTime     @default(now())
+  id            String       @id @default(cuid())
+  planungId     String
+  planung       PlanungEntry @relation(fields: [planungId], references: [id], onDelete: Cascade)
+  aushangOk     Boolean?
+  werbungOk     Boolean?
+  unterbrechung String?
+  rueckmeldung  String
+  gemeldetAm    DateTime     @default(now())
 }
 
 model Task {
-  id              String     @id @default(cuid())
+  id              String       @id @default(cuid())
   projectId       String
-  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project         Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title           String
   description     String?
-  status          TaskStatus @default(OPEN)
+  status          TaskStatus   @default(OPEN)
+  priority        TaskPriority @default(MEDIUM)
+  source          TaskSource   @default(MANUAL)
+  isMangel        Boolean      @default(false)
   dueDate         DateTime?
   assigneeId      String?
-  assignee        Employee?  @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  protocolMissing Boolean    @default(false)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  assignee        Employee?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  protocolMissing Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  name      String
-  url       String?
-  createdAt DateTime @default(now())
+  id         String         @id @default(cuid())
+  projectId  String
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  url        String?
+  docType    String?
+  version    Int            @default(1)
+  docStatus  DocumentStatus @default(VORHANDEN)
+  createdAt  DateTime       @default(now())
 }
 
-model ChronicleEntry {
-  id        String   @id @default(cuid())
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  authorId  String?
-  author    User?    @relation("ChronicleAuthor", fields: [authorId], references: [id])
-  body      String
-  createdAt DateTime @default(now())
+/// Spez: ChronikEntry (Tabelle „ChronicleEntry“)
+model ChronikEntry {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId    String?
+  author      User?    @relation("ChronikAuthor", fields: [authorId], references: [id])
+  body        String
+  action      String?
+  targetType  String?
+  targetId    String?
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@map("ChronicleEntry")
 }
 
 model PlanungEntry {
-  id                   String               @id @default(cuid())
-  projectId            String
-  project              Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  isoYear              Int
-  isoWeek              Int
-  sortOrder            Int                  @default(0)
-  employeeId           String?
-  employee             Employee?            @relation(fields: [employeeId], references: [id])
-  turnusLabel          String?
-  note                 String?
-  feedback             String?
-  conflict             Boolean              @default(false)
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  vorOrtRueckmeldungen VorOrtRueckmeldung[]
+  id                     String               @id @default(cuid())
+  projectId              String
+  project                Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isoYear                Int
+  isoWeek                Int
+  sortOrder              Int                  @default(0)
+  employeeId             String?
+  employee               Employee?            @relation(fields: [employeeId], references: [id])
+  plannedDate            DateTime?
+  turnusLabel            String?
+  note                   String?
+  feedback               String?
+  conflict               Boolean              @default(false)
+  planungStatus          PlanungStatus        @default(GEPLANT)
+  planungType            PlanungType         @default(REGULAER)
+  planungSource          PlanungSource       @default(MANUELL)
+  priority               Int                  @default(0)
+  begehungSollNummer     Int?
+  begehungIstNummer      Int?
+  isCompletedForContract Boolean              @default(false)
+  specialCode            SpecialCode          @default(NONE)
+  tourId                 String?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  vorOrtRueckmeldungen   VorOrtRueckmeldung[]
 
   @@index([isoYear, isoWeek])
   @@index([employeeId, isoYear, isoWeek])
