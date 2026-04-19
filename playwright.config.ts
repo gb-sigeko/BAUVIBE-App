@@ -25,7 +25,12 @@ export default defineConfig({
         storageState: "e2e/.auth/user.json",
       },
       dependencies: ["setup"],
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: [/auth\.setup\.ts/, /phase10-security\.spec\.ts/],
+    },
+    {
+      name: "chromium-extern",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /phase10-security\.spec\.ts/,
     },
   ],
   webServer: {

@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 /**
  * Prüft Pflicht-Umgebungsvariablen vor `dev` / `build`.
  * In Produktion (NODE_ENV=production) kein Überspringen ohne explizites Opt-in.
