@@ -50,7 +50,8 @@
 
 | Norm | Hinweis | URL (Einstieg) |
 | --- | --- | --- |
-| DIN EN 39, EN 280, EN 1004, EN 1263, EN 4420-1, EN 1961 | Normtexte lizenziert; für Produktnutzung Beuth-Abdeckung klären | https://www.din.de/de |
+| DIN EN 39, EN 280, EN 1004, EN 1263, EN 4420-1, EN 12811-1 (temporäre Tragsysteme) | Normtexte lizenziert; für Produktnutzung Beuth-Abdeckung klären | https://www.din.de/de |
+| DIN 1961 (VOB/B) | Vertrags-/Vergaberegelwerk (nicht Arbeitsschutztechnik); oft als „1961“ kurz bezeichnet | https://www.din.de/de |
 
 ## VDE FNN / Arbeiten an Netzanlagen
 

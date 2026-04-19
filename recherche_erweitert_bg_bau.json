@@ -126,13 +126,22 @@
       ]
     },
     {
-      "norm": "DIN EN 1961",
-      "thema": "Fangnetze/Personenauffangeinrichtungen (Netzsysteme; Begriff je nach Ausgabe prüfen)",
+      "norm": "DIN 1961 (VOB/B) / Nachfolgeregelungen",
+      "thema": "Vergabe- und Vertragsordnung für Bauleistungen (vertragliche Schnittstellen, nicht technische Absturzsicherung)",
       "checkliste_tags": [
-        "fangnetz",
-        "dacharbeiten"
+        "vertrag",
+        "schnittstellen"
       ],
-      "bemerkung": "Exakte Geltungsbezeichnung und aktuelle Ausgabe in Beuth/DIN-Suche verifizieren."
+      "bemerkung": "Häufig mit „1961“ in Bauprojekten gemeint. Für technische Gerüst-/Tragsysteme stattdessen z. B. DIN EN 12811-1 prüfen."
+    },
+    {
+      "norm": "DIN EN 12811-1",
+      "thema": "Traggerüste – Anforderungen und allgemeine Regeln (häufig relevant für temporäre Konstruktionen auf Baustellen)",
+      "checkliste_tags": [
+        "geruest",
+        "tragwerk_temporaer"
+      ],
+      "bemerkung": "Als Ergänzung zu EN 4420-Systematik je nach Anwendungsfall heranziehen; Ausgabe in DIN-Suche verifizieren."
     }
   ],
   "vde_fn_netzbetrieb": {
