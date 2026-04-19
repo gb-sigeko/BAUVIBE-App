@@ -21,6 +21,9 @@ export async function GET(req: Request) {
   const weekOr = isoWeeks.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek }));
 
   if (session.user.role === "EXTERN") {
+    if (url.searchParams.get("filter") !== "own") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { employeeId: true },
