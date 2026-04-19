@@ -1,0 +1,263 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  BUERO
+  SIKOGO
+  EXTERN
+  GF
+}
+
+enum EmployeeKind {
+  INTERN
+  EXTERN
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  DONE
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum OfferStatus {
+  ENTWURF     @map("entwurf")
+  FREIGEGEBEN @map("freigegeben")
+  VERSENDET   @map("versendet")
+  ABGELEHNT   @map("abgelehnt")
+}
+
+enum VKStatus {
+  ENTWURF     @map("entwurf")
+  PDF_ERZEUGT @map("pdf_erzeugt")
+  VERSENDET   @map("versendet")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  passwordHash   String
+  name           String?
+  role           Role             @default(BUERO)
+  employeeId     String?          @unique
+  employee       Employee?        @relation(fields: [employeeId], references: [id])
+  chronicleNotes ChronicleEntry[] @relation("ChronicleAuthor")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Employee {
+  id                String         @id @default(cuid())
+  shortCode         String         @unique
+  displayName       String
+  kind              EmployeeKind
+  active            Boolean        @default(true)
+  user              User?
+  holidays          Holiday[]
+  coveringFor       Substitution[] @relation("SubstitutionDelegate")
+  coveredBy         Substitution[] @relation("SubstitutionCovered")
+  planEntries       PlanungEntry[]
+  tasks             Task[]         @relation("TaskAssignee")
+  offersFreigegeben Offer[]        @relation("OfferFreigegeben")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Holiday {
+  id         String   @id @default(cuid())
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  startsOn   DateTime
+  endsOn     DateTime
+  note       String?
+}
+
+model Substitution {
+  id                 String   @id @default(cuid())
+  coveredEmployeeId  String
+  delegateEmployeeId String
+  startsOn           DateTime
+  endsOn             DateTime
+  note               String?
+  coveredEmployee    Employee @relation("SubstitutionCovered", fields: [coveredEmployeeId], references: [id], onDelete: Cascade)
+  delegateEmployee   Employee @relation("SubstitutionDelegate", fields: [delegateEmployeeId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id                String            @id @default(cuid())
+  code              String            @unique
+  name              String
+  client            String?
+  siteAddress       String?
+  status            ProjectStatus     @default(ACTIVE)
+  description       String?
+  targetHours       Int?
+  actualHours       Int?
+  begehungen        Begehung[]
+  tasks             Task[]
+  documents         Document[]
+  chronicle         ChronicleEntry[]
+  planEntries       PlanungEntry[]
+  offers            Offer[]
+  vorankuendigungen Vorankuendigung[]
+  telefonnotizen    Telefonnotiz[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+/// Persistiert als Tabelle "Inspection" (Legacy-Name).
+model Begehung {
+  id               String    @id @default(cuid())
+  projectId        String
+  project          Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  date             DateTime
+  title            String?
+  notes            String?
+  protocolMissing  Boolean   @default(false)
+  uebersichtFoto   String?
+  protokollPdf     String?
+  textbausteine    Json?
+  verteiler        Json      @default("[]")
+  versendetAm      DateTime?
+  mangels          Mangel[]
+
+  @@map("Inspection")
+}
+
+model Mangel {
+  id               String      @id @default(cuid())
+  begehungId       String
+  begehung         Begehung    @relation(fields: [begehungId], references: [id], onDelete: Cascade)
+  fotoUrl          String
+  beschreibung     String
+  regel            String?
+  textbausteinId   String?
+  textbaustein     Textbaustein? @relation(fields: [textbausteinId], references: [id], onDelete: SetNull)
+  createdAt        DateTime    @default(now())
+}
+
+model Offer {
+  id                 String      @id @default(cuid())
+  projectId          String
+  project            Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  emailInput         String
+  kalkulation        Json
+  status             OfferStatus @default(ENTWURF)
+  freigegebenVonId   String?
+  freigegebenVon     Employee?   @relation("OfferFreigegeben", fields: [freigegebenVonId], references: [id], onDelete: SetNull)
+  freigabeAm         DateTime?
+  pdfUrl             String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+}
+
+model Vorankuendigung {
+  id                     String   @id @default(cuid())
+  projectId              String
+  project                Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  pdfFormular            String
+  arbeitsschutzAntworten Json
+  status                 VKStatus @default(ENTWURF)
+  generiertesPdf         String?
+  versendetAm            DateTime?
+  createdAt              DateTime @default(now())
+}
+
+model Textbaustein {
+  id        String   @id @default(cuid())
+  name      String
+  kategorie String
+  inhalt    String
+  createdAt DateTime @default(now())
+  mangels   Mangel[]
+}
+
+model Telefonnotiz {
+  id         String    @id @default(cuid())
+  projectId  String
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  notiz      String
+  erfasstVon String
+  erfasstAm  DateTime  @default(now())
+  erledigt   Boolean   @default(false)
+  followUp   DateTime?
+}
+
+model VorOrtRueckmeldung {
+  id              String       @id @default(cuid())
+  planungId       String
+  planung         PlanungEntry @relation(fields: [planungId], references: [id], onDelete: Cascade)
+  aushangOk       Boolean?
+  werbungOk       Boolean?
+  unterbrechung   String?
+  rueckmeldung    String
+  gemeldetAm      DateTime     @default(now())
+}
+
+model Task {
+  id              String     @id @default(cuid())
+  projectId       String
+  project         Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  status          TaskStatus @default(OPEN)
+  dueDate         DateTime?
+  assigneeId      String?
+  assignee        Employee?  @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  protocolMissing Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  url       String?
+  createdAt DateTime @default(now())
+}
+
+model ChronicleEntry {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  authorId  String?
+  author    User?    @relation("ChronicleAuthor", fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model PlanungEntry {
+  id                   String               @id @default(cuid())
+  projectId            String
+  project              Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isoYear              Int
+  isoWeek              Int
+  sortOrder            Int                  @default(0)
+  employeeId           String?
+  employee             Employee?            @relation(fields: [employeeId], references: [id])
+  turnusLabel          String?
+  note                 String?
+  feedback             String?
+  conflict             Boolean              @default(false)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  vorOrtRueckmeldungen VorOrtRueckmeldung[]
+
+  @@index([isoYear, isoWeek])
+  @@index([employeeId, isoYear, isoWeek])
+}

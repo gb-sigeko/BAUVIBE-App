@@ -1,0 +1,14 @@
+---
+description: Plan-First und fokussierte Änderungen für BAUVIBE
+globs:
+alwaysApply: true
+---
+
+# Plan-First
+
+- Vor größeren Refactors oder neuen Domänenmodulen einen kurzen Umsetzungsplan skizzieren (Dateien, Migration, Risiken).
+- Prisma-Schema-Änderungen immer mit Migration und angepasstem Seed-`deleteMany`-Block ausliefern.
+
+# Scope
+
+- Nur angeforderte Dateien ändern; keine mitgelieferten „Aufräum“-Refactors in fremden Bereichen.

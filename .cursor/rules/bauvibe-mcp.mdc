@@ -1,0 +1,12 @@
+---
+description: MCP-Nutzung GitHub & Supabase für BAUVIBE
+globs:
+alwaysApply: true
+---
+
+# MCP
+
+- **GitHub:** Für Remote-Operationen (Branches, PRs, Issues) MCP bevorzugen, sofern der GitHub-MCP-Server in Cursor aktiv ist.
+- **Supabase:** Bei Datenbank-, Auth- und RLS-Fragen Supabase-MCP nutzen; keine Produktions-Secrets in Chat oder Git.
+
+Tokens und MCP-Server-Konfiguration liegen in den Cursor-Benutzer-/Team-Einstellungen, nicht im Repository.
