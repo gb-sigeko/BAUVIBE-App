@@ -12,6 +12,7 @@ import { getIsoWeekParts } from "@/lib/utils";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { isoWeekOverlapsClosedInterval } from "@/lib/planung-week-overlap";
 import { appendChronikEntry } from "@/lib/chronik";
+import { nextFreeWeekInHorizon } from "@/lib/planung-next-free-week";
 
 /** Priorität: fester Termin (0) > Vertretung (1) > Turnus (2) > manuell (3). */
 export const PLANUNG_PRIORITY = {
@@ -140,7 +141,6 @@ export async function rollForwardNotCompleted(
   opts?: SyncTurnusOptions,
 ) {
   const current = getIsoWeekParts(anchor);
-  const keys = horizonKeySet(horizon);
 
   const stale = await db.planungEntry.findMany({
     where: {
@@ -152,17 +152,15 @@ export async function rollForwardNotCompleted(
   for (const e of stale) {
     const pos = { isoYear: e.isoYear, isoWeek: e.isoWeek };
     if (!isIsoWeekBefore(pos, current)) continue;
-    const next = addIsoWeeks(e.isoYear, e.isoWeek, 1);
-    if (!keys.has(isoWeekKey(next.isoYear, next.isoWeek))) continue;
 
-    const targetOccupied = await hasCellEntry(db, e.projectId, next.isoYear, next.isoWeek);
-    if (targetOccupied) continue;
+    const nxt = await nextFreeWeekInHorizon(db, e.projectId, e.isoYear, e.isoWeek, horizon);
+    if (!nxt) continue;
 
     await db.planungEntry.update({
       where: { id: e.id },
       data: {
-        isoYear: next.isoYear,
-        isoWeek: next.isoWeek,
+        isoYear: nxt.isoYear,
+        isoWeek: nxt.isoWeek,
         planungType: "VERSCHOBEN",
         planungSource: "RUECKLAUF",
         planungStatus: "NICHT_ERLEDIGT",
@@ -170,7 +168,7 @@ export async function rollForwardNotCompleted(
       },
     });
     await recalcConflictsForWeek(e.isoYear, e.isoWeek);
-    await recalcConflictsForWeek(next.isoYear, next.isoWeek);
+    await recalcConflictsForWeek(nxt.isoYear, nxt.isoWeek);
   }
 }
 

@@ -1,47 +1,13 @@
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { PlanungStatus, SpecialCode } from "@/generated/prisma/client";
-import { addIsoWeeks, horizonKeySet, isoWeekKey } from "@/lib/iso-week";
+import { appendChronikEntry } from "@/lib/chronik";
 import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
+import { nextFreeWeekInHorizon } from "@/lib/planung-next-free-week";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { syncProjectCompletedBegehungenCount } from "@/lib/planung-contract-sync";
 import { computeIsCompletedForContract } from "@/lib/turnus-engine";
 
 export type PlanungFeedbackOutcome = "erledigt" | "nicht_erledigt" | "nb" | "ob";
-
-async function cellOccupied(db: PrismaClient, projectId: string, isoYear: number, isoWeek: number) {
-  const n = await db.planungEntry.count({ where: { projectId, isoYear, isoWeek } });
-  return n > 0;
-}
-
-/**
- * Nächste freie Planungszelle: bevorzugt KW+1, sonst erste freie KW im Horizont.
- */
-async function nextFreeWeekInHorizon(
-  db: PrismaClient,
-  projectId: string,
-  fromIsoYear: number,
-  fromIsoWeek: number,
-  horizonKeys: Set<string>,
-) {
-  const immediate = addIsoWeeks(fromIsoYear, fromIsoWeek, 1);
-  if (
-    horizonKeys.has(isoWeekKey(immediate.isoYear, immediate.isoWeek)) &&
-    !(await cellOccupied(db, projectId, immediate.isoYear, immediate.isoWeek))
-  ) {
-    return immediate;
-  }
-
-  let y = fromIsoYear;
-  let w = fromIsoWeek;
-  for (let step = 0; step < 120; step++) {
-    const nxt = addIsoWeeks(y, w, 1);
-    y = nxt.isoYear;
-    w = nxt.isoWeek;
-    if (!horizonKeys.has(isoWeekKey(y, w))) return null;
-    if (!(await cellOccupied(db, projectId, y, w))) return { isoYear: y, isoWeek: w };
-  }
-  return null;
-}
 
 export type ApplyPlanungFeedbackParams = {
   entryId: string;
@@ -61,7 +27,6 @@ export async function applyPlanungFeedback(db: PrismaClient, params: ApplyPlanun
   const anchor = new Date();
   const horizonWeekCount = params.horizonWeekCount ?? 52;
   const horizon = horizonToIsoWeeks(buildPlanungHorizon(anchor, horizonWeekCount));
-  const hKeys = horizonKeySet(horizon);
 
   const data: Prisma.PlanungEntryUpdateInput = {
     feedback:
@@ -82,7 +47,7 @@ export async function applyPlanungFeedback(db: PrismaClient, params: ApplyPlanun
   } else if (params.outcome === "nicht_erledigt") {
     data.planungStatus = "NICHT_ERLEDIGT";
     data.specialCode = "NONE";
-    const nxt = await nextFreeWeekInHorizon(db, existing.projectId, existing.isoYear, existing.isoWeek, hKeys);
+    const nxt = await nextFreeWeekInHorizon(db, existing.projectId, existing.isoYear, existing.isoWeek, horizon);
     if (nxt) {
       data.isoYear = nxt.isoYear;
       data.isoWeek = nxt.isoWeek;
@@ -105,6 +70,24 @@ export async function applyPlanungFeedback(db: PrismaClient, params: ApplyPlanun
   const row = await db.planungEntry.update({
     where: { id: existing.id },
     data,
+  });
+
+  const weekMoved = row.isoYear !== existing.isoYear || row.isoWeek !== existing.isoWeek;
+  const chronikBody =
+    params.outcome === "nicht_erledigt" && weekMoved
+      ? `Rückmeldung: nicht erledigt → nächste freie KW ${row.isoWeek}/${row.isoYear}`
+      : `Rückmeldung Planung: ${params.outcome} (jetzt ${row.planungStatus})`;
+  await appendChronikEntry({
+    projectId: existing.projectId,
+    body: chronikBody,
+    action: "planung_rueckmeldung",
+    targetType: "PlanungEntry",
+    targetId: existing.id,
+    details: {
+      outcome: params.outcome,
+      fromKw: `${existing.isoWeek}/${existing.isoYear}`,
+      toKw: `${row.isoWeek}/${row.isoYear}`,
+    },
   });
 
   await recalcConflictsForWeek(existing.isoYear, existing.isoWeek);

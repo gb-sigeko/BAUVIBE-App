@@ -7,6 +7,7 @@ import { requireApiUser, requireWriteRole } from "@/lib/api-helpers";
 import { recalcConflictsForWeek } from "@/lib/planung-conflicts";
 import { computeIsCompletedForContract } from "@/lib/turnus-engine";
 import { syncProjectCompletedBegehungenCount } from "@/lib/planung-contract-sync";
+import { appendChronikEntry } from "@/lib/chronik";
 
 const updateSchema = z.object({
   employeeId: z.string().optional().nullable(),
@@ -58,6 +59,23 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     where: { id: params.id },
     data,
   });
+
+  if (d.employeeId !== undefined && d.employeeId !== existing.employeeId) {
+    const [fromE, toE] = await Promise.all([
+      existing.employeeId ? prisma.employee.findUnique({ where: { id: existing.employeeId }, select: { shortCode: true } }) : null,
+      row.employeeId ? prisma.employee.findUnique({ where: { id: row.employeeId! }, select: { shortCode: true } }) : null,
+    ]);
+    await appendChronikEntry({
+      projectId: row.projectId,
+      authorId: session.user.id,
+      body: `Planung: Mitarbeiterzuweisung ${fromE?.shortCode ?? "—"} → ${toE?.shortCode ?? "—"} (KW ${row.isoWeek}/${row.isoYear})`,
+      action: "planung_mitarbeiter_zugewiesen",
+      targetType: "PlanungEntry",
+      targetId: row.id,
+      details: { fromEmployeeId: existing.employeeId, toEmployeeId: row.employeeId },
+    });
+  }
+
   await recalcConflictsForWeek(row.isoYear, row.isoWeek);
   if (parsed.data.isoYear != null && parsed.data.isoWeek != null) {
     await recalcConflictsForWeek(existing.isoYear, existing.isoWeek);

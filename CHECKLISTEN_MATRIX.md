@@ -60,7 +60,7 @@ Hinweis: Viele Begehungs-Endpunkte liegen unter **`/api/projects/[projectId]/beg
 |--------------|--------|------------|-----------|
 | `/` Fee-Arbeitsfläche mit Widgets | ~ | U | Redirect nach `/fee`; Widgets teilweise |
 | `/dashboard` GF | ~ | U | `/gf` statt `/dashboard` |
-| `/planung` Raster, DnD, Kontextpanel | ~ | U | Raster + Virtualisierung; **Filter, gespeicherte Ansichten, volles Kontextpanel, DnD→Chronik** lückenhaft |
+| `/planung` Raster, DnD, Kontextpanel | ~ | U | Phase 1: Filter, Views (localStorage), Kontextpanel, DnD→Zuweisung+Chronik, Legende, Kapazität; Virtualisierung erhalten |
 | `/arbeitskorb` | ~ | U | Kernlisten; **weitere Kategorien** (Phase 6) offen |
 | `/projekte`, `/projekte/[id]` Tabs | ~ | U | Akte nicht alle Tabs / Abrechnung vollständig |
 | `/mitarbeiter` | ~ | U | |
@@ -77,13 +77,13 @@ Hinweis: Viele Begehungs-Endpunkte liegen unter **`/api/projects/[projectId]/beg
 | D1 | Turnus nächste KW, Abruf ohne Auto | ~ | L | `syncTurnusSuggestions` (optional `tenantId` für Tests/Generator); Hintergrund-Job Phase 1 |
 | D2 | Vorschläge 12 Wochen, Status vorgeschlagen | ~ | L | konfigurierbar; Page oft 12 |
 | D3 | FEST > Vertretung > Turnus > manuell | ~ | L | `PLANUNG_PRIORITY` |
-| D4 | DnD → Chronik | ~ | L | `POST /api/planung/move` schreibt Chronik; **Raster-DnD** UI offen/teils |
-| D5 | Rückmeldung nb/ob, Büro-Arbeitskorb | ~ | L/A | Feedback-API; Bestätigungsworkflow Fee |
-| D6 | Nicht erledigt → nächste freie KW | ~ | L | `applyPlanungFeedback` |
+| D4 | DnD → Chronik | ~ | L | KW: `POST /api/planung/move`; Mitarbeiter: DnD → `PUT /api/planung/[id]` + Chronik |
+| D5 | Rückmeldung nb/ob, Büro-Arbeitskorb | ~ | L/A | Feedback-API + Chronik; Arbeitskorb-Fee weiter Phase 6 |
+| D6 | Nicht erledigt → nächste freie KW | ~ | L | `applyPlanungFeedback` + `rollForwardNotCompleted` (gemeinsam `nextFreeWeekInHorizon`) |
 | D7 | isCompletedForContract / UF / nb/ob | ~ | L | `computeIsCompletedForContract` |
 | D8 | Arbeitskorb >1 / >3 Tage Rückmeldung | ~ | U/L | **angepasst** Phase 0 |
 | D9 | Protokoll fehlt >3 Tage | ~ | U | Begehungen-Liste |
-| D10 | Chronik bei allen Änderungen | [ ] | L | Service da, **Durchsetzung** offen |
+| D10 | Chronik bei allen Änderungen | ~ | L | Planung: Move, DnD-Zuweisung, Rückmeldung; weitere Module offen |
 | D11 | Extern nur eigene Planung + API-Filter | ~ | L/A | Middleware prüfen (Phase 10) |
 | D12 | Dashboard-KPIs exakt Formel | [ ] | U/L | `/gf` teilweise, Formeln prüfen |
 

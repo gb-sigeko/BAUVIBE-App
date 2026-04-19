@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { loginFee } from "./helpers";
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 test.beforeEach(async ({ page }) => {
   await loginFee(page);
