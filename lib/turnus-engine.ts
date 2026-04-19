@@ -44,6 +44,9 @@ export function computeIsCompletedForContract(input: {
 
 export type HorizonWeek = { isoYear: number; isoWeek: number };
 
+/** Optional: nur Projekte dieses Mandanten synchronisieren (Tests, Daten-Generator). */
+export type SyncTurnusOptions = { tenantId?: string };
+
 function festCellKey(projectId: string, isoYear: number, isoWeek: number) {
   return `${projectId}:${isoWeekKey(isoYear, isoWeek)}`;
 }
@@ -130,13 +133,19 @@ async function createIfEmpty(
 /**
  * Nicht erledigte Einträge aus vergangenen Wochen eine KW nach vorne schieben (Roll-Forward).
  */
-export async function rollForwardNotCompleted(db: PrismaClient, anchor: Date, horizon: HorizonWeek[]) {
+export async function rollForwardNotCompleted(
+  db: PrismaClient,
+  anchor: Date,
+  horizon: HorizonWeek[],
+  opts?: SyncTurnusOptions,
+) {
   const current = getIsoWeekParts(anchor);
   const keys = horizonKeySet(horizon);
 
   const stale = await db.planungEntry.findMany({
     where: {
       planungStatus: "NICHT_ERLEDIGT",
+      ...(opts?.tenantId ? { project: { tenantId: opts.tenantId } } : {}),
     },
   });
 
@@ -168,14 +177,23 @@ export async function rollForwardNotCompleted(db: PrismaClient, anchor: Date, ho
 /**
  * Turnus-Vorschläge (12 Wochen-Horizont), Vertretungs-Hinweise, ohne ABRUF/pausierte Projekte.
  */
-export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, horizon: HorizonWeek[]) {
-  await rollForwardNotCompleted(db, anchor, horizon);
+export async function syncTurnusSuggestions(
+  db: PrismaClient,
+  anchor: Date,
+  horizon: HorizonWeek[],
+  opts?: SyncTurnusOptions,
+) {
+  await rollForwardNotCompleted(db, anchor, horizon, opts);
   const keys = horizonKeySet(horizon);
   const minW = horizon.reduce((a, b) => (compareIsoWeek(a, b) < 0 ? a : b));
   const maxW = horizon.reduce((a, b) => (compareIsoWeek(a, b) > 0 ? a : b));
 
   const projects = await db.project.findMany({
-    where: { status: "ACTIVE", turnus: { not: null } },
+    where: {
+      status: "ACTIVE",
+      turnus: { not: null },
+      ...(opts?.tenantId ? { tenantId: opts.tenantId } : {}),
+    },
     include: { responsibleEmployee: true },
   });
 
@@ -183,12 +201,14 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
     where: {
       planungType: "FEST",
       OR: horizon.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek })),
+      ...(opts?.tenantId ? { project: { tenantId: opts.tenantId } } : {}),
     },
     select: { projectId: true, isoYear: true, isoWeek: true },
   });
   const festCells = new Set(festRows.map((r) => festCellKey(r.projectId, r.isoYear, r.isoWeek)));
 
   const activeProjectIds = projects.map((p) => p.id);
+  const tenantProjectIdSet = new Set(activeProjectIds);
   const horizonOr = horizon.map((w) => ({ isoYear: w.isoYear, isoWeek: w.isoWeek }));
   const occupiedCache = new Set<string>();
   let priorityBlockCells = new Set<string>();
@@ -222,6 +242,7 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
     for (const w of horizon) {
       if (!weekInSubstitute(sub, w.isoYear, w.isoWeek)) continue;
       for (const projectId of affected) {
+        if (opts?.tenantId && !tenantProjectIdSet.has(projectId)) continue;
         await clearTurnusSuggestionsForCell(db, projectId, w.isoYear, w.isoWeek);
         occupiedCache.delete(festCellKey(projectId, w.isoYear, w.isoWeek));
         await createIfEmpty(
@@ -309,7 +330,7 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
     }
   }
 
-  await applyKrankVertretungForHorizon(db, horizon);
+  await applyKrankVertretungForHorizon(db, horizon, opts);
 
   for (const w of horizon) {
     await recalcConflictsForWeek(w.isoYear, w.isoWeek);
@@ -320,7 +341,11 @@ export async function syncTurnusSuggestions(db: PrismaClient, anchor: Date, hori
  * Krankheits-Ausfall: Planungseinträge der betroffenen KW auf `Project.substituteEmployeeId` umbuchen
  * oder Konflikt markieren; Chronik-Eintrag bei erfolgreicher Umbuchung.
  */
-export async function applyKrankVertretungForHorizon(db: PrismaClient, horizon: HorizonWeek[]) {
+export async function applyKrankVertretungForHorizon(
+  db: PrismaClient,
+  horizon: HorizonWeek[],
+  opts?: SyncTurnusOptions,
+) {
   const kranks = await db.availability.findMany({
     where: { reason: "KRANKHEIT" },
     include: { employee: true },
@@ -336,8 +361,9 @@ export async function applyKrankVertretungForHorizon(db: PrismaClient, horizon: 
           employeeId: av.employeeId,
           isoYear: w.isoYear,
           isoWeek: w.isoWeek,
+          ...(opts?.tenantId ? { project: { tenantId: opts.tenantId } } : {}),
         },
-        include: { project: { select: { id: true, code: true, substituteEmployeeId: true } } },
+        include: { project: { select: { id: true, code: true, substituteEmployeeId: true, tenantId: true } } },
       });
 
       for (const ent of entries) {

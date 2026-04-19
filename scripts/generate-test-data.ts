@@ -5,6 +5,7 @@
  * Ausführung: `npx tsx scripts/generate-test-data.ts`
  */
 import "dotenv/config";
+import bcrypt from "bcryptjs";
 import type { Turnus } from "../generated/prisma/client";
 import {
   AvailabilityReason,
@@ -13,6 +14,7 @@ import {
   PlanungStatus,
   PlanungType,
   ProjectStatus,
+  Role,
 } from "../generated/prisma/client";
 import { prisma } from "../lib/prisma";
 import { mondayUtcOfIsoWeek } from "../lib/iso-week";
@@ -88,6 +90,28 @@ async function main() {
   const ex2 = await prisma.employee.create({
     data: { shortCode: "T42-EX2", displayName: "Test extern 2", kind: "EXTERN" },
   });
+
+  const demoPasswordHash = await bcrypt.hash("Bauvibe2026!", 10);
+  const demoUsers: { email: string; name: string; role: Role; employeeId: string | null }[] = [
+    { email: "admin@bauvibe.de", name: "Admin", role: Role.ADMIN, employeeId: null },
+    { email: "fee@bauvibe.local", name: "Fee Büro", role: Role.BUERO, employeeId: null },
+    { email: "gf@bauvibe.local", name: "Geschäftsführung", role: Role.GF, employeeId: null },
+    { email: "extern@bauvibe.local", name: "Extern", role: Role.EXTERN, employeeId: ex1.id },
+    { email: "sikogo@bauvibe.local", name: "SiGeKo Leitung", role: Role.SIKOGO, employeeId: in1.id },
+  ];
+  for (const u of demoUsers) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { passwordHash: demoPasswordHash, employeeId: u.employeeId },
+      create: {
+        email: u.email,
+        passwordHash: demoPasswordHash,
+        name: u.name,
+        role: u.role,
+        employeeId: u.employeeId ?? undefined,
+      },
+    });
+  }
 
   const pool = [in1, in2, ex1, ex2];
 
@@ -198,7 +222,7 @@ async function main() {
 
   const anchor = mondayUtcOfIsoWeek(2026, 1);
   const horizon = Array.from({ length: 40 }, (_, i) => ({ isoYear: 2026, isoWeek: i + 1 }));
-  await syncTurnusSuggestions(prisma, anchor, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon, { tenantId: TENANT });
 
   console.info("[generate-test-data] OK", {
     tenant: TENANT,

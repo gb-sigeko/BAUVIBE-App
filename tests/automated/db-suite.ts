@@ -69,7 +69,7 @@ async function testTurnus40Weeks(
   horizon: { isoYear: number; isoWeek: number }[],
   push: (t: string, m: string) => void,
 ) {
-  await syncTurnusSuggestions(prisma, anchor, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon, { tenantId: AUTO_TEST_TENANT });
 
   const projects = await prisma.project.findMany({
     where: { tenantId: AUTO_TEST_TENANT },
@@ -185,7 +185,7 @@ async function testFestPriority(
     });
   }
 
-  await syncTurnusSuggestions(prisma, anchor, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon, { tenantId: AUTO_TEST_TENANT });
 
   for (const p of pick) {
     const turnusHit = await prisma.planungEntry.count({
@@ -361,7 +361,7 @@ async function testVertretungKrank(
     }
   }
 
-  await applyKrankVertretungForHorizon(prisma, horizon);
+  await applyKrankVertretungForHorizon(prisma, horizon, { tenantId: AUTO_TEST_TENANT });
 
   for (const p of sampleProjects) {
     for (const wk of [10, 11, 12]) {

@@ -69,7 +69,7 @@ async function main() {
   const weeks = buildPlanungHorizon(anchor, 12);
   const horizon = horizonToIsoWeeks(weeks);
   console.log("[kern] sync turnus…");
-  await syncTurnusSuggestions(prisma, anchor, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon, { tenantId: tag });
 
   const turnusSuggestions = await prisma.planungEntry.count({
     where: {
@@ -109,7 +109,7 @@ async function main() {
       note: "E2E fester Termin",
     },
   });
-  await syncTurnusSuggestions(prisma, anchor, horizon);
+  await syncTurnusSuggestions(prisma, anchor, horizon, { tenantId: tag });
   const turnusOnFestCell = await prisma.planungEntry.count({
     where: {
       projectId: festProject.id,

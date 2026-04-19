@@ -2,25 +2,37 @@
 
 ## Phase 0 – Fundament & Spez-Härtung
 
-**Status:** abgeschlossen (Teillieferung).
+**Status:** abgeschlossen (inkl. Grind-Iteration bis grüne Testsuite).
 
 ### Erledigt
 
-- **`CHECKLISTEN_MATRIX.md`:** Epic-Matrix zu Checklisten A–G (Zeilen 860–1014) mit Status *erfüllt* / *teilweise* / *offen* und Zuordnung Prisma / API / UI / Logik.
-- **`.cursor/rules/bauvibe-kernregeln.mdc`:** Verbindliche Regeln zu Arbeitskorb-Schwellen (1 / 3 Tage), Priorität FEST > Vertretung > Turnus > manuell, Zähl-Logik nb/ob/UF, Chronik-Pflicht über `appendChronikEntry`.
-- **Arbeitskorb:** Planungs-Rückläufe in zwei Stufen (**>1 Tag und <3 Tage** vs. **>3 Tage rot**) gemäß Grundidee; Protokoll-Frist bleibt **>3 Tage** nach Begehungsdatum.
-- **Chronik:** `applyKrankVertretung` nutzt `appendChronikEntry` statt direkter Prisma-Calls (Konsistenz mit zentralem Service).
-- **Tests:** `tests/automated/db-suite.ts` (Arbeitskorb-Überfälligkeit) an **3-Tage**-Schwelle angeglichen.
-- **`scripts/ci.sh`:** Lint, Build, `test:automated` (ohne `migrate deploy`, da Umgebungsabhängig).
+- **`CHECKLISTEN_MATRIX.md`:** Epic-Matrix Checklisten A–G (Grundidee Zeilen 860–1014) mit Status und Komponenten-Zuordnung.
+- **`.cursor/rules/bauvibe-kernregeln.mdc`:** Bindende Regeln – Arbeitskorb-Schwellen (Rückmeldung >1 / >3 Tage; fehlende Protokolle bei erledigter Begehung >3 Tage ohne Protokoll), Priorität FEST > Vertretung > Turnus > manuell, `isCompletedForContract` / nb / ob / UF, Chronik-Pflicht über `appendChronikEntry`.
+- **Turnus-Sync Mandanten-Scope:** `syncTurnusSuggestions` / `rollForwardNotCompleted` / `applyKrankVertretungForHorizon` akzeptieren optional `{ tenantId }`. Tests und `generate-test-data` nutzen `bauvibe-auto-42` bzw. Kern-Test-Tag – verhindert Minuten-Läufe und Seiteneffekte auf fremde Mandanten in Cloud-DBs. Produktion/API `/planung/sync-turnus` und `/planung`-Seite bleiben ohne Filter (gesamte DB wie bisher).
+- **E2E-Stabilität:** `scripts/generate-test-data.ts` upsertet Demo-User (`fee@bauvibe.local`, `admin@bauvibe.de`, …) mit Passwort `Bauvibe2026!`, damit Playwright auch ohne vorheriges `db seed` anmeldet. Login-Helper: Timeout 90s, `waitUntil: "domcontentloaded"`.
+- **`scripts/kernfunktionen-test.ts`:** Turnus-Sync mit `{ tenantId: tag }` für isolierte Läufe.
 
-### Automatisierte Tests (Phase 0)
+### Automatisierte Tests (Phase 0, dieser Stand)
 
-- Nach Merge: `npm run test:automated` bzw. `bash scripts/ci.sh` mit gesetzter `DATABASE_URL` ausführen.
-- *(In dieser Session nicht erneut vollständig ausgeführt, sobald Umgebung verfügbar bitte nachziehen.)*
+| Kommando | Ergebnis |
+|----------|----------|
+| `npm run lint` | grün |
+| `npm run build` | grün |
+| `npm run test:automated` | **grün** (generate-test-data → DB-Suite → API-Suite → Playwright; Laufzeit je nach DB ~7–8 Min) |
 
-### Hinweis zu Phase 1–10
+### Grind-Iterationen (kurz dokumentiert)
 
-Die Phasen 1–10 aus dem Auftrag (Wochenplanung-Leitstand, Projektakte vollständig, Touren, Arbeitskorb-Erweiterungen, KI-Stubs, Dashboards, Exporte, Middleware-Matrix, PR `feature/vollumfang`) umfassen den **gesamten verbleibenden Realisierungsumfang** der Grundidee. Sie sind in `CHECKLISTEN_MATRIX.md` als **offen** bzw. **teilweise** dokumentiert und sollen **phasenweise** mit jeweils neuem `PHASENBERICHT`-Eintrag und grüner Testsuite abgearbeitet werden.
+1. Erster Lauf: Playwright-Login-Timeout (Demo-User fehlten nach frischer DB / langsamer Navigation) → Upsert Demo-User im Generator + robusteres `waitForURL`.
+2. Vorher: Turnus-Sync ohne Mandantenfilter → extrem lange oder hängende Suite bei großer Cloud-DB → optionaler `tenantId`-Filter.
 
 ---
-*Stand: Phase 0 abgeschlossen.*
+
+## Phase 1–10 (Kernlogik, Akte, Touren, Arbeitskorb, Kommunikation, Dashboards, Exporte, Middleware/CI)
+
+**Status:** gemäß `CHECKLISTEN_MATRIX.md` weiterhin überwiegend **teilweise** / **offen** (vollständige Grundidee-Umsetzung ist der verbleibende Hauptblock).
+
+Geplanter Ablauf: je Phase Matrix aktualisieren, `npm run test:automated` erneut grün, dann nächste Phase.
+
+---
+
+*Letzte Aktualisierung: Phase-0-Abschluss inkl. grüner Lint/Build/Tests.*

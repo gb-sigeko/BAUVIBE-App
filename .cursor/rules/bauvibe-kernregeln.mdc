@@ -12,9 +12,9 @@ Diese Regeln entsprechen der Spezifikation in `Grundidee_APP_Bauvibe.md` (Checkl
 
 - **Heute relevant („>1 Tag“):** `PlanungEntry` mit `planungStatus` in `RUECKMELDUNG_OFFEN`, `VORGESCHLAGEN` und `updatedAt` **älter als 1 Kalendertag** (bezogen auf Tagesbeginn heute), aber **noch nicht** in der überfälligen Kategorie.
 - **Überfällig (rot, „>3 Tage“):** dieselben Status, `updatedAt` **älter als 3 Kalendertage** (bezogen auf Tagesbeginn heute).
-- **Fehlende Protokolle (Begehung):** Begehung mit `protocolMissing` und `date` mindestens **3 Tage** vor heutigem Tagesbeginn (wie Spez „fehlendes Protokoll“).
+- **Fehlende Protokolle (Begehung):** **Erledigte** Begehung (`begehungStatus = DURCHGEFUEHRT` bzw. Referenzdatum der Begehung) **ohne** Protokoll/PDF (`protocolMissing` oder kein `protokollPdf`), `date` mindestens **3 Kalendertage** vor heutigem Tagesbeginn.
 
-Implementierung: `app/(dashboard)/arbeitskorb/page.tsx` (Listen „Fehlende Rückläufe“).
+Implementierung: `app/(dashboard)/arbeitskorb/page.tsx` (Kategorie „fehlende Protokolle“).
 
 ## Priorität Planungseinträge
 

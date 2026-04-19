@@ -74,7 +74,7 @@ Hinweis: Viele Begehungs-Endpunkte liegen unter **`/api/projects/[projectId]/beg
 
 | # | Anforderung | Status | L | Bemerkung |
 |---|-------------|--------|---|-----------|
-| D1 | Turnus nächste KW, Abruf ohne Auto | ~ | L | `syncTurnusSuggestions`; Hintergrund-Job Phase 1 |
+| D1 | Turnus nächste KW, Abruf ohne Auto | ~ | L | `syncTurnusSuggestions` (optional `tenantId` für Tests/Generator); Hintergrund-Job Phase 1 |
 | D2 | Vorschläge 12 Wochen, Status vorgeschlagen | ~ | L | konfigurierbar; Page oft 12 |
 | D3 | FEST > Vertretung > Turnus > manuell | ~ | L | `PLANUNG_PRIORITY` |
 | D4 | DnD → Chronik | ~ | L | `POST /api/planung/move` schreibt Chronik; **Raster-DnD** UI offen/teils |
@@ -111,7 +111,7 @@ Hinweis: Viele Begehungs-Endpunkte liegen unter **`/api/projects/[projectId]/beg
 | F3 | Middleware-Matrix Rollen | [ ] | L | `MIDDLEWARE_MATRIX.md` Phase 10 |
 | F4 | .env / .env.example | ~ | Betrieb |
 | F5 | prisma.config / Migrationen | ~ | P |
-| F6 | Seed Demo-User | ~ | P |
+| F6 | Seed Demo-User | ~ | P | Zusätzlich Upsert in `generate-test-data.ts` für E2E ohne Seed |
 | F7 | GitHub / kein Secret im Repo | ~ | Prozess |
 
 ---
