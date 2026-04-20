@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { assertProject, requireApiUser, requireWriteRole } from "@/lib/api-helpers";
+import { appendChronikEntry } from "@/lib/chronik";
 
 const patchSchema = z.object({
   status: z.string().min(1).optional(),
   followUp: z.string().datetime().nullable().optional(),
   subject: z.string().optional().nullable(),
   body: z.string().min(1).optional(),
+  erledigt: z.boolean().optional(),
 });
 
 export async function PATCH(
@@ -31,10 +33,17 @@ export async function PATCH(
   const parsed = patchSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
+  const nextStatus =
+    parsed.data.erledigt === true ? "erledigt" : parsed.data.status !== undefined ? parsed.data.status : undefined;
+  const becameDone =
+    nextStatus !== undefined &&
+    nextStatus.toLowerCase() === "erledigt" &&
+    existing.status.toLowerCase() !== "erledigt";
+
   const row = await prisma.communication.update({
     where: { id: existing.id },
     data: {
-      ...(parsed.data.status !== undefined ? { status: parsed.data.status } : {}),
+      ...(nextStatus !== undefined ? { status: nextStatus } : {}),
       ...(parsed.data.followUp !== undefined
         ? { followUp: parsed.data.followUp ? new Date(parsed.data.followUp) : null }
         : {}),
@@ -47,6 +56,17 @@ export async function PATCH(
       responsibleEmployee: { select: { id: true, shortCode: true, displayName: true } },
     },
   });
+
+  if (becameDone) {
+    await appendChronikEntry({
+      projectId: params.projectId,
+      authorId: session.user.id,
+      body: `Kommunikations-Wiedervorlage erledigt: ${(row.subject ?? row.body).slice(0, 200)}`,
+      action: "ARBEITSKORB_ERLEDIGT",
+      targetType: "Communication",
+      targetId: row.id,
+    });
+  }
 
   return NextResponse.json(row);
 }

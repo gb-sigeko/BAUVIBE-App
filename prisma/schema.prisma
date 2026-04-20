@@ -433,6 +433,7 @@ model VorOrtRueckmeldung {
   unterbrechung String?
   rueckmeldung  String
   gemeldetAm    DateTime     @default(now())
+  bearbeitet    Boolean      @default(false)
 }
 
 model Task {

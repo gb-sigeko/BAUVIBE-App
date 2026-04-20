@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { assertProject, requireApiUser, requireWriteRole } from "@/lib/api-helpers";
+import { appendChronikEntry } from "@/lib/chronik";
 
 const patchSchema = z.object({
   notiz: z.string().min(1).optional(),
@@ -27,6 +28,8 @@ export async function PATCH(req: Request, { params }: { params: { projectId: str
   const parsed = patchSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
+  const becameDone = parsed.data.erledigt === true && !row.erledigt;
+
   const updated = await prisma.telefonnotiz.update({
     where: { id: row.id },
     data: {
@@ -37,6 +40,18 @@ export async function PATCH(req: Request, { params }: { params: { projectId: str
         : {}),
     },
   });
+
+  if (becameDone) {
+    await appendChronikEntry({
+      projectId: params.projectId,
+      authorId: session.user.id,
+      body: `Telefon-Wiedervorlage erledigt: ${updated.notiz.slice(0, 200)}`,
+      action: "ARBEITSKORB_ERLEDIGT",
+      targetType: "Telefonnotiz",
+      targetId: updated.id,
+    });
+  }
+
   return NextResponse.json(updated);
 }
 

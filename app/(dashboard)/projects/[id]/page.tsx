@@ -15,7 +15,27 @@ import { ProjectAbrechnungTab } from "@/components/project/tabs/project-abrechnu
 
 export const dynamic = "force-dynamic";
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+const TAB_VALUES = new Set([
+  "overview",
+  "beteiligte",
+  "termine",
+  "begehungen",
+  "tasks",
+  "docs",
+  "kommunikation",
+  "chronicle",
+  "billing",
+]);
+
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const rawTab = typeof searchParams?.tab === "string" ? searchParams.tab : undefined;
+  const defaultTab = rawTab && TAB_VALUES.has(rawTab) ? rawTab : "overview";
   const [project, organizations, contacts, employees, planEntriesActive] = await Promise.all([
     prisma.project.findUnique({
       where: { id: params.id },
@@ -142,7 +162,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         </p>
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs key={defaultTab} defaultValue={defaultTab}>
         <TabsList className="flex h-auto min-h-10 flex-wrap gap-1">
           <TabsTrigger value="overview">Übersicht</TabsTrigger>
           <TabsTrigger value="beteiligte">Beteiligte</TabsTrigger>
