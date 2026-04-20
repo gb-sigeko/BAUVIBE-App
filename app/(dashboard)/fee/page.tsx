@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { getIsoWeekParts } from "@/lib/utils";
 
 export default async function FeeHomePage() {
@@ -134,6 +135,12 @@ export default async function FeeHomePage() {
             <Button asChild variant="secondary">
               <Link href="/gf">GF-Dashboard</Link>
             </Button>
+            <ExportCsvButton
+              endpoint="/api/export/projects"
+              downloadName="projekte.csv"
+              label="Projekte CSV (Export)"
+              testId="export-fee-projects-csv"
+            />
           </CardContent>
         </Card>
       </div>

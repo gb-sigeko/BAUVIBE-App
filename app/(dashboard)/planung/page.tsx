@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { PlanungBoard, type PlanungBoardEntry, type PlanungBoardProject, type PlanungBoardWeek } from "@/components/planung-board";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildPlanungHorizon, horizonToIsoWeeks } from "@/lib/planung-horizon";
 import { syncTurnusSuggestions } from "@/lib/turnus-engine";
@@ -91,11 +92,19 @@ export default async function PlanungPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Wochenplanung</h1>
-        <p className="text-muted-foreground">
-          Projektzeilen, KW-Spalten, Drag &amp; Drop zwischen Wochen, Turnus- und Rückmeldefelder. Konflikte werden automatisch markiert.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Wochenplanung</h1>
+          <p className="text-muted-foreground">
+            Projektzeilen, KW-Spalten, Drag &amp; Drop zwischen Wochen, Turnus- und Rückmeldefelder. Konflikte werden automatisch markiert.
+          </p>
+        </div>
+        <ExportCsvButton
+          endpoint="/api/export/planung"
+          downloadName="planung-export.csv"
+          label="Planung CSV"
+          testId="export-planung-csv"
+        />
       </div>
 
       <Card>

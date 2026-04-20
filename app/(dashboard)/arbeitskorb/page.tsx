@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BegehungStatus, CommunicationKind, PlanungStatus, TaskPriority, TaskStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -190,11 +191,19 @@ export default async function ArbeitskorbPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
-        <p className="text-muted-foreground">
-          Planungs-Rückmeldungen, fehlende Protokolle, Wiedervorlagen, Vor-Ort-Rückmeldungen und kritische Projekte.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
+          <p className="text-muted-foreground">
+            Planungs-Rückmeldungen, fehlende Protokolle, Wiedervorlagen, Vor-Ort-Rückmeldungen und kritische Projekte.
+          </p>
+        </div>
+        <ExportCsvButton
+          endpoint="/api/export/projects"
+          downloadName="projekte.csv"
+          label="Projekte CSV"
+          testId="export-arbeitskorb-projects-csv"
+        />
       </div>
 
       <Card data-testid="arbeitskorb-rueckmeldungen-heute">

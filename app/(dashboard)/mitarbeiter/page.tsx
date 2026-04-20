@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default async function MitarbeiterPage() {
@@ -17,9 +18,17 @@ export default async function MitarbeiterPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Mitarbeiter & Verfügbarkeit</h1>
-        <p className="text-muted-foreground">Intern/extern, Kürzel, Urlaub und Vertretung.</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Mitarbeiter & Verfügbarkeit</h1>
+          <p className="text-muted-foreground">Intern/extern, Kürzel, Urlaub und Vertretung.</p>
+        </div>
+        <ExportCsvButton
+          endpoint="/api/export/employees"
+          downloadName="mitarbeiter.csv"
+          label="Mitarbeiter CSV"
+          testId="export-mitarbeiter-csv"
+        />
       </div>
 
       <Card>

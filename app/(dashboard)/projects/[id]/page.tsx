@@ -3,6 +3,7 @@ import { PlanungStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { ProjectOverviewTab } from "@/components/project/tabs/project-overview-tab";
 import { ProjectBeteiligteTab, type BeteiligterRow } from "@/components/project/tabs/project-beteiligte-tab";
 import { ProjectTermineTab, type PlanRow } from "@/components/project/tabs/project-termine-tab";
@@ -157,9 +158,17 @@ export default async function ProjectDetailPage({
           <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
           <Badge variant="secondary">{project.status}</Badge>
         </div>
-        <p className="text-muted-foreground">
-          {project.code} · {project.client ?? "Ohne Bauherr"} · {project.siteAddress ?? "Ohne Einsatzort"}
-        </p>
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-muted-foreground">
+            {project.code} · {project.client ?? "Ohne Bauherr"} · {project.siteAddress ?? "Ohne Einsatzort"}
+          </p>
+          <ExportCsvButton
+            endpoint={`/api/export/project/${params.id}/tasks`}
+            downloadName={`projekt-${project.code}-aufgaben.csv`}
+            label="Aufgaben CSV"
+            testId="export-project-tasks-csv"
+          />
+        </div>
       </div>
 
       <Tabs key={defaultTab} defaultValue={defaultTab}>

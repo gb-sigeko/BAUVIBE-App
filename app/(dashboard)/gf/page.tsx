@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 
 export default async function GfDashboardPage() {
   const projects = await prisma.project.findMany({
@@ -38,9 +39,25 @@ export default async function GfDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">GF-Dashboard</h1>
-        <p className="text-muted-foreground">Auslastung (Soll/Ist), kritische Themen und operative Risiken.</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">GF-Dashboard</h1>
+          <p className="text-muted-foreground">Auslastung (Soll/Ist), kritische Themen und operative Risiken.</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ExportCsvButton
+            endpoint="/api/export/projects"
+            downloadName="projekte.csv"
+            label="Projekte CSV"
+            testId="export-gf-projects-csv"
+          />
+          <ExportCsvButton
+            endpoint="/api/export/organizations"
+            downloadName="organisationen.csv"
+            label="Organisationen CSV"
+            testId="export-gf-organizations-csv"
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

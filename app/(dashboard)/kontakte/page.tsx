@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CreateContactForm, CreateOrganizationForm } from "@/components/kontakte/kontakte-forms";
 import { KontakteSearchBar } from "@/components/kontakte/kontakte-search-bar";
+import { ExportCsvButton } from "@/components/export/export-csv-button";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -53,11 +54,27 @@ export default async function KontaktePage({ searchParams }: { searchParams: { q
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Kontakte</h1>
-        <p className="text-muted-foreground">
-          Organisationen und Ansprechpartner für Büro und Projektakten. Daten werden über dieselben Tabellen wie in den Projekt-Tabs geführt.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Kontakte</h1>
+          <p className="text-muted-foreground">
+            Organisationen und Ansprechpartner für Büro und Projektakten. Daten werden über dieselben Tabellen wie in den Projekt-Tabs geführt.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <ExportCsvButton
+            endpoint="/api/export/organizations"
+            downloadName="organisationen.csv"
+            label="Organisationen CSV"
+            testId="export-organizations-csv"
+          />
+          <ExportCsvButton
+            endpoint="/api/export/contacts"
+            downloadName="kontakte.csv"
+            label="Kontakte CSV"
+            testId="export-contacts-csv"
+          />
+        </div>
       </div>
 
       <Suspense fallback={<div className="text-sm text-muted-foreground">Suche lädt…</div>}>
