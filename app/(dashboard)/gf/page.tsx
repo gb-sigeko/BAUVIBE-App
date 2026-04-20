@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OfferStatus, VKStatus } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,19 +20,24 @@ export default async function GfDashboardPage() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const [openHighRiskTasks, overdueTasks, missingTaskProtocols, missingBegehungProtocols] = await Promise.all([
-    prisma.task.count({
-      where: {
-        status: { not: "DONE" },
-        OR: [{ title: { contains: "Mangel", mode: "insensitive" } }, { title: { contains: "Absturz", mode: "insensitive" } }],
-      },
-    }),
-    prisma.task.count({
-      where: { status: { not: "DONE" }, dueDate: { lt: startOfToday } },
-    }),
-    prisma.task.count({ where: { protocolMissing: true, status: { not: "DONE" } } }),
-    prisma.begehung.count({ where: { protocolMissing: true } }),
-  ]);
+  const [openHighRiskTasks, overdueTasks, missingTaskProtocols, missingBegehungProtocols, offersPipeline, vkNotSent] =
+    await Promise.all([
+      prisma.task.count({
+        where: {
+          status: { not: "DONE" },
+          OR: [{ title: { contains: "Mangel", mode: "insensitive" } }, { title: { contains: "Absturz", mode: "insensitive" } }],
+        },
+      }),
+      prisma.task.count({
+        where: { status: { not: "DONE" }, dueDate: { lt: startOfToday } },
+      }),
+      prisma.task.count({ where: { protocolMissing: true, status: { not: "DONE" } } }),
+      prisma.begehung.count({ where: { protocolMissing: true } }),
+      prisma.offer.count({
+        where: { status: { in: [OfferStatus.ENTWURF, OfferStatus.FREIGEGEBEN] } },
+      }),
+      prisma.vorankuendigung.count({ where: { status: { not: VKStatus.VERSENDET } } }),
+    ]);
 
   const missingProtocols = missingTaskProtocols + missingBegehungProtocols;
 
@@ -58,6 +64,36 @@ export default async function GfDashboardPage() {
             testId="export-gf-organizations-csv"
           />
         </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card data-testid="gf-kpi-angebote-pipeline">
+          <CardHeader>
+            <CardTitle className="text-base">Angebots-Pipeline</CardTitle>
+            <CardDescription>Entwürfe und freigegebene Angebote (operative Steuerung)</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-end justify-between">
+            <div className="text-3xl font-semibold" data-testid="gf-kpi-angebote-pipeline-value">
+              {offersPipeline}
+            </div>
+            <Badge variant="secondary">alle Projekte</Badge>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="gf-kpi-vorankuendigungen-offen">
+          <CardHeader>
+            <CardTitle className="text-base">Vorankündigungen offen</CardTitle>
+            <CardDescription>Noch nicht versendet</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-end justify-between">
+            <div className="text-3xl font-semibold" data-testid="gf-kpi-vorankuendigungen-offen-value">
+              {vkNotSent}
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/projects">Zu den Akten</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

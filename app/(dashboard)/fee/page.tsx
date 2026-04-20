@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OfferStatus, VKStatus } from "@/generated/prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,25 +17,37 @@ export default async function FeeHomePage() {
 
   const { isoYear, isoWeek } = getIsoWeekParts(today);
 
-  const [openProjects, dueToday, overdue, missingTaskProtocols, missingBegehungProtocols, conflictsThisWeek] =
-    await Promise.all([
-      prisma.project.count({ where: { status: "ACTIVE" } }),
-      prisma.task.count({
-        where: {
-          status: { not: "DONE" },
-          dueDate: { gte: startOfDay, lte: endOfDay },
-        },
-      }),
-      prisma.task.count({
-        where: {
-          status: { not: "DONE" },
-          dueDate: { lt: startOfDay },
-        },
-      }),
-      prisma.task.count({ where: { protocolMissing: true, status: { not: "DONE" } } }),
-      prisma.begehung.count({ where: { protocolMissing: true } }),
-      prisma.planungEntry.count({ where: { isoYear, isoWeek, conflict: true } }),
-    ]);
+  const [
+    openProjects,
+    dueToday,
+    overdue,
+    missingTaskProtocols,
+    missingBegehungProtocols,
+    conflictsThisWeek,
+    offersPipeline,
+    vkNotSent,
+  ] = await Promise.all([
+    prisma.project.count({ where: { status: "ACTIVE" } }),
+    prisma.task.count({
+      where: {
+        status: { not: "DONE" },
+        dueDate: { gte: startOfDay, lte: endOfDay },
+      },
+    }),
+    prisma.task.count({
+      where: {
+        status: { not: "DONE" },
+        dueDate: { lt: startOfDay },
+      },
+    }),
+    prisma.task.count({ where: { protocolMissing: true, status: { not: "DONE" } } }),
+    prisma.begehung.count({ where: { protocolMissing: true } }),
+    prisma.planungEntry.count({ where: { isoYear, isoWeek, conflict: true } }),
+    prisma.offer.count({
+      where: { status: { in: [OfferStatus.ENTWURF, OfferStatus.FREIGEGEBEN] } },
+    }),
+    prisma.vorankuendigung.count({ where: { status: { not: VKStatus.VERSENDET } } }),
+  ]);
 
   const missingProtocols = missingTaskProtocols + missingBegehungProtocols;
 
@@ -94,6 +107,38 @@ export default async function FeeHomePage() {
             <div className="text-3xl font-semibold">{missingProtocols}</div>
             <Button asChild size="sm" variant="outline">
               <Link href="/arbeitskorb">Prüfen</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card data-testid="fee-kpi-angebote-laufend">
+          <CardHeader>
+            <CardTitle className="text-base">Angebote in Bearbeitung</CardTitle>
+            <CardDescription>Entwurf oder freigegeben, noch nicht versendet/abgeschlossen</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-end justify-between">
+            <div className="text-3xl font-semibold" data-testid="fee-kpi-angebote-laufend-value">
+              {offersPipeline}
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/projects">In Akten prüfen</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="fee-kpi-vk-offen">
+          <CardHeader>
+            <CardTitle className="text-base">Vorankündigungen offen</CardTitle>
+            <CardDescription>Noch nicht als „versendet“ gebucht</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-end justify-between">
+            <div className="text-3xl font-semibold" data-testid="fee-kpi-vk-offen-value">
+              {vkNotSent}
+            </div>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/projects">In Akten prüfen</Link>
             </Button>
           </CardContent>
         </Card>
