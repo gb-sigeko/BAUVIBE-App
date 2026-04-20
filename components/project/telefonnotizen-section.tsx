@@ -7,6 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Note = {
   id: string;
@@ -22,6 +30,7 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
   const [notiz, setNotiz] = useState("");
   const [followUp, setFollowUp] = useState("");
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function create() {
     if (!notiz.trim()) return;
@@ -37,6 +46,7 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
     setNotiz("");
     setFollowUp("");
     setBusy(false);
+    setOpen(false);
     router.refresh();
   }
 
@@ -51,19 +61,36 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Notiz</label>
-          <Textarea data-testid="telefonnotiz-text" value={notiz} onChange={(e) => setNotiz(e.target.value)} rows={3} />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Follow-up (optional, Datum/Zeit lokal)</label>
-          <Input type="datetime-local" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
-          <Button data-testid="telefonnotiz-save" type="button" className="mt-2" disabled={busy} onClick={() => void create()}>
-            Speichern
-          </Button>
-        </div>
-      </div>
+      <Button type="button" variant="secondary" data-testid="telefonnotiz-dialog-open" onClick={() => setOpen(true)}>
+        Neue Telefonnotiz
+      </Button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Neue Telefonnotiz</DialogTitle>
+            <DialogDescription>Notiz und optionales Follow-up-Datum.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Notiz</label>
+              <Textarea data-testid="telefonnotiz-text" value={notiz} onChange={(e) => setNotiz(e.target.value)} rows={3} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Follow-up (optional)</label>
+              <Input type="datetime-local" data-testid="telefonnotiz-followup" value={followUp} onChange={(e) => setFollowUp(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button data-testid="telefonnotiz-save" type="button" disabled={busy} onClick={() => void create()}>
+              Speichern
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Table>
         <TableHeader>
@@ -77,7 +104,7 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
         </TableHeader>
         <TableBody>
           {notes.map((n) => (
-            <TableRow key={n.id}>
+            <TableRow key={n.id} data-testid={`telefonnotiz-row-${n.id}`}>
               <TableCell className="max-w-[320px] text-sm">{n.notiz}</TableCell>
               <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                 {new Date(n.erfasstAm).toLocaleString("de-DE")}
@@ -88,7 +115,7 @@ export function TelefonnotizenSection({ projectId, notes }: { projectId: string;
                 {n.erledigt ? <Badge variant="secondary">Erledigt</Badge> : <Badge variant="outline">Offen</Badge>}
               </TableCell>
               <TableCell className="text-right">
-                <Button type="button" size="sm" variant="outline" onClick={() => void toggle(n.id, n.erledigt)}>
+                <Button type="button" size="sm" variant="outline" data-testid={`telefonnotiz-toggle-${n.id}`} onClick={() => void toggle(n.id, n.erledigt)}>
                   {n.erledigt ? "Wieder öffnen" : "Erledigt"}
                 </Button>
               </TableCell>

@@ -12,16 +12,29 @@ const createSchema = z.object({
   active: z.boolean().optional(),
 });
 
-export async function GET() {
+export async function GET(req: Request) {
   const { session, response } = await requireApiUser();
   if (!session) return response!;
 
+  const q = new URL(req.url).searchParams.get("q")?.trim();
+
   const rows = await prisma.organization.findMany({
-    where: { active: true },
+    where: {
+      active: true,
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" } },
+              { address: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     include: {
       _count: { select: { contacts: true } },
     },
     orderBy: { name: "asc" },
+    take: q ? 50 : undefined,
   });
   return NextResponse.json(rows);
 }

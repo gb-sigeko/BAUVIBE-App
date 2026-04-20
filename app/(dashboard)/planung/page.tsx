@@ -7,7 +7,14 @@ import { applyKrankVertretungForHorizon } from "@/lib/vertretung";
 
 export const dynamic = "force-dynamic";
 
-export default async function PlanungPage() {
+export default async function PlanungPage({
+  searchParams,
+}: {
+  searchParams: { isoYear?: string; isoWeek?: string; projectId?: string };
+}) {
+  const focusIsoYear = searchParams.isoYear ? Number(searchParams.isoYear) : undefined;
+  const focusIsoWeek = searchParams.isoWeek ? Number(searchParams.isoWeek) : undefined;
+
   const anchor = new Date();
   const weeks: PlanungBoardWeek[] = buildPlanungHorizon(anchor, 12);
   const horizon = horizonToIsoWeeks(weeks);
@@ -128,7 +135,14 @@ export default async function PlanungPage() {
           <CardDescription>Ziehen Sie eine Karte auf eine andere KW-Spalte, um die Zuordnung zu verschieben.</CardDescription>
         </CardHeader>
         <CardContent>
-          <PlanungBoard projects={boardProjects} weeks={weeks} entries={boardEntries} tours={boardTours} />
+          <PlanungBoard
+            projects={boardProjects}
+            weeks={weeks}
+            entries={boardEntries}
+            tours={boardTours}
+            focusIsoYear={Number.isFinite(focusIsoYear) ? focusIsoYear : undefined}
+            focusIsoWeek={Number.isFinite(focusIsoWeek) ? focusIsoWeek : undefined}
+          />
         </CardContent>
       </Card>
     </div>

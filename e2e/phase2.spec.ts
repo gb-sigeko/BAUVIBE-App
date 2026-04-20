@@ -47,6 +47,7 @@ test.describe("Phase 2 – Projektakte", () => {
     await page.getByRole("tab", { name: "Kommunikation" }).click();
 
     const text = `E2E-Telefon-${Date.now()}`;
+    await page.getByTestId("telefonnotiz-dialog-open").click();
     await page.getByTestId("telefonnotiz-text").fill(text);
     await page.getByTestId("telefonnotiz-save").click();
     await expect(page.getByTestId("kommunikation-telefon-card").getByText(text)).toBeVisible();

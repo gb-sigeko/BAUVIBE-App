@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactElement } from "react";
-import { useMemo, useTransition } from "react";
+import { useEffect, useMemo, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { List } from "react-window";
 import { DndContext, DragEndEvent, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
@@ -249,14 +249,19 @@ export function PlanungBoard({
   weeks,
   entries,
   tours = [],
+  focusIsoYear,
+  focusIsoWeek,
 }: {
   projects: PlanungBoardProject[];
   weeks: PlanungBoardWeek[];
   entries: PlanungBoardEntry[];
   tours?: PlanungBoardTour[];
+  focusIsoYear?: number;
+  focusIsoWeek?: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const scrollWrapRef = useRef<HTMLDivElement>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   const toursByWeek = useMemo(() => {
@@ -286,6 +291,12 @@ export function PlanungBoard({
     () => ({ projects, weeks, entriesByProjectWeek, toursByWeek }),
     [projects, weeks, entriesByProjectWeek, toursByWeek],
   );
+
+  useEffect(() => {
+    if (focusIsoYear == null || focusIsoWeek == null) return;
+    const header = scrollWrapRef.current?.querySelector(`[data-testid="planung-week-${focusIsoYear}-${focusIsoWeek}"]`);
+    header?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [focusIsoYear, focusIsoWeek, weeks]);
 
   const totalWidth = COL_PROJECT + weeks.length * COL_WEEK;
   const listHeight = Math.min(560, Math.max(projects.length ? ROW_H : 0, projects.length * ROW_H));
@@ -317,7 +328,7 @@ export function PlanungBoard({
 
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-      <div className="overflow-x-auto rounded-lg border">
+      <div ref={scrollWrapRef} className="overflow-x-auto rounded-lg border">
         <div className="flex border-b bg-muted/40" style={{ width: totalWidth, minWidth: totalWidth }}>
           <div
             className="shrink-0 px-2 py-2 text-left text-sm font-semibold"
@@ -328,6 +339,7 @@ export function PlanungBoard({
           {weeks.map((w) => (
             <div
               key={droppableId(w.isoYear, w.isoWeek)}
+              data-testid={`planung-week-${w.isoYear}-${w.isoWeek}`}
               className="shrink-0 px-1 py-2 text-left text-sm font-semibold leading-tight"
               style={{ width: COL_WEEK, minWidth: COL_WEEK }}
             >

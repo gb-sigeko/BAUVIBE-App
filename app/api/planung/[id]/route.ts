@@ -31,6 +31,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const json = await req.json().catch(() => null);
+  const jsonKeys = json && typeof json === "object" ? Object.keys(json as Record<string, unknown>) : [];
+  const tourIdOnly = jsonKeys.length === 1 && jsonKeys[0] === "tourId";
+
+  if (!tourIdOnly && existing.planungSource !== "MANUELL") {
+    return NextResponse.json({ error: "Planungseintrag ist nicht bearbeitbar (nur Quelle MANUELL)" }, { status: 403 });
+  }
+
   const parsed = updateSchema.safeParse(json);
   if (!parsed.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
 
@@ -91,6 +98,10 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
 
   const existing = await prisma.planungEntry.findUnique({ where: { id: params.id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (!(existing.planungType === "FEST" && existing.planungSource === "MANUELL")) {
+    return NextResponse.json({ error: "Nur manuell angelegte feste Termine dürfen gelöscht werden" }, { status: 400 });
+  }
 
   await prisma.planungEntry.delete({ where: { id: params.id } });
   await recalcConflictsForWeek(existing.isoYear, existing.isoWeek);

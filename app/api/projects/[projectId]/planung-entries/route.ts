@@ -20,26 +20,16 @@ export async function GET(_req: Request, { params }: { params: { projectId: stri
   const { project, response: p404 } = await assertProject(params.projectId);
   if (!project) return p404!;
 
-  const upcoming = await prisma.planungEntry.findMany({
+  const entries = await prisma.planungEntry.findMany({
     where: {
       projectId: params.projectId,
-      planungStatus: { not: PlanungStatus.ERLEDIGT },
+      planungStatus: { notIn: [PlanungStatus.ERLEDIGT, PlanungStatus.ABGESAGT] },
     },
     include: { employee: true },
     orderBy: [{ isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
   });
 
-  const fixedManual = await prisma.planungEntry.findMany({
-    where: {
-      projectId: params.projectId,
-      planungType: "FEST",
-      planungSource: "MANUELL",
-    },
-    include: { employee: true },
-    orderBy: [{ isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
-  });
-
-  return NextResponse.json({ upcoming, fixedManual });
+  return NextResponse.json({ entries });
 }
 
 export async function POST(req: Request, { params }: { params: { projectId: string } }) {
@@ -81,6 +71,7 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
       employeeId: employeeId ?? undefined,
       planungType: "FEST",
       planungSource: "MANUELL",
+      /** Entspricht „höchster Priorität“ in `PLANUNG_PRIORITY` (numerisch niedriger = höher). */
       priority: PLANUNG_PRIORITY.FEST,
       planungStatus: "GEPLANT",
       isCompletedForContract: computeIsCompletedForContract({

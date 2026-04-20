@@ -44,7 +44,11 @@ export function ProjectBegehungenTab({ projectId, rows }: { projectId: string; r
                   <Link className="text-sm text-primary underline" href={`/projects/${projectId}/begehungen/${i.id}`}>
                     Bearbeiten
                   </Link>
-                  <Link className="text-sm text-primary underline" href={`/begehungen/${i.id}/protokoll`}>
+                  <Link
+                    className="text-sm text-primary underline"
+                    href={`/begehungen/${i.id}/protokoll`}
+                    data-testid="begehung-protokoll-link"
+                  >
                     Protokoll
                   </Link>
                 </TableCell>
