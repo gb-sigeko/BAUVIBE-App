@@ -24,17 +24,34 @@ export default async function globalSetup() {
     adapter: new PrismaPg(pool),
   });
 
-  const email = "fee@bauvibe.local";
   const passwordHash = await bcrypt.hash("Bauvibe2026!", 10);
 
   await prisma.user.upsert({
-    where: { email },
+    where: { email: "fee@bauvibe.local" },
     update: { passwordHash },
     create: {
-      email,
+      email: "fee@bauvibe.local",
       passwordHash,
       name: "Fee Büro",
       role: "BUERO",
+    },
+  });
+
+  const extEmployee =
+    (await prisma.employee.findFirst({ where: { shortCode: "EXT-E2E" } })) ??
+    (await prisma.employee.create({
+      data: { shortCode: "EXT-E2E", displayName: "E2E Extern", kind: "EXTERN", jobRole: "EXTERN" },
+    }));
+
+  await prisma.user.upsert({
+    where: { email: "extern@bauvibe.local" },
+    update: { passwordHash, role: "EXTERN", employeeId: extEmployee.id },
+    create: {
+      email: "extern@bauvibe.local",
+      passwordHash,
+      name: "E2E Extern",
+      role: "EXTERN",
+      employeeId: extEmployee.id,
     },
   });
 

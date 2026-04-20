@@ -1,0 +1,2221 @@
+
+
+0. Wochenplanung / operative Einsatzplanung
+Dieses Modul habe ich dir im letzten Schritt bereits vollständig und tief beschrieben.
+Es bleibt in genau dieser Form bestehen und ist weiterhin eines der absoluten Kernmodule.
+Kernaussage:
+•nicht Kalender, sondern Einsatzsteuerung 
+•turnusbasierte Begehungsplanung 
+•Mitarbeiter- und Externen-Disposition 
+•Rücklauf / Soll-Ist / Verschiebungen / Vertretungen 
+•Tourenlogik 
+•Konflikt- und Kapazitätssteuerung 
+•enge Kopplung an Projektakte, Protokolle, Aufgaben, Arbeitskorb und Chronik 
+Die Modulübersicht ordnet Wochenplanung klar als Herz der operativen Steuerung ein und 
+beschreibt den Planungsleitstand als Cockpit mit Filtern, Tourblöcken, Konfliktwarnungen, Soll-/Ist 
+und Umplanung. 
+1. Projektstamm / Projektverwaltung / 
+Projektakte
+Zweck
+Das Projektmodul ist der zentrale Anker aller Arbeit.
+Ein Projekt darf nicht nur ein Datensatz sein, sondern muss die aktive Baustellenakte sein, an der 
+Planung, Beteiligte, Begehungen, Aufgaben, Dokumente, Kommunikation und Chronik 
+zusammenlaufen.
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Was ist das für ein Projekt? 
+•Wer ist beteiligt? 
+•Wo steht es aktuell? 
+•Welche Termine, Begehungen, Pflichten und offenen Punkte hängen daran? 
+•Was ist zuletzt passiert? 
+•Was ist als Nächstes fällig? 
+Kernobjekte / Daten
+Wichtige Felder:
+•Projekt-ID 
+
+•interne Projektnummer 
+•externer Projektname / Bauvorhaben 
+•Ort / Adresse / Region 
+•Auftraggeber / Bauherr 
+•verantwortliche Ansprechpartner 
+•Status 
+•Start / Ende / Bauzeit 
+•Leistungsart 
+•Turnus / Begehungslogik 
+•Soll-Begehungen / Vertragsbezug 
+•zuständiger Koordinator 
+•Vertreter 
+•Projektbeteiligte 
+•öffentliche / private Ausschreibung 
+•LV-/Abrechnungsbezug optional 
+•Dokumentenordner / Aktenstruktur 
+•Notizen / Besonderheiten 
+•Baustopp / Pause / Sonderstatus 
+Hauptfunktionen
+•Projekt anlegen, bearbeiten, archivieren 
+•Beteiligte zuordnen 
+•Projektstatus pflegen 
+•Begehungs- und Turnusparameter pflegen 
+•direkte Verknüpfung zu Planung, Aufgaben, Dokumenten, Kommunikation, Chronik 
+•Übersicht über letzte und nächste operative Aktion 
+•Projekt als zentrale Arbeitsakte öffnen 
+Rollen
+•Büro: Projektanlage, Stammdatenpflege, Beteiligte, Fristen 
+•SiGeKo intern: operative Projektbearbeitung, Begehungsbezug, Projektstatus 
+•Externe: eingeschränkte Projektsicht 
+•Leitung/Admin: Gesamtübersicht, Steuerung, Freigaben, kritische Projekte 
+UI-Struktur
+Die Projektakte sollte als Tab-Struktur aufgebaut sein:
+•Übersicht 
+•Beteiligte 
+•Termine / Planung 
+•Begehungen 
+•Aufgaben / Mängel 
+•Dokumente 
+•Kommunikation 
+
+•Chronik 
+•Abrechnung / LV 
+Genau diese Projektakte mit mehreren Tabs ist in deiner Modulübersicht bereits als zentrale 
+Hauptansicht beschrieben. 
+Besondere Regeln
+•Ein Projekt darf nie nur “statisch” sein. 
+•Jede relevante Änderung erzeugt Chronik. 
+•Projektstatus muss operativ nutzbar sein, nicht nur dekorativ. 
+•Projekte in Pause/Baustopp dürfen nicht normal weiter durchgeplant werden. 
+•Projektbeteiligte müssen historisierbar sein. 
+Abhängigkeiten
+Hart gekoppelt an:
+•Wochenplanung 
+•Kontakte / Organisationen 
+•Mitarbeiter 
+•Begehungen / Protokolle 
+•Aufgaben / Mängel 
+•Dokumente 
+•Kommunikation 
+•Chronik 
+•Abrechnung / LV 
+Reifegrad
+Sehr tief entwickelt.
+Eines der belastbarsten Module im Gesamtsystem.
+2. Kontakt- und Kundendatenbank
+Zweck
+Dieses Modul ist die strukturierte Verwaltung aller Firmen, Ansprechpartner und projektbezogenen 
+Kontaktkonstellationen.
+Es ist kein Adressbuch-Spielzeug, sondern ein arbeitsrelevantes Beziehungsmodul:
+•Bauherr 
+•Auftraggeber 
+•Architekt 
+•Bauleiter 
+•Fachplaner 
+
+•Unternehmen 
+•Nachunternehmer 
+•Behördenkontakte 
+•interne Ansprechpartner 
+•externe Koordinatoren 
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Wer gehört zu wem? 
+•Wer ist Ansprechpartner in welchem Projekt? 
+•Welche Rolle hat eine Person oder Organisation? 
+•Wie erreiche ich sie? 
+•Welche Kommunikation lief bereits? 
+•Für welche Projekte ist der Kontakt relevant? 
+Kernobjekte / Daten
+Organisation
+•Firmenname 
+•Rechtsform 
+•Adresse 
+•Rechnungsdaten optional 
+•Notizen 
+•Branche / Typ 
+•aktive / inaktive Beziehung 
+Kontaktperson
+•Name 
+•Funktion / Rolle 
+•E-Mail 
+•Telefon / Mobil 
+•Zugehörige Organisation 
+•projektbezogene Rolle 
+•bevorzugte Kontaktart 
+•Bemerkungen 
+•Status aktiv/inaktiv 
+Projektkontakt-Zuordnung
+•Projekt-ID 
+•Kontakt-ID 
+•Rolle im Projekt 
+•Hauptansprechpartner ja/nein 
+•Gültigkeitszeitraum 
+
+•Bemerkung 
+Hauptfunktionen
+•Firmen und Personen getrennt verwalten 
+•mehrere Ansprechpartner pro Firma 
+•mehrere Rollen je Kontakt 
+•Kontakte projektbezogen zuordnen 
+•direkte Verlinkung in Kommunikation, Projektakte, Aufgaben, Abrechnung 
+•schnelle Suche nach Firma, Ort, Person, E-Mail, Telefonnummer 
+•spätere CRM-nahe Verlaufssicht 
+Rollen
+•Büro: Stammdatenpflege, Kontaktpflege, Zuordnung 
+•SiGeKo: Einsicht, Nutzung in Projekten 
+•Leitung/Admin: Gesamtpflege, Dublettenbereinigung, Rechte 
+•Externe: nur eingeschränkte projektrelevante Kontakte 
+UI-Struktur
+Sinnvolle Ansichten:
+•Organisationsliste 
+•Personenliste 
+•Kontakt-Detailseite 
+•Firmenakte 
+•Projektbezogene Kontaktübersicht 
+•Schnellfilter nach Rolle, Region, aktiv/inaktiv, Projekten 
+Besondere Regeln
+•Kontakte nie nur projektlos speichern, wenn Projektbezug existiert 
+•gleiche Person kann in mehreren Projekten unterschiedliche Rollen haben 
+•Dublettenprüfung ist wichtig 
+•Kommunikation sollte nicht an freien Text hängen, sondern an Kontakte/Organisationen 
+Abhängigkeiten
+•Projektmodul 
+•Kommunikationsmodul 
+•Abrechnung / Angebote 
+•Aufgaben / Wiedervorlagen 
+•Chronik 
+
+Reifegrad
+Gut und belastbar entwickelt, besonders fachlich-konzeptionell.
+Technisch noch weniger tief als Wochenplanung, aber eindeutig Kernmodul.
+3. Mitarbeiter / Externe / Verfügbarkeit / 
+Vertretung / Urlaub
+Zweck
+Dieses Modul steuert die einsatzrelevanten Personaldaten.
+Für euch ist das kein HR-System im klassischen Sinn, sondern eine operative Verfügbarkeits- und 
+Einsatzgrundlage:
+•interne feste Mitarbeiter 
+•externe freie Koordinatoren 
+•Büro / Verwaltung 
+•Leitung / Admin 
+•ggf. Leserollen / Servicekonten 
+Die Modulübersicht betont ausdrücklich, dass Externe kein Sonderfall, sondern ein Kernfall sind 
+und von Anfang an mit anderer Sichtbarkeit, anderer Verfügbarkeitspflege, Vertretungsrolle und 
+eingeschränkter Projektsicht modelliert werden müssen. 
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Wer steht zur Verfügung? 
+•Wer darf was sehen? 
+•Wer kann welche Projekte übernehmen? 
+•Wer ist intern, wer extern? 
+•Wer vertritt wen? 
+•Wer ist wann nicht verfügbar? 
+Kernobjekte / Daten
+Mitarbeiter
+•Mitarbeiter-ID 
+•Name 
+•Kürzel 
+•intern / extern 
+•Rolle 
+•Einsatzgebiet / Region 
+
+•Qualifikationen 
+•Wochenkapazität 
+•Beschäftigungsart 
+•Standard-Verfügbarkeit 
+•Vertreterprofil 
+•aktive Projekte 
+•Kontaktinfos 
+Verfügbarkeit
+•Zeitraum 
+•Grund: Urlaub / Krankheit / Fortbildung / blockiert / frei 
+•Ganztägig oder tageweise 
+•Kommentar 
+•bestätigter oder geplanter Status 
+Vertretung
+•zu vertretende Person 
+•Vertreter 
+•Zeitraum 
+•Art der Vertretung 
+•betroffene Projekte 
+•Priorität 
+Hauptfunktionen
+•Mitarbeiterstamm verwalten 
+•Kürzel-Logik pflegen 
+•interne/externe Sicht trennen 
+•Verfügbarkeiten pflegen 
+•Urlaub/Krankheit hinterlegen 
+•Vertretungsregeln abbilden 
+•Kapazität für Planung bereitstellen 
+•spätere Auslastungsanzeigen 
+Rollen
+•Büro: Pflege von Stammdaten und Abwesenheiten 
+•Mitarbeiter intern: Einsicht in eigene Daten, evtl. Verfügbarkeit melden 
+•Externe: reduzierte Selbstpflege 
+•Leitung/Admin: volle Sicht auf Auslastung, Rollen, Einsatzfähigkeit 
+UI-Struktur
+•Mitarbeiterliste 
+•Mitarbeiterakte 
+•Verfügbarkeitskalender 
+
+•Vertretungsübersicht 
+•Kapazitätsübersicht 
+•Filter nach intern/extern/Region/Rolle 
+Besondere Regeln
+•externe Mitarbeiter benötigen andere Rechte als interne 
+•UF/Bürorollen dürfen nicht automatisch wie operative Begehungsleistung gezählt werden 
+•Mitarbeiterkürzel sind operative Primärsignale in der Wochenplanung 
+•Vertretungen müssen historisiert werden 
+•Verfügbarkeit ist planungsrelevant und darf nicht nur “Hinweistext” sein 
+Abhängigkeiten
+•Wochenplanung 
+•Projektmodul 
+•Rollen/Rechte 
+•Arbeitskorb 
+•Dashboard 
+•Kommunikation 
+Reifegrad
+Sehr weit entwickelt, vor allem in Verbindung mit Planung und Externenlogik.
+4. Tourenplanung
+Zweck
+Tourenplanung ist der operative Brückenbau zwischen Wochenplan und realer Fahr- / Besuchslogik.
+Sie dient dazu, mehrere Projekte sinnvoll räumlich und zeitlich zu bündeln, sodass Begehungen 
+nicht nur fachlich korrekt geplant, sondern auch praktisch machbar sind.
+In deiner Modulübersicht ist Tourenplanung ausdrücklich als Teil der operativen Steuerung genannt 
+und im Planungsleitstand sollen Tourblöcke sichtbar sein. 
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Welche Baustellen lassen sich sinnvoll zu einer Tour zusammenfassen? 
+•An welchem Tag fährt welcher Mitarbeiter wohin? 
+•Welche Reihenfolge ist plausibel? 
+•Wo entstehen Überlast, unnötige Leerfahrten oder Konflikte? 
+
+Kernobjekte / Daten
+•Tour-ID 
+•KW / Datum 
+•Mitarbeiter 
+•Region / Tourgebiet 
+•zugeordnete Projekte/Baustellen 
+•Reihenfolge 
+•grobe Fahrzeit 
+•grobe Vor-Ort-Zeit 
+•Bemerkungen 
+•Tourstatus 
+•Konfliktflag 
+Hauptfunktionen
+•Projekte aus Wochenplanung zu Touren bündeln 
+•manuelle oder halbautomatische Reihenfolge 
+•Tages- oder Wochen-Touren 
+•Sicht nach Region / Mitarbeiter / KW 
+•Tourstatus pflegen 
+•Konflikte anzeigen 
+Rollen
+•Büro/Disposition: Touren bilden und anpassen 
+•Mitarbeiter: eigene Tour sehen 
+•Leitung: Auslastung, Machbarkeit, Regionen 
+UI-Struktur
+•Tourenliste 
+•Kartenoption später 
+•Tages-/Wochen-Touransicht 
+•Drag-and-drop-Zuordnung aus Planung 
+•Tour-Detailpanel mit Projektreihenfolge 
+Besondere Regeln
+•Tour ist abgeleitet aus Planung, nicht unabhängig davon 
+•feste Termine schlagen freie Routenoptimierung 
+•Vertretungswechsel muss Tour neu bewerten 
+•Touren dürfen keine versteckte Doppelplanung erzeugen 
+Abhängigkeiten
+•Wochenplanung 
+
+•Mitarbeiter / Verfügbarkeit 
+•Projektmodul 
+•ggf. Karten-/Routing-Komponente später 
+Reifegrad
+Fachlich gut beschrieben, aber noch weniger tief als Wochenplanung.
+Ein starkes V1.5-/V2-Modul.
+5. Begehungen / Protokolle
+Zweck
+Dieses Modul bildet die operative und nachweisbare Durchführung von Baustellenbegehungen ab.
+Es ist fachlich extrem relevant, weil hier aus geplanter Arbeit dokumentierte Leistung wird.
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Welche Begehung wurde wann durchgeführt? 
+•Wer war vor Ort? 
+•Zu welchem Projekt gehört sie? 
+•Welche laufende Nummer hat sie? 
+•Wurde ein Protokoll erstellt? 
+•Gibt es Mängel, Nacharbeit oder offene Dokumente? 
+Kernobjekte / Daten
+Begehung
+•Begehungs-ID 
+•Projekt-ID 
+•Datum 
+•Mitarbeiter 
+•Art der Begehung 
+•turnusmäßig / Sondertermin 
+•Status 
+•laufende Nummer 
+•Soll-/Ist-Bezug 
+•Bemerkung 
+Protokoll
+•Protokoll-ID 
+
+•Begehungs-ID 
+•Dateiname 
+•Dokumenttyp 
+•Upload-Datum 
+•Version 
+•Freigabestatus 
+•Bezug zu Aufgaben/Mängeln 
+Ein bereits mehrfach genutztes Benennungsschema lautet sinngemäß:
+JJMMTT SiGe Protokoll <Nr.> <Ort> <Projektname> <Kürzel>.pdf
+Hauptfunktionen
+•Begehung erfassen 
+•mit Planungseintrag verknüpfen 
+•laufende Nummer pflegen 
+•Protokoll hochladen / verknüpfen 
+•Protokollstatus sichtbar machen 
+•fehlendes Protokoll in Arbeitskorb geben 
+•Mängel/Aufgaben ableiten 
+Rollen
+•SiGeKo intern/extern: Durchführung / Rückmeldung / Protokollbezug 
+•Büro: Prüfung, Zuordnung, Nachverfolgung 
+•Leitung/Admin: Sicht auf Erledigung, Nachweis, Vollständigkeit 
+UI-Struktur
+•Begehungsliste 
+•Begehungsdetail 
+•Protokollstatus-Spalte 
+•Schnellzugriff aus Projekt und Wochenplanung 
+•offene Protokolle / fehlende Uploads als Spezialansicht 
+Besondere Regeln
+•Planung ≠ erledigte Begehung 
+•nb / ob oder vergleichbare Nicht-Durchführungen dürfen nicht als vollwertig zählen 
+•Protokoll fehlt ≠ Begehung nie stattgefunden, aber Nacharbeit ist offen 
+•bei Erreichen der vertraglichen Gesamtzahl muss Meldelogik greifen 
+Abhängigkeiten
+•Wochenplanung 
+•Projektmodul 
+•Dokumente 
+
+•Aufgaben/Mängel 
+•Arbeitskorb 
+•Chronik 
+Reifegrad
+Sehr tief und praxisnah entwickelt.
+Eines der belastbarsten Module.
+6. Aufgaben / Wiedervorlagen / Mängel / 
+Maßnahmenverfolgung
+Zweck
+Dieses Modul verwaltet alles, was nachverfolgt werden muss:
+•offene Punkte 
+•Fristen 
+•Mängel 
+•Maßnahmen 
+•Wiedervorlagen 
+•Nacharbeit aus Begehungen, Kommunikation oder Dokumenten 
+Fachliche Aufgabe
+Es beantwortet:
+•Was ist offen? 
+•Wer ist zuständig? 
+•Bis wann? 
+•Woher kommt die Aufgabe? 
+•Hat sie Projektbezug? 
+•Ist sie kritisch, überfällig oder eskalationsrelevant? 
+Kernobjekte / Daten
+Aufgabe
+•Aufgaben-ID 
+•Titel 
+•Beschreibung 
+•Projektbezug 
+•Verantwortlicher 
+•Fälligkeitsdatum 
+•Priorität 
+
+•Status 
+•Quelle 
+•Kategorie 
+•Wiedervorlagelogik 
+•Notiz / Verlauf 
+Mangel
+•Mangel-ID 
+•Projekt/Begehung 
+•Beschreibung 
+•Kategorie 
+•Verantwortlicher 
+•Frist 
+•Status 
+•Nachweis / Foto / Dokumentbezug optional 
+Hauptfunktionen
+•Aufgabe anlegen 
+•Wiedervorlage setzen 
+•Aufgaben aus Begehungen / Kommunikation generieren 
+•Mängel gesondert abbilden 
+•Statuswechsel 
+•Fristen und Überfälligkeiten 
+•Zuordnung zu Projekt / Mitarbeiter / Kommunikation 
+•spätere Eskalationsstufen 
+Rollen
+•Büro: Aufgabenkoordination, Wiedervorlagen 
+•SiGeKo: operative Bearbeitung, Mängelnachverfolgung 
+•Leitung: kritische/überfällige Aufgaben 
+•Externe: nur eigene oder projektbezogene Aufgaben 
+UI-Struktur
+•globale Aufgabenliste 
+•projektbezogene Aufgabenansicht 
+•Mängelansicht 
+•Wiedervorlagen-Board 
+•Filter nach Status, Priorität, Fälligkeit, Projekt, Verantwortlichem 
+Besondere Regeln
+•Aufgaben müssen immer eine Quelle haben: manuell, Begehung, Kommunikation, 
+Dokument, QA 
+
+•Wiedervorlage ist nicht nur Datum, sondern operativer Wiederaufnahme-Punkt 
+•Mängel sind fachlich verwandt, aber oft eigenständige Kategorie 
+•Überfälliges gehört in Arbeitskorb und Eskalationslogik 
+Abhängigkeiten
+•Projektmodul 
+•Begehungen/Protokolle 
+•Kommunikation 
+•Arbeitskorb 
+•Dashboard 
+•Chronik 
+•Eskalationsmodul 
+Reifegrad
+Sehr weit entwickelt.
+Als Kernmodul für Tagesarbeit und Nachverfolgung gesetzt.
+7. Dokumentenverwaltung
+Zweck
+Dieses Modul verwaltet die projektbezogene Akte:
+•PDFs 
+•Protokolle 
+•Vorankündigungen 
+•SiGe-Pläne 
+•Unterlagen 
+•E-Mails als Dateien 
+•sonstige projektrelevante Dokumente 
+Fachliche Aufgabe
+Das Modul muss beantworten:
+•Welche Dokumente gibt es zu einem Projekt? 
+•Welche Version ist gültig? 
+•Was fehlt? 
+•Was wurde zuletzt ergänzt oder ersetzt? 
+•Welche Dokumente hängen an Begehungen, Aufgaben oder Kommunikation? 
+Kernobjekte / Daten
+•Dokument-ID 
+
+•Projektbezug 
+•Dateiname 
+•Dokumenttyp 
+•Upload-/Erstellungsdatum 
+•Version 
+•Status 
+•Verknüpfung zu Begehung / Aufgabe / Kommunikation 
+•Quelle 
+•Tags / Kategorie 
+Hauptfunktionen
+•Dokumente projektbezogen verwalten 
+•Typisierung 
+•Versionierung leicht 
+•Direktzugriff aus Projektakte 
+•Verknüpfung mit Begehung, Aufgabe, Kommunikation 
+•fehlende Unterlagen sichtbar machen 
+•Export-/Download-Bezug 
+Rollen
+•Büro: Upload, Zuordnung, Struktur 
+•SiGeKo: Nutzung, Upload eigener Dokumente 
+•Externe: eingeschränkter dokumentbezogener Zugriff 
+•Leitung/Admin: Gesamtzugriff nach Rechtelogik 
+UI-Struktur
+•Dokumentenliste pro Projekt 
+•globale Suchansicht 
+•Filter nach Typ/Status/Projekt/Datum 
+•Vorschau 
+•Schnellverknüpfung zur Quelle 
+Besondere Regeln
+•Dokumente müssen immer kontextbezogen sein 
+•Dokumentenereignisse gehören in Chronik 
+•fehlende Pflichterlagen müssen sichtbar werden 
+•Externe dürfen nicht automatisch alles sehen 
+Abhängigkeiten
+•Projektmodul 
+•Begehungen/Protokolle 
+•Kommunikation 
+
+•Export 
+•Chronik 
+•Rollen/Rechte 
+Reifegrad
+Gut und klar entwickelt, besonders als Bestandteil der Projektakte.
+Operativ stark, technisch noch nicht bis ins letzte Detail ausdefiniert.
+8. Projektchronik
+Zweck
+Die Chronik ist das Nachvollziehbarkeits-Rückgrat der App.
+Sie hält nicht nur Notizen, sondern die zeitliche und sachliche Geschichte des Projekts:
+•wer hat was wann getan 
+•was wurde geändert 
+•was wurde geplant, erledigt, verschoben, hochgeladen, kommuniziert 
+In deiner Modulübersicht wird Chronik sowohl als Teil der Nachweis-/Dokumentationsebene als 
+auch als Element des Arbeits- und Steuerungssystems geführt. 
+Fachliche Aufgabe
+Das Modul beantwortet:
+•Was ist zuletzt passiert? 
+•Warum ist der aktuelle Zustand so? 
+•Welche Aktionen gab es im Verlauf? 
+•Welche Nachweise existieren? 
+Kernobjekte / Daten
+•Chronik-ID 
+•Zeitstempel 
+•Projektbezug 
+•Objektart 
+•Objekt-ID 
+•Aktionstyp 
+•Benutzer / System / KI 
+•Kurztext 
+•Details 
+•Sichtbarkeit 
+•Änderungsgrund optional 
+
+Hauptfunktionen
+•automatische Einträge aus anderen Modulen 
+•manuelle Notizen ergänzbar 
+•Filter nach Art/Zeit/Benutzer 
+•direkte Navigation zur Quelle 
+•revisionsnahe Nachvollziehbarkeit 
+Rollen
+•alle mit projektrelevantem Zugang sehen den passenden Ausschnitt 
+•Büro/Leitung mit breiterer Gesamtsicht 
+•Externe nur eingeschränkte projektrelevante Chronik 
+UI-Struktur
+•Timeline in Projektakte 
+•globale Chroniksuche 
+•Filter nach Ereignisart 
+•Kontextsprung zum Ursprungsobjekt 
+Besondere Regeln
+•Chronik darf kein Freitext-Friedhof werden 
+•möglichst viel automatisch erzeugen 
+•keine relevanten Änderungen ohne Spuren 
+•Sichtbarkeiten müssen rollenabhängig sein 
+Abhängigkeiten
+•praktisch alle Module 
+•besonders Projekt, Planung, Begehungen, Aufgaben, Kommunikation, Dokumente 
+Reifegrad
+Konzeptionell sehr stark, technisch als Querschnittsmodul gedacht.
+Eines der wichtigsten, auch wenn es selten das erste sichtbare Modul ist.
+9. Kommunikationsmodul
+Zweck
+Das Kommunikationsmodul bündelt den projektbezogenen Kommunikationsverlauf:
+•E-Mails 
+•Rückfragen 
+
+•Wiedervorlagen 
+•Telefonnotizen 
+•Statusabsprachen 
+•Anschreiben / Entwürfe 
+Fachliche Aufgabe
+Es beantwortet:
+•Wer wurde wann kontaktiert? 
+•Worum ging es? 
+•Was ist offen? 
+•Welche Wiedervorlage ergibt sich? 
+•Zu welchem Projekt/Kontakt gehört die Kommunikation? 
+Kernobjekte / Daten
+•Kommunikations-ID 
+•Projektbezug 
+•Kontakt / Organisation 
+•Kommunikationsart 
+•Datum/Zeit 
+•Betreff / Kurzinhalt 
+•Status 
+•Wiedervorlage 
+•Verknüpfte Dokumente 
+•Verantwortlicher 
+Hauptfunktionen
+•Kommunikationsereignisse dokumentieren 
+•E-Mail-/Kontaktbezug speichern 
+•Wiedervorlagen aus Kommunikation ableiten 
+•Kommunikationsverlauf in Projektakte zeigen 
+•Vorlagen / Textbausteine nutzen 
+•Chronikeinträge erzeugen 
+Rollen
+•Büro: zentrale Kommunikationssteuerung 
+•SiGeKo: projektrelevante Kommunikation 
+•Leitung: Einblick in kritische Kommunikation 
+•Externe: eingeschränkter Sichtbereich 
+UI-Struktur
+•Kommunikationsliste je Projekt 
+
+•globale Kommunikation mit Filtern 
+•Wiedervorlagenansicht 
+•Schnellaktion “E-Mail/Notiz anlegen” 
+Besondere Regeln
+•Kommunikation sollte nicht losgelöst vom Projekt stattfinden 
+•Wiedervorlage ist Kernfunktion, kein Zusatz 
+•Kommunikation gehört in Chronik 
+•Kontakte müssen strukturiert angebunden sein 
+Abhängigkeiten
+•Kontaktmodul 
+•Projektmodul 
+•Aufgaben/Wiedervorlagen 
+•Vorlagen 
+•Chronik 
+Reifegrad
+Gut beschrieben, aber noch eher als funktionale Schicht als bis ins Kleinste ausmodelliertes 
+Tiefenmodul.
+10. Arbeitskorb / Tagessteuerung
+Zweck
+Der Arbeitskorb ist die tägliche operative Sammelstelle.
+Nicht hübsch, sondern nützlich.
+In der Modulübersicht wird er als eine der drei zentralen Hauptansichten beschrieben, mit Fokus auf 
+heute fällige, überfällige, Rückmeldungen offen, Protokolle nacharbeiten, fehlende Unterlagen und 
+kritische Projekte. 
+Fachliche Aufgabe
+Er beantwortet:
+•Was muss heute / jetzt bearbeitet werden? 
+•Was ist offen, überfällig, unvollständig oder kritisch? 
+•Welche Rückläufe fehlen? 
+•Wo hängt das System gerade? 
+
+Kernobjekte / Daten
+Der Arbeitskorb ist überwiegend abgeleitet, also keine komplett eigene Fachwelt.
+Er zieht sich Inhalte aus:
+•Aufgaben 
+•Wiedervorlagen 
+•fehlenden Protokollen 
+•offenen Rückmeldungen 
+•fehlenden Dokumenten 
+•Konflikten in der Planung 
+•Kommunikationswiedervorlagen 
+Hauptfunktionen
+•tägliche Prioritätenliste 
+•Filter nach Person / Projekt / Team / Art 
+•Bündelung aus mehreren Modulen 
+•schneller Sprung zum Ursprungsobjekt 
+•Abarbeitung / Erledigung / Delegation 
+Rollen
+•Büro: Hauptnutzer 
+•Leitung: Engpasssicht 
+•Koordinatoren: eigene offenen Punkte 
+•Externe: reduzierte eigene Arbeitsliste 
+UI-Struktur
+•“Heute” 
+•“Diese Woche” 
+•“Überfällig” 
+•“Fehlende Rückläufe” 
+•“Fehlende Unterlagen” 
+•“Kritische Projekte” 
+Besondere Regeln
+•Arbeitskorb ist kein zweites Aufgabenmodul 
+•er bündelt aus anderen Modulen 
+•Einträge müssen auf Quelle zurückspringen 
+•Priorisierung ist wichtiger als optische Schönheit 
+Abhängigkeiten
+•Wochenplanung 
+•Aufgaben/Mängel 
+
+•Begehungen/Protokolle 
+•Dokumente 
+•Kommunikation 
+•Dashboard 
+Reifegrad
+Klar und sinnvoll ausgearbeitet.
+Stärker als Tagessteuerungsansicht denn als isoliertes Stammmodul.
+11. Dashboard / Leitstand / Chef-Übersicht
+Zweck
+Das Dashboard ist die verdichtete Management- und Überblicksebene.
+Es soll nicht bloß Zahlen zeigen, sondern schnell beantworten:
+•Wo brennt es? 
+•Wo sind Engpässe? 
+•Was ist kritisch? 
+•Wie ist die Auslastung? 
+•Welche Projekte laufen sauber, welche nicht? 
+Fachliche Aufgabe
+Das Modul verdichtet:
+•offene Aufgaben 
+•kritische Projekte 
+•Rückstände 
+•Auslastung 
+•offene Protokolle 
+•Konflikte in der Planung 
+•KPIs / Soll-Ist 
+Die Modulübersicht nennt es ausdrücklich als Teil der Management-Ebene mit offenen Aufgaben, 
+kritischen Projekten, Fristen, Auslastung, Soll-/Ist, Eskalationen und Qualitätslogik. 
+Kernobjekte / Daten
+Keine völlig eigene Datenwelt, sondern aggregierte Sichten aus:
+•Projekte 
+•Planung 
+•Mitarbeiter 
+•Aufgaben 
+
+•Protokolle 
+•Arbeitskorb 
+•Chronik 
+Hauptfunktionen
+•Kennzahlen und Warnungen 
+•Schnellzugriff auf Problemfälle 
+•Rollenabhängige Dashboards 
+•Chef-Sicht / Büro-Sicht / eigene Sicht 
+•Trends und Engpassanzeigen 
+Rollen
+•Leitung/Admin: volle Steuerungssicht 
+•Büro: operative Gesamtübersicht 
+•Mitarbeiter: reduzierte persönliche Ansicht 
+UI-Struktur
+•KPI-Karten sparsam 
+•Listen kritischer Projekte 
+•Engpass-Widgets 
+•Auslastungsübersichten 
+•offene Wiedervorlagen 
+•letzte relevante Ereignisse 
+Besondere Regeln
+•Dashboard darf nie Kernlogik ersetzen 
+•keine Show-Oberfläche 
+•zuerst nützliche Steuerungsinfos, dann hübsche Charts 
+Abhängigkeiten
+•praktisch alle Kernmodule 
+Reifegrad
+Konzeptionell stark, aber bewusst nachgeordnet gegenüber Projektakte, Wochenplanung und 
+Arbeitskorb.
+
+12. Rollen / Rechte / Adminlogik
+Zweck
+Dieses Modul steuert, wer was sehen, bearbeiten, auslösen und administrieren darf.
+Für ein System mit Büro, Leitung, internen Koordinatoren, externen Mitarbeitern und ggf. 
+Lesekonten ist das kein Beiwerk, sondern Sicherheits- und Betriebsgrundlage.
+Fachliche Aufgabe
+Es beantwortet:
+•Wer hat Zugriff auf welche Module? 
+•Wer sieht welche Projekte? 
+•Wer darf planen, freigeben, exportieren, administrieren? 
+•Was dürfen Externe nicht sehen? 
+Kernobjekte / Daten
+•Benutzer 
+•Rolle 
+•Rechteprofil 
+•Projekt-/Bereichszuordnungen 
+•ggf. Organisations-/Mandantenbezug 
+•Aktivstatus 
+•Login-/Statusdaten 
+Typische Rollen
+•Superadmin / Admin 
+•Leitung 
+•Büro / Assistenz / Sachbearbeitung 
+•Koordinator intern 
+•Koordinator extern 
+•Leser / Gast 
+•KI-/Servicekonto 
+Die Rollen-/Rechtelogik ist bereits in der Architektur eures Systems mehrfach angelegt und in der 
+Modulübersicht als eigener Kernblock benannt. 
+Hauptfunktionen
+•Benutzer anlegen 
+•Rollen vergeben 
+•Sichtbarkeiten je Modul 
+•Rechte auf Objekt-/Projekt-Ebene 
+•Externensicht beschneiden 
+
+•Admin-Konfiguration 
+UI-Struktur
+•Benutzerliste 
+•Rollenmatrix 
+•Rechte-Editor 
+•modulbezogene Freigaben 
+•Projekt-/Team-Zuordnungen 
+Besondere Regeln
+•Externe dürfen nur klar begrenzte Projekte und Daten sehen 
+•Dokumente und Kommunikation brauchen zusätzliche Schutzebenen 
+•Rollen müssen später erweiterbar sein 
+•Audit/Aktivitätsprotokolle sind sinnvoll 
+Abhängigkeiten
+•alle Module, besonders Projekte, Dokumente, Kommunikation, Planung 
+Reifegrad
+Sehr klar entwickelt, vor allem strukturell.
+Technisch später sauber umzusetzen, aber fachlich gesetzt.
+13. Vorlagen / Textbausteine / SOP / WIKI / 
+Benutzerhilfe
+Zweck
+Dieses Modul standardisiert wiederkehrende Inhalte und Wissen:
+•Textbausteine 
+•Standardschreiben 
+•E-Mail-Vorlagen 
+•Protokollvorlagen 
+•SOPs 
+•WIKI-Artikel 
+•modulbezogene Hilfen 
+Fachliche Aufgabe
+Es beantwortet:
+
+•Welche Standards nutzen wir? 
+•Wie schreiben wir wiederkehrende Texte? 
+•Wie wird ein Prozess intern erklärt? 
+•Welche Hilfen und Vorlagen stehen zur Verfügung? 
+Kernobjekte / Daten
+•Vorlage-ID 
+•Typ 
+•Titel 
+•Inhalt 
+•Kategorien / Tags 
+•Gültigkeitsstatus 
+•Version 
+•Einsatzkontext 
+•Verantwortlicher 
+Hauptfunktionen
+•Vorlagen verwalten 
+•Textbausteine pflegen 
+•Nutzung in Kommunikation / Dokumenten / Aufgaben 
+•SOPs / Hilfen strukturiert anzeigen 
+•spätere modulspezifische Hilfesysteme 
+Rollen
+•Büro/Leitung/Admin: Pflege 
+•Nutzer: Verwendung 
+•Externe: stark eingeschränkter Zugriff 
+UI-Struktur
+•Vorlagenbibliothek 
+•Editor 
+•Kategorien 
+•In-App-Hilfebereich / WIKI 
+Besondere Regeln
+•Vorlagen müssen kontextbezogen sein 
+•Versionierung ist wichtig 
+•Hilfetexte sollten direkt im Modulkontext auftauchen 
+Abhängigkeiten
+•Kommunikation 
+
+•Dokumente 
+•Aufgaben 
+•WIKI/Benutzerhilfe 
+Reifegrad
+Gut als Modul definiert, aber eher als Stützsystem denn als erster MVP-Treiber.
+14. Exportmodul
+Zweck
+Das Exportmodul stellt Daten und Dokumente in nutzbarer Form bereit:
+•PDF 
+•CSV 
+•Listen 
+•Druckansichten 
+•Übergabe-/Reportingformate 
+Fachliche Aufgabe
+Es beantwortet:
+•Wie bekomme ich Planungslisten, Aufgaben, Protokollübersichten, Projektlisten sauber 
+raus? 
+•Was kann gedruckt, versendet oder archiviert werden? 
+Kernobjekte / Daten
+Das Modul ist ebenfalls überwiegend abgeleitet und greift auf andere Objekte zu:
+•Wochenplanung 
+•Projekte 
+•Aufgaben 
+•Dokumente 
+•Protokolle 
+•Auswertungen 
+Hauptfunktionen
+•Wochenliste exportieren 
+•Projektübersicht exportieren 
+•Aufgabenlisten exportieren 
+•Protokoll- / Dokumentenübersichten exportieren 
+•spätere standardisierte Berichte 
+
+Rollen
+•Büro und Leitung als Hauptnutzer 
+•Fachnutzer ggf. exportberechtigt je Rolle 
+UI-Struktur
+•Exportdialoge direkt im jeweiligen Modul 
+•zentrale Exportübersicht optional 
+•Auswahl von Filtern / Zeitraum / Format 
+Besondere Regeln
+•Exporte bei großen Datenmengen asynchron denken 
+•Rechte müssen respektiert werden 
+•Layouts müssen praxistauglich und nüchtern sein 
+Abhängigkeiten
+•praktisch alle fachlichen Module 
+•Dokumentenlogik 
+•Rechte 
+Reifegrad
+Klar vorgesehen und notwendig, aber als Querschnittsmodul eher funktional als fachlich tief.
+15. Abrechnung / LV / öffentliche Aufträge / 
+GAEB / REB
+Zweck
+Dieses Modul bildet die wirtschaftliche und ausschreibungsbezogene Fachschicht ab.
+Es ist für euch wichtig, aber als Ausbaupfad zu behandeln:
+•LV-Bezug 
+•Abrechnung 
+•Mengenermittlung 
+•öffentliche Aufträge 
+•GAEB 
+•REB 
+Die Modulübersicht nennt diesen Bereich ausdrücklich als spätere Wirtschafts-/Ausbauschicht. 
+
+Fachliche Aufgabe
+Es beantwortet:
+•Welche Leistungen sind vertraglich vereinbart? 
+•Welche Positionen sind zu bearbeiten oder abzurechnen? 
+•Wie verknüpfen wir operative Arbeit mit wirtschaftlicher Struktur? 
+Kernobjekte / Daten
+•Vertrag / LV 
+•Positionen 
+•Leistungsstände 
+•Abrechnungseinträge 
+•Projektbezug 
+•Dokument-/Exportbezug 
+•öffentliche Vergabe-Metadaten 
+Hauptfunktionen
+•LV zu Projekt verknüpfen 
+•spätere Positionserfassung / Auswertung 
+•Abrechnungsbezug 
+•Integration in Projektakte 
+•GAEB-/REB-fähige Ausbauarchitektur 
+Rollen
+•Leitung / Kalkulation / Büro 
+•nicht primär tägliches SiGeKo-Feldmodul 
+UI-Struktur
+•Vertrags-/LV-Tab im Projekt 
+•spätere Positionslisten 
+•Abrechnungssichten 
+•Import-/Exportoberflächen 
+Besondere Regeln
+•nicht zu früh zum Kernmodul aufblasen 
+•operative Module müssen zuerst sauber stehen 
+•klare Trennung zwischen Tagesarbeit und wirtschaftlicher Tiefe 
+Abhängigkeiten
+•Projektmodul 
+•Dokumente 
+
+•Export 
+•ggf. Aufgaben / Leistungen 
+•spätere Integrationen 
+Reifegrad
+Fachlich klar erkannt, aber bislang eher strategisch als operativ tief ausgearbeitet.
+16. Feedback / Verbesserung / QA / Eskalation
+Zweck
+Dieses Modul sammelt Rückmeldungen, Verbesserungen und Qualitätsinformationen und überführt 
+sie in Aufgaben oder Systemverbesserungen.
+Fachliche Aufgabe
+Es beantwortet:
+•Welche Probleme oder Verbesserungsideen wurden gemeldet? 
+•Was ist ein echter Fehler? 
+•Was ist Prozessverbesserung? 
+•Welche offenen Qualitätsmängel müssen verfolgt werden? 
+Die Modulübersicht nennt Feedback/Verbesserung/QA als eigenes Modul und führt in der 
+Management-Ebene außerdem Qualitäts- und Eskalationslogik. 
+Kernobjekte / Daten
+•Feedback-ID 
+•Quelle 
+•Projekt-/Modulbezug 
+•Kategorie 
+•Beschreibung 
+•Priorität 
+•Status 
+•Verantwortlicher 
+•abgeleitete Aufgabe ja/nein 
+Hauptfunktionen
+•Feedback erfassen 
+•kategorisieren 
+•Aufgaben ableiten 
+•Qualitätsprobleme sammeln 
+•Eskalationen sichtbar machen 
+
+•spätere Test-/QS-Logik unterstützen 
+Rollen
+•alle Nutzer als Melder 
+•Büro/Admin/Leitung als Bearbeiter 
+•Entwicklung / Systempflege optional 
+UI-Struktur
+•Feedbackliste 
+•Problem-/Verbesserungssicht 
+•Eskalationsbereich 
+•Verknüpfung zu Aufgaben 
+Besondere Regeln
+•Feedback darf nicht im Nirwana verschwinden 
+•Verbesserung ohne Verantwortlichen ist nur ein Wunschzettel 
+•Eskalation sollte an Fristen und Kritikalität gekoppelt sein 
+Abhängigkeiten
+•Aufgaben 
+•Dashboard 
+•Arbeitskorb 
+•ggf. KI-Assistenz 
+•QA/Testmodul 
+Reifegrad
+Konzeptionell vorhanden und sinnvoll, aber noch nicht so tief operativ wie Planung, Projektakte 
+oder Aufgaben.
+17. KI-Assistenz / Analyse / Hilfsfunktionen
+Zweck
+Dieses Modul bringt GPT-/KI-Unterstützung in das System:
+•Analyse von Daten und Dokumenten 
+•Zusammenfassungen 
+•Vorschläge 
+•Hilfen im Arbeitsfluss 
+•spätere intelligente Planung / Priorisierung 
+
+Die Modulübersicht führt KI-Assistenz ausdrücklich als eigenes System-/Intelligenzmodul. 
+Fachliche Aufgabe
+Es beantwortet:
+•Wo kann KI helfen, ohne die Fachlogik zu ersetzen? 
+•Welche Vorschläge oder Auswertungen sind sinnvoll? 
+•Wie lassen sich Dokumente, Aufgaben, Planung oder Kommunikation unterstützen? 
+Mögliche Einsatzfelder
+•Projektzusammenfassungen 
+•E-Mail-Entwürfe 
+•Protokollauswertung 
+•Aufgabenableitung aus Rückmeldungen 
+•Vorschläge für Prioritäten 
+•spätere Planungs- und Vertretungsvorschläge 
+•Dokumentklassifikation 
+Hauptfunktionen
+•kontextbezogene Hilfen 
+•Analyse-Widgets 
+•Zusammenfassungen 
+•Vorschläge, keine ungeprüften Automatismen 
+•Verknüpfung mit Projekt, Dokumenten, Aufgaben, Kommunikation 
+Rollen
+•Leitung/Büro/SiGeKo als Nutzer 
+•Admin für Freigaben / Sicherheit 
+•keine unkontrollierte Vollautomatik 
+UI-Struktur
+•KI-Aktionspanel 
+•kontextbezogene Hilfsboxen in Projekt, Planung, Dokumenten, Kommunikation 
+•Analyseaufträge / Ergebnislisten 
+Besondere Regeln
+•KI unterstützt, entscheidet aber nicht blind 
+•Vorschläge müssen nachvollziehbar sein 
+•sensible Daten und Rechte sind strikt einzuhalten 
+•gute Integration ist wichtiger als Show-Effekte 
+
+Abhängigkeiten
+•Projektakte 
+•Dokumente 
+•Kommunikation 
+•Aufgaben 
+•Planung 
+•Rechte 
+Reifegrad
+Strategisch stark und für das Gesamtprodukt prägend, operativ aber bewusst als 
+Ausbau-/Assistenzschicht zu behandeln.
+18. Modul-Landkarte nach Reifegrad
+Bereits sehr tief ausgearbeitet
+•Wochenplanung 
+•Projektstamm / Projektakte 
+•Mitarbeiter / Externe / Verfügbarkeit / Vertretung 
+•Begehungen / Protokolle 
+•Aufgaben / Wiedervorlagen / Mängel 
+•Projektchronik 
+•Kontakt- und Kundendatenbank 
+Gut konzipiert und klar strukturierbar
+•Tourenplanung 
+•Dokumentenverwaltung 
+•Kommunikationsmodul 
+•Arbeitskorb 
+•Dashboard / Leitstand 
+•Rollen / Rechte / Admin 
+•Vorlagen / SOP / WIKI 
+•Export 
+Bisher stärker als Ausbaupfad / Strategie gedacht
+•Abrechnung / LV / GAEB / REB 
+•Feedback / QA / Eskalation 
+•KI-Assistenz 
+
+19. Meine ehrliche Gesamtbewertung
+Wenn ich alle Module zusammenziehe, ergibt sich kein loses Sammelsurium, sondern bereits eine 
+klare Produktarchitektur:
+Kernsystem
+•Projektakte 
+•Wochenplanung 
+•Arbeitskorb 
+•Mitarbeiter/Verfügbarkeit 
+•Aufgaben/Mängel 
+•Begehungen/Protokolle 
+•Dokumente 
+•Chronik 
+Stützsystem
+•Kontakte 
+•Kommunikation 
+•Vorlagen/WIKI 
+•Rollen/Rechte 
+•Dashboard 
+Ausbau-/Fachsystem
+•Touren vertiefen 
+•Abrechnung/LV 
+•GAEB/REB 
+•Feedback/QA 
+•KI-Assistenz 
+Und genau das passt auch zur hochgeladenen Modulübersicht:
+Sie beschreibt die App nicht als simples CRM oder Dokumentenarchiv, sondern als zentrales 
+Betriebs- und Steuerungssystem, mit der klaren Priorität auf Wochenplanung, Projektakte und 
+Arbeitskorb. 
+Mein klares Fazit
+Die stärkste Linie ist schon erkennbar:
+Nicht alles gleich tief bauen.
+Sondern zuerst brutal stark machen:
+•Projektakte 
+•Wochenplanung 
+•Arbeitskorb 
+•Mitarbeiter/Externe 
+
+•Aufgaben/Mängel 
+•Begehungen/Protokolle 
+•Dokumente/Chronik 
+Alles andere wird darum herum sauber eingehängt.
+Wenn diese Module sitzen, wirkt die App wie ein echtes SiGeKo-Betriebssystem.
+Wenn die nicht sitzen, ist der Rest nur digital veredeltes Durcheinander mit schicken Buttons.
+Im nächsten Schritt kann ich dir daraus ein komplettes Lastenheft pro Modul bauen — mit 
+Datenfeldern, UI-Bausteinen, API-Schnittstellen, Statuslogiken und Abhängigkeiten für Cursor.
+Im nächsten Schritt kann ich dir daraus ein **komplettes Lastenheft pro Modul** bauen — mit 
+Datenfeldern, UI-Bausteinen, API-Schnittstellen, Statuslogiken und Abhängigkeiten
+ja bitte. aber vielleicht nicht nur auf cursor, einfach neutral aufbauen. 
+Ich baue dir das jetzt neutral als fachliches Lastenheft auf — also nicht für Cursor, sondern so, 
+dass es für Entwickler, Agenturen oder interne Umsetzung gleichermaßen taugt. Fokus: Ziel je 
+Modul, Funktionen, Daten, UI, Rollen, Schnittstellen, Statuslogik und Abhängigkeiten.
+Thought for 42s
+Perfekt. Dann bauen wir es neutral als fachliches Lastenheft auf — also technologieoffen, ohne 
+Bindung an Cursor, ein bestimmtes Framework oder einen bestimmten Entwickler.
+Basis sind die bisher gemeinsam ausgearbeiteten Module und die hochgeladene Modulübersicht mit 
+der klaren Zielrichtung: keine einfache Bürosoftware, sondern ein operatives Betriebs- und 
+Steuerungssystem für ein SiGeKo-Büro mit Projektakte, Wochenplanung und Arbeitskorb als 
+Hauptachsen. 
+Lastenheft – SiGeKo Büro-App / Betriebs- und 
+Steuerungssystem
+1. Ziel des Gesamtsystems
+Das System soll ein SiGeKo-Büro mit vielen parallel laufenden Projekten, internen und externen 
+Mitarbeitern sowie hohem Termin-, Dokumentations- und Abstimmungsaufwand operativ 
+unterstützen.
+Das System muss insbesondere:
+•Projekte zentral verwalten 
+•operative Wochenplanung und Einsatzsteuerung ermöglichen 
+•Begehungen und Protokolle nachvollziehbar abbilden 
+•Aufgaben, Mängel und Wiedervorlagen steuern 
+•Dokumente, Kommunikation und Chronik projektbezogen bündeln 
+•Auslastung, Konflikte und kritische Fälle sichtbar machen 
+•eine Chef-, Büro- und Fachanwendersicht unterstützen 
+
+Die Zielarchitektur folgt dem bereits entwickelten Grundbild aus Stammdaten, operativer 
+Steuerung, Nachweis/Dokumentation und Management/Leitstand. 
+2. Grundprinzipien des Systems
+2.1 Fachlicher Leitgedanke
+Die Anwendung soll nicht nur Daten speichern, sondern Arbeit steuern.
+2.2 Zentrale Arbeitslogik
+Die wichtigsten Hauptansichten sind:
+•Projektakte 
+•Wochenplanung / Planungsleitstand 
+•Arbeitskorb / Tagessteuerung 
+2.3 Technologieneutralität
+Das Lastenheft beschreibt:
+•fachliche Ziele 
+•Datenobjekte 
+•Statuslogiken 
+•UI-Bausteine 
+•Schnittstellen auf Fachebene 
+•Rollen und Rechte 
+•Abhängigkeiten 
+Es legt keine konkrete Programmiersprache, kein Framework und keine bestimmte 
+Infrastruktur fest.
+3. Benutzerrollen
+3.1 Leitung / Geschäftsführung
+Benötigt:
+•Gesamtübersicht 
+•kritische Projekte 
+•Auslastung 
+•Rückstände 
+•Qualitäts- und Eskalationssicht 
+•Zugriff auf Reports und Steuerungsdaten 
+
+3.2 Büro / Verwaltung / Disposition
+Benötigt:
+•Pflege von Projekten, Kontakten, Dokumenten 
+•Wochenplanung 
+•Rücklaufbearbeitung 
+•Aufgaben- und Wiedervorlagensteuerung 
+•Kommunikations- und Exportfunktionen 
+3.3 Interner SiGeKo / Fachanwender
+Benötigt:
+•Einsicht in eigene Projekte 
+•Begehungs- und Protokollbezug 
+•Aufgabenbearbeitung 
+•Rückmeldungen 
+•Dokumenten- und Kommunikationszugriff im Projektkontext 
+3.4 Externer Mitarbeiter / freier Koordinator
+Benötigt:
+•eingeschränkte Projektsicht 
+•eigene Verfügbarkeit 
+•eigene Termine / Touren / Planungen 
+•Rückmeldung 
+•ggf. Protokoll- und Dokumentenzugriff nur im zugewiesenen Rahmen 
+3.5 Admin
+Benötigt:
+•Benutzer- und Rechteverwaltung 
+•Systemkonfiguration 
+•Freigaben 
+•technische und organisatorische Steuerung 
+3.6 Leser / Gast / Servicekonto
+Benötigt:
+•gezielt eingeschränkte oder automatische Systemzugriffe 
+
+4. Querschnittsanforderungen
+4.1 Nachvollziehbarkeit
+Relevante Änderungen sollen nachvollziehbar protokolliert werden.
+4.2 Projektbezug
+Fast alle operativen Informationen müssen einem Projekt zuordenbar sein.
+4.3 Rollenbasierte Sichtbarkeit
+Benutzer dürfen nur die Daten sehen und ändern, für die sie berechtigt sind.
+4.4 Performanz
+Das System muss auch bei vielen Projekten, vielen Mitarbeitern und vielen Dokumenten bedienbar 
+bleiben.
+4.5 Erweiterbarkeit
+Spätere Erweiterungen wie Abrechnung, GAEB/REB, KI-Assistenz oder tiefere Auswertung 
+müssen möglich sein.
+4.6 Saubere Objektbeziehungen
+Es sollen klare Kernobjekte existieren, keine unkontrollierte Freitext- oder Dateiwildnis.
+5. Modulspezifikation
+M01 – Projektstamm / Projektverwaltung / 
+Projektakte
+Ziel
+Zentrale Verwaltung aller Projekte als operative Hauptakte.
+Fachlicher Nutzen
+Das Modul bündelt den vollständigen Projektkontext und dient als Einstiegspunkt für Planung, 
+Begehung, Dokumente, Aufgaben, Kommunikation und Chronik.
+
+Muss-Funktionen
+•Projekt anlegen, bearbeiten, archivieren 
+•Projektstatus verwalten 
+•Projektbeteiligte zuordnen 
+•Projektdaten zentral anzeigen 
+•Zugriff auf Planung, Begehungen, Aufgaben, Dokumente, Kommunikation und Chronik 
+•projektbezogene Filter und Suche 
+•Kennzeichnung pausierter oder abgeschlossener Projekte 
+Datenobjekte / Kernfelder
+•Projekt-ID 
+•interne/externe Projektnummer 
+•Projektname / Bauvorhaben 
+•Ort / Adresse / Region 
+•Auftraggeber / Bauherr 
+•Status 
+•Start / Ende / geplante Bauzeit 
+•Leistungsart 
+•Turnus / Begehungslogik 
+•Gesamtanzahl vereinbarter Begehungen 
+•zuständiger Mitarbeiter 
+•Vertreter 
+•Projektbeteiligte 
+•Besonderheiten 
+•Baustopp / Pause 
+•öffentliche Ausschreibung ja/nein 
+•LV-/Abrechnungsbezug optional 
+Hauptansichten
+•Projektliste 
+•Projektakte 
+•Projektübersicht 
+•Beteiligtenansicht 
+•Projektchronik 
+•projektbezogene Dokumente 
+•projektbezogene Aufgaben/Mängel 
+•projektbezogene Kommunikation 
+•projektbezogene Planung 
+Statuslogik
+Mindestens:
+•Anfrage 
+
+•Angebot 
+•beauftragt 
+•in Vorbereitung 
+•aktiv 
+•pausiert 
+•abgeschlossen 
+•abgerechnet 
+•archiviert 
+Fachliche Schnittstellen
+•Wochenplanung 
+•Kontakte / Organisationen 
+•Mitarbeiter / Verfügbarkeiten 
+•Begehungen / Protokolle 
+•Aufgaben / Mängel 
+•Dokumente 
+•Kommunikation 
+•Chronik 
+•Export 
+•Abrechnung / LV 
+Abnahmekriterien
+•Ein Projekt kann vollständig angelegt und bearbeitet werden. 
+•Alle wichtigen Teilinformationen sind aus der Projektakte erreichbar. 
+•Projektstatus ist filterbar und steuerungsrelevant. 
+•Projekte können sauber archiviert werden, ohne Historie zu verlieren. 
+M02 – Kontakt- und Kundendatenbank
+Ziel
+Zentrale Verwaltung von Organisationen und Ansprechpartnern.
+Fachlicher Nutzen
+Saubere Zuordnung von Personen und Firmen zu Projekten, Kommunikation und wirtschaftlichen 
+Vorgängen.
+Muss-Funktionen
+•Organisationen anlegen und pflegen 
+•Kontaktpersonen anlegen und pflegen 
+•Kontakte Rollen zuordnen 
+
+•Kontakte Projekten zuordnen 
+•Suche nach Name, Firma, Ort, E-Mail, Telefon 
+•Historisierung relevanter Zuordnungen 
+•Dublettenvermeidung 
+Datenobjekte / Kernfelder
+Organisation
+•Organisations-ID 
+•Firmenname 
+•Rechtsform 
+•Adresse 
+•Bemerkungen 
+•Status aktiv/inaktiv 
+Kontaktperson
+•Kontakt-ID 
+•Name 
+•Funktion / Rolle 
+•E-Mail 
+•Telefon 
+•Mobil 
+•Zugehörige Organisation 
+•Bemerkungen 
+•Status 
+Projektkontakt-Zuordnung
+•Projekt-ID 
+•Kontakt-ID 
+•Rolle im Projekt 
+•Hauptansprechpartner ja/nein 
+•Gültigkeit 
+Hauptansichten
+•Organisationsliste 
+•Kontaktliste 
+•Firmenakte 
+•Kontaktakte 
+•Projektkontakt-Übersicht 
+Statuslogik
+•aktiv 
+•inaktiv 
+
+•archiviert 
+Fachliche Schnittstellen
+•Projektakte 
+•Kommunikation 
+•Aufgaben / Wiedervorlagen 
+•Abrechnung / Angebote 
+•Chronik 
+Abnahmekriterien
+•Eine Organisation mit mehreren Ansprechpartnern ist abbildbar. 
+•Ein Kontakt kann mehreren Projekten mit unterschiedlichen Rollen zugeordnet werden. 
+•Kontakte sind aus Projekt und Kommunikation direkt nutzbar. 
+•Dubletten sind erkennbar oder vermeidbar. 
+M03 – Mitarbeiter / Externe / Verfügbarkeit / 
+Vertretung
+Ziel
+Verwaltung aller einsatzrelevanten Personaldaten.
+Fachlicher Nutzen
+Basis für Wochenplanung, Vertretungen, Auslastung und rollengerechte Sicht.
+Muss-Funktionen
+•Mitarbeiter anlegen und pflegen 
+•interne und externe Mitarbeiter unterscheiden 
+•Rollen und Einsatzgebiete verwalten 
+•Verfügbarkeiten erfassen 
+•Urlaub, Krankheit, Sperrzeiten pflegen 
+•Vertretungslogik abbilden 
+•Kapazitäten planungsrelevant bereitstellen 
+Datenobjekte / Kernfelder
+Mitarbeiter
+•Mitarbeiter-ID 
+•Name 
+
+•Kürzel 
+•intern/extern 
+•Rolle 
+•Region 
+•Qualifikation 
+•Wochenkapazität 
+•Status 
+•Standardverfügbarkeit 
+•Vertretbarkeit 
+Verfügbarkeit
+•Verfügbarkeits-ID 
+•Mitarbeiter-ID 
+•Zeitraum 
+•Grund 
+•Kommentar 
+•Status bestätigt/geplant 
+Vertretung
+•Vertretungs-ID 
+•zu vertretender Mitarbeiter 
+•Vertreter 
+•Zeitraum 
+•betroffene Projekte 
+•Bemerkung 
+Hauptansichten
+•Mitarbeiterliste 
+•Mitarbeiterakte 
+•Verfügbarkeitskalender 
+•Vertretungsübersicht 
+•Kapazitätsansicht 
+Statuslogik
+Mitarbeiter:
+•aktiv 
+•inaktiv 
+•extern aktiv 
+•archiviert 
+Verfügbarkeit:
+•verfügbar 
+•teilweise verfügbar 
+
+•Urlaub 
+•krank 
+•blockiert 
+•Fortbildung 
+Fachliche Schnittstellen
+•Wochenplanung 
+•Projekte 
+•Rollen / Rechte 
+•Dashboard 
+•Arbeitskorb 
+•Kommunikation 
+Abnahmekriterien
+•Interne und externe Mitarbeiter sind unterscheidbar. 
+•Verfügbarkeiten beeinflussen Planbarkeit. 
+•Vertretungen können projektrelevant gepflegt werden. 
+•Mitarbeiterkürzel sind eindeutig und operativ nutzbar. 
+M04 – Wochenplanung / operative 
+Einsatzplanung
+Ziel
+Zentrale Einsatz- und Steuerungslogik für Begehungen, Termine und Wochenarbeit.
+Fachlicher Nutzen
+Abbildung der tatsächlichen operativen Wochensteuerung mit Turnus, Rückmeldungen, 
+Verschiebungen, Vertretungen und Touren.
+Muss-Funktionen
+•Planung je Kalenderwoche 
+•Mitarbeiterzuordnung 
+•Turnuslogik 
+•feste Termine berücksichtigen 
+•Verfügbarkeiten berücksichtigen 
+•Rückmeldungen verarbeiten 
+•Soll-/Ist-Vergleich 
+•Verschiebungen / Roll-Forward 
+•Vertreterlogik 
+
+•Konfliktanzeige 
+•Wochenlisten erzeugen 
+Datenobjekte / Kernfelder
+•Planungseintrag-ID 
+•Projekt-ID 
+•KW 
+•Datum optional 
+•Mitarbeiter-ID 
+•Planungsart 
+•Status 
+•Priorität 
+•Quelle 
+•Tour-ID optional 
+•Soll-/Ist-Bezug 
+•Rückmeldung 
+•Erledigt-Flag 
+•Bemerkung 
+Hauptansichten
+•Planungsleitstand 
+•KW-Ansicht 
+•Mitarbeiteransicht 
+•Projektansicht in der Planung 
+•Rücklaufansicht 
+•Konfliktansicht 
+Statuslogik
+•vorgeschlagen 
+•geplant 
+•bestätigt 
+•in Durchführung 
+•erledigt 
+•nicht erledigt 
+•verschoben 
+•pausiert 
+•abgesagt 
+•Rückmeldung offen 
+Fachliche Schnittstellen
+•Projekte 
+•Mitarbeiter / Verfügbarkeit 
+•Touren 
+
+•Begehungen / Protokolle 
+•Aufgaben / Mängel 
+•Arbeitskorb 
+•Chronik 
+•Dashboard 
+•Export 
+Abnahmekriterien
+•Projekte lassen sich nach KW planen. 
+•Turnus- und Verfügbarkeitslogik wirkt auf die Planung. 
+•Nicht erledigte Einträge können fachlich korrekt verschoben werden. 
+•Offene Rückmeldungen und Konflikte sind sichtbar. 
+M05 – Tourenplanung
+Ziel
+Bündelung geplanter Einsätze zu sinnvollen Touren.
+Fachlicher Nutzen
+Reduzierung von Leerfahrten, bessere Tagesplanung, regionale Bündelung.
+Muss-Funktionen
+•Projekte einer Tour zuordnen 
+•Touren nach Mitarbeiter und Tag strukturieren 
+•Reihenfolge pflegen 
+•regionale Bündelung ermöglichen 
+•Tourkonflikte sichtbar machen 
+Datenobjekte / Kernfelder
+•Tour-ID 
+•KW 
+•Datum 
+•Mitarbeiter 
+•Region 
+•Reihenfolge 
+•Projekte 
+•geschätzte Zeit 
+•Status 
+•Bemerkung 
+
+Hauptansichten
+•Tourenliste 
+•Tages-/Wochen-Tour 
+•Tour-Detail 
+•Zuordnungsansicht aus Wochenplanung 
+Statuslogik
+•geplant 
+•bestätigt 
+•in Durchführung 
+•abgeschlossen 
+•geändert 
+•storniert 
+Fachliche Schnittstellen
+•Wochenplanung 
+•Mitarbeiter 
+•Projekte 
+•ggf. Karten-/Routing-Dienste später 
+Abnahmekriterien
+•Mehrere Projekte können einer Tour zugeordnet werden. 
+•Touren sind pro Mitarbeiter sichtbar. 
+•Änderungen in der Planung wirken auf Touren. 
+•Touren sind operativ nutzbar, nicht nur dekorativ. 
+M06 – Begehungen / Protokolle
+Ziel
+Abbildung und Nachweis durchgeführter Begehungen samt Protokollbezug.
+Fachlicher Nutzen
+Verbindung zwischen geplanter und erbrachter Leistung.
+Muss-Funktionen
+•Begehung erfassen 
+•Bezug zu Projekt und Planungseintrag 
+•laufende Nummer pflegen 
+
+•Protokoll verknüpfen 
+•fehlende Protokolle sichtbar machen 
+•Begehungsfortschritt führen 
+•Aufgaben/Mängel ableiten 
+Datenobjekte / Kernfelder
+Begehung
+•Begehungs-ID 
+•Projekt-ID 
+•Datum 
+•Mitarbeiter 
+•Art 
+•Status 
+•laufende Nummer 
+•Bemerkung 
+Protokoll
+•Protokoll-ID 
+•Begehungs-ID 
+•Dateiname 
+•Typ 
+•Version 
+•Upload-Datum 
+•Status 
+•Freigabe optional 
+Hauptansichten
+•Begehungsliste 
+•Begehungsdetail 
+•Protokollstatus 
+•offene Protokolle 
+•Projektbegehungen 
+Statuslogik
+Begehung:
+•geplant 
+•durchgeführt 
+•nicht durchgeführt 
+•nachzuarbeiten 
+•storniert 
+Protokoll:
+
+•offen 
+•hochgeladen 
+•geprüft 
+•freigegeben 
+•ersetzt 
+•fehlt 
+Fachliche Schnittstellen
+•Wochenplanung 
+•Projekte 
+•Dokumente 
+•Aufgaben / Mängel 
+•Arbeitskorb 
+•Chronik 
+Abnahmekriterien
+•Durchgeführte Begehungen sind projektbezogen erfassbar. 
+•Protokolle können eindeutig verknüpft werden. 
+•Fehlende Protokolle sind sichtbar. 
+•Aufgaben oder Mängel können aus Begehungen entstehen. 
+M07 – Aufgaben / Wiedervorlagen / Mängel
+Ziel
+Verwaltung aller offenen operativen Punkte.
+Fachlicher Nutzen
+Sicherstellung, dass nichts liegen bleibt und offene Maßnahmen systematisch verfolgt werden.
+Muss-Funktionen
+•Aufgaben anlegen und pflegen 
+•Wiedervorlagen verwalten 
+•Mängel gesondert abbilden 
+•Fristen und Prioritäten verwalten 
+•Verantwortliche zuordnen 
+•Aufgaben aus anderen Modulen ableiten 
+•Überfälligkeiten sichtbar machen 
+
+Datenobjekte / Kernfelder
+Aufgabe
+•Aufgaben-ID 
+•Titel 
+•Beschreibung 
+•Projektbezug 
+•Verantwortlicher 
+•Fälligkeitsdatum 
+•Priorität 
+•Status 
+•Quelle 
+•Bemerkung 
+Mangel
+•Mangel-ID 
+•Projekt-/Begehungsbezug 
+•Beschreibung 
+•Frist 
+•Verantwortlicher 
+•Status 
+•Kategorie 
+Hauptansichten
+•Aufgabenliste 
+•Wiedervorlagen 
+•Mängelansicht 
+•projektbezogene Aufgaben 
+•überfällige Aufgaben 
+Statuslogik
+Aufgabe:
+•offen 
+•in Bearbeitung 
+•wartet auf Rückmeldung 
+•erledigt 
+•verschoben 
+•abgebrochen 
+•eskaliert 
+Mangel:
+•offen 
+•gemeldet 
+
+•in Bearbeitung 
+•erledigt 
+•nachzuverfolgen 
+•überfällig 
+Fachliche Schnittstellen
+•Projekte 
+•Begehungen / Protokolle 
+•Kommunikation 
+•Arbeitskorb 
+•Dashboard 
+•Chronik 
+•Eskalation 
+Abnahmekriterien
+•Aufgaben und Mängel sind klar getrennt oder kategorisierbar. 
+•Fristen und Verantwortlichkeiten sind sichtbar. 
+•Aufgaben lassen sich aus Begehungen oder Kommunikation erzeugen. 
+•Überfällige Punkte erscheinen im Arbeitskorb. 
+M08 – Dokumentenverwaltung
+Ziel
+Projektbezogene Verwaltung aller relevanten Dokumente.
+Fachlicher Nutzen
+Saubere Aktenstruktur und Zugriff auf Nachweise, Unterlagen und Protokolle.
+Muss-Funktionen
+•Dokumente hochladen und verknüpfen 
+•Dokumenttypen verwalten 
+•projektbezogene Zuordnung 
+•Versionen nachvollziehen 
+•Vorschau / Zugriff 
+•fehlende Unterlagen sichtbar machen 
+Datenobjekte / Kernfelder
+•Dokument-ID 
+•Projekt-ID 
+
+•Typ 
+•Dateiname 
+•Version 
+•Upload-Datum 
+•Quelle 
+•Status 
+•Verknüpfung zu Begehung / Aufgabe / Kommunikation 
+Hauptansichten
+•Dokumentenliste 
+•Projekt-Dokumente 
+•globale Suche 
+•Dokumentdetail / Vorschau 
+Statuslogik
+•vorhanden 
+•in Prüfung 
+•freigegeben 
+•ersetzt 
+•archiviert 
+•fehlt 
+Fachliche Schnittstellen
+•Projekte 
+•Begehungen / Protokolle 
+•Kommunikation 
+•Export 
+•Chronik 
+•Rechte 
+Abnahmekriterien
+•Dokumente sind Projekten eindeutig zugeordnet. 
+•Dokumente können nach Typ und Datum gefiltert werden. 
+•Versionen oder Ersetzungen sind nachvollziehbar. 
+•Fehlende Unterlagen können markiert werden. 
+M09 – Kommunikation
+Ziel
+Strukturierte Abbildung projektbezogener Kommunikation.
+
+Fachlicher Nutzen
+Nachvollziehbarkeit von Abstimmungen und Ableitung von Wiedervorlagen.
+Muss-Funktionen
+•Kommunikationseinträge erfassen 
+•Projekt- und Kontaktbezug 
+•Wiedervorlagen aus Kommunikation 
+•Status offener Vorgänge 
+•Zugriff aus Projektakte 
+•Verknüpfung zu Dokumenten und Aufgaben 
+Datenobjekte / Kernfelder
+•Kommunikations-ID 
+•Projekt-ID 
+•Kontakt-ID 
+•Art 
+•Datum 
+•Betreff 
+•Inhalt / Kurztext 
+•Status 
+•Wiedervorlage 
+•Verantwortlicher 
+Hauptansichten
+•Kommunikationsliste 
+•projektbezogene Kommunikation 
+•Wiedervorlagenansicht 
+•Kontaktverlauf 
+Statuslogik
+•offen 
+•beantwortet 
+•in Klärung 
+•Wiedervorlage gesetzt 
+•abgeschlossen 
+Fachliche Schnittstellen
+•Kontakte 
+•Projekte 
+•Aufgaben 
+•Vorlagen 
+
+•Chronik 
+Abnahmekriterien
+•Kommunikation ist projekt- und kontaktbezogen speicherbar. 
+•Wiedervorlagen sind daraus ableitbar. 
+•Einträge sind aus der Projektakte erreichbar. 
+•Kommunikation kann chronologisch nachvollzogen werden. 
+M10 – Chronik / Audit / Projekthistorie
+Ziel
+Lückenarme Nachvollziehbarkeit aller wesentlichen projektbezogenen Vorgänge.
+Fachlicher Nutzen
+Verständnis des Projektverlaufs und Absicherung gegen Informationsverlust.
+Muss-Funktionen
+•automatische Chronikeinträge 
+•manuelle Ergänzungen 
+•zeitliche Sortierung 
+•Filter nach Ereignisart 
+•Verlinkung zur Quelle 
+Datenobjekte / Kernfelder
+•Chronik-ID 
+•Projekt-ID 
+•Zeitstempel 
+•Ereignistyp 
+•Objektart 
+•Objekt-ID 
+•Benutzer / System 
+•Kurztext 
+•Details 
+•Sichtbarkeit 
+Hauptansichten
+•Projekt-Timeline 
+•globale Chronik 
+•Filteransichten 
+
+Statuslogik
+Keine klassische Statuslogik; Ereignistypen statt Status.
+Fachliche Schnittstellen
+•alle Kernmodule 
+Abnahmekriterien
+•Relevante Aktionen erzeugen Chronikeinträge. 
+•Chronikeinträge sind filterbar. 
+•Einträge verweisen auf ihr Ursprungsobjekt. 
+•Chronik ist projektbezogen verständlich. 
+M11 – Arbeitskorb / Tagessteuerung
+Ziel
+Zentrale Abarbeitung offener und kritischer Tagespunkte.
+Fachlicher Nutzen
+Priorisierte Arbeitsübersicht statt Suchen in mehreren Modulen.
+Muss-Funktionen
+•offene Punkte bündeln 
+•heute fällige, überfällige und kritische Fälle anzeigen 
+•schnelle Navigation zur Quelle 
+•Filter nach Person, Projekt, Art 
+•Abarbeitung und Delegation unterstützen 
+Datenobjekte / Kernfelder
+Überwiegend abgeleitet aus:
+•Aufgaben 
+•Wiedervorlagen 
+•fehlenden Protokollen 
+•offenen Rückmeldungen 
+•fehlenden Dokumenten 
+•Planungsproblemen 
+
+Hauptansichten
+•heute 
+•diese Woche 
+•überfällig 
+•Rückmeldungen offen 
+•fehlende Unterlagen 
+•kritische Projekte 
+Statuslogik
+Der Arbeitskorb übernimmt Status aus Quellmodulen und verdichtet sie zu Prioritätsstufen.
+Fachliche Schnittstellen
+•Wochenplanung 
+•Aufgaben 
+•Begehungen / Protokolle 
+•Dokumente 
+•Kommunikation 
+•Dashboard 
+Abnahmekriterien
+•Arbeitskorb zeigt offene Punkte aus mehreren Modulen. 
+•Jeder Eintrag führt zur Quelle. 
+•Kritische oder überfällige Punkte sind priorisiert. 
+•Der Arbeitskorb ist täglich nutzbar. 
+M12 – Dashboard / Leitstand / Chef-Übersicht
+Ziel
+Verdichtete Gesamtübersicht für Steuerung und Entscheidung.
+Fachlicher Nutzen
+Schnelles Erkennen von Engpässen, Rückständen und kritischen Projekten.
+Muss-Funktionen
+•KPI- und Statusübersicht 
+•kritische Projekte 
+•offene Aufgaben 
+•Auslastung 
+
+•Konflikte 
+•Rückstände 
+•persönliche und leitende Sichten 
+Datenobjekte / Kernfelder
+Aggregierte Daten aus:
+•Projekte 
+•Wochenplanung 
+•Mitarbeiter 
+•Aufgaben 
+•Protokolle 
+•Arbeitskorb 
+•Chronik 
+Hauptansichten
+•Management-Dashboard 
+•Büro-Leitstand 
+•persönliche Übersicht 
+Statuslogik
+Aggregierte Ampel- und Warnlogik statt eigener Fachstatus.
+Fachliche Schnittstellen
+•alle Kernmodule 
+Abnahmekriterien
+•Das Dashboard zeigt handlungsrelevante Kennzahlen. 
+•Kritische Fälle sind direkt erreichbar. 
+•Rollenabhängige Sichten sind möglich. 
+•Das Dashboard ersetzt nicht die Arbeitsmodule, sondern verdichtet sie. 
+M13 – Rollen / Rechte / Administration
+Ziel
+Regelung von Zugriff, Bearbeitung und Sichtbarkeit.
+Fachlicher Nutzen
+Datensicherheit, klare Verantwortlichkeit und kontrollierte Externensicht.
+
+Muss-Funktionen
+•Benutzer anlegen 
+•Rollen vergeben 
+•Rechte je Modul 
+•Projekt- oder Bereichszuordnungen 
+•eingeschränkte Sicht für Externe 
+•Aktivierung / Deaktivierung 
+Datenobjekte / Kernfelder
+•Benutzer-ID 
+•Rolle 
+•Rechteprofil 
+•Projekt-/Bereichszuordnung 
+•Status 
+•Letzte Aktivität optional 
+Hauptansichten
+•Benutzerliste 
+•Rollenmatrix 
+•Rechteübersicht 
+•Benutzerdetail 
+Statuslogik
+Benutzer:
+•aktiv 
+•gesperrt 
+•inaktiv 
+•archiviert 
+Fachliche Schnittstellen
+•alle Module 
+Abnahmekriterien
+•Rollen sind klar definierbar. 
+•Rechte wirken auf Sicht und Bearbeitung. 
+•Externe sehen nur freigegebene Inhalte. 
+•Benutzer können administrativ verwaltet werden. 
+
+M14 – Vorlagen / Textbausteine / SOP / WIKI
+Ziel
+Standardisierung von Inhalten, Prozessen und internem Wissen.
+Fachlicher Nutzen
+Weniger doppelte Arbeit, konsistente Kommunikation, schnellere Einarbeitung.
+Muss-Funktionen
+•Vorlagen anlegen und pflegen 
+•Textbausteine kategorisieren 
+•Nutzung in Kommunikation und Dokumenten 
+•SOPs / Hilfetexte verwalten 
+•modulspezifische Hilfen bereitstellen 
+Datenobjekte / Kernfelder
+•Vorlagen-ID 
+•Typ 
+•Titel 
+•Inhalt 
+•Kategorie 
+•Version 
+•Status 
+•Gültigkeit 
+Hauptansichten
+•Vorlagenbibliothek 
+•Editor 
+•WIKI-/Hilfeansicht 
+•Kontext-Hilfe 
+Statuslogik
+•Entwurf 
+•aktiv 
+•ersetzt 
+•archiviert 
+Fachliche Schnittstellen
+•Kommunikation 
+•Dokumente 
+
+•Aufgaben 
+•Benutzerhilfe 
+Abnahmekriterien
+•Vorlagen sind strukturiert pflegbar. 
+•Vorlagen lassen sich in anderen Modulen verwenden. 
+•SOPs und Hilfen sind auffindbar. 
+•Versionen sind nachvollziehbar. 
+M15 – Export / Berichte
+Ziel
+Ausgabe von Daten und Übersichten in nutzbaren Formaten.
+Fachlicher Nutzen
+Druck, Versand, Archivierung und Weiterverarbeitung.
+Muss-Funktionen
+•Export von Wochenlisten 
+•Export von Projektlisten 
+•Export von Aufgaben- und Protokollübersichten 
+•Filter vor Export 
+•Formatwahl 
+Datenobjekte / Kernfelder
+Abgeleitete Exportdefinitionen mit:
+•Quelle 
+•Filter 
+•Zeitraum 
+•Format 
+•Benutzer 
+•Erstellungszeitpunkt 
+Hauptansichten
+•Exportdialoge je Modul 
+•optionale zentrale Berichtsliste 
+
+Statuslogik
+•angefordert 
+•in Erstellung 
+•bereit 
+•fehlgeschlagen 
+•archiviert optional 
+Fachliche Schnittstellen
+•Projekte 
+•Wochenplanung 
+•Aufgaben 
+•Dokumente 
+•Begehungen 
+•Rechte 
+Abnahmekriterien
+•Daten lassen sich aus Kernmodulen exportieren. 
+•Filter wirken auf den Export. 
+•Exporte berücksichtigen Rechte. 
+•Große Exporte blockieren nicht die Bedienung. 
+M16 – Abrechnung / LV / öffentliche 
+Aufträge / GAEB / REB
+Ziel
+Wirtschaftliche und ausschreibungsbezogene Erweiterung des Systems.
+Fachlicher Nutzen
+Spätere Verknüpfung von operativer Leistung, Vertragsstruktur und Abrechnung.
+Muss-Funktionen
+•Vertrags-/LV-Bezug zum Projekt 
+•Positionen und Leistungsbezüge abbilden 
+•Abrechnungseinträge erfassen 
+•öffentliche Auftragslogik vorbereiten 
+•Import-/Exportfähigkeit perspektivisch 
+
+Datenobjekte / Kernfelder
+•Vertrag-ID 
+•LV-ID 
+•Position 
+•Projekt-ID 
+•Leistungsstatus 
+•Abrechnungseintrag 
+•Vergabe-/Ausschreibungsmetadaten 
+Hauptansichten
+•Vertrags-/LV-Ansicht im Projekt 
+•Positionsübersicht 
+•Abrechnungsliste 
+•Import-/Exportbereich 
+Statuslogik
+•angelegt 
+•in Bearbeitung 
+•geprüft 
+•abgerechnet 
+•abgeschlossen 
+Fachliche Schnittstellen
+•Projekte 
+•Dokumente 
+•Export 
+•Aufgaben 
+•spätere wirtschaftliche Integrationen 
+Abnahmekriterien
+•Ein Projekt kann einen Vertrags-/LV-Bezug erhalten. 
+•Positionen sind strukturiert erfassbar. 
+•Abrechnungsstände sind nachvollziehbar. 
+•Das Modul bleibt vom Tagesgeschäft entkoppelt genug, um den Kern nicht zu blockieren. 
+
+M17 – Feedback / Verbesserung / QA / 
+Eskalation
+Ziel
+Erfassung von Verbesserungen, Qualitätsproblemen und Eskalationsfällen.
+Fachlicher Nutzen
+Kontinuierliche Verbesserung und systematische Nachverfolgung kritischer Themen.
+Muss-Funktionen
+•Feedback erfassen 
+•kategorisieren 
+•Aufgaben daraus ableiten 
+•Eskalationsfälle kennzeichnen 
+•Qualitätsprobleme sichtbar machen 
+Datenobjekte / Kernfelder
+•Feedback-ID 
+•Quelle 
+•Bezug zu Projekt oder Modul 
+•Kategorie 
+•Beschreibung 
+•Priorität 
+•Status 
+•Verantwortlicher 
+•Eskalationskennzeichen 
+Hauptansichten
+•Feedbackliste 
+•Qualitätsübersicht 
+•Eskalationsansicht 
+Statuslogik
+•neu 
+•bewertet 
+•in Bearbeitung 
+•umgesetzt 
+•verworfen 
+•eskaliert 
+
+Fachliche Schnittstellen
+•Aufgaben 
+•Dashboard 
+•Arbeitskorb 
+•Chronik 
+•KI-Assistenz optional 
+Abnahmekriterien
+•Feedback kann strukturiert erfasst werden. 
+•Daraus können Aufgaben entstehen. 
+•Kritische Punkte sind separat sichtbar. 
+•Verbesserungen versanden nicht kommentarlos. 
+M18 – KI-Assistenz / Analyse / Hilfsfunktionen
+Ziel
+Unterstützung der Facharbeit durch kontextbezogene KI-Funktionen.
+Fachlicher Nutzen
+Schnellere Auswertung, Zusammenfassung, Vorschläge und Entlastung bei Routinearbeit.
+Muss-Funktionen
+•Kontextanalyse von Projekt- oder Dokumentdaten 
+•Zusammenfassungen 
+•Vorschläge für Aufgaben / Prioritäten 
+•Textentwürfe 
+•Hilfestellungen im Projektkontext 
+Datenobjekte / Kernfelder
+•KI-Auftrag-ID 
+•Kontextobjekt 
+•Anfrage 
+•Ergebnis 
+•Status 
+•Benutzer 
+•Zeitstempel 
+
+Hauptansichten
+•KI-Panel im Projekt 
+•KI-Hilfe in Planung, Dokumenten, Kommunikation 
+•Ergebnisliste / Verlauf 
+Statuslogik
+•angefordert 
+•in Bearbeitung 
+•abgeschlossen 
+•verworfen 
+•bestätigt optional 
+Fachliche Schnittstellen
+•Projekte 
+•Dokumente 
+•Kommunikation 
+•Aufgaben 
+•Wochenplanung 
+•Rechte 
+Abnahmekriterien
+•KI-Funktionen liefern kontextbezogene Unterstützung. 
+•Ergebnisse bleiben nachvollziehbar. 
+•KI ersetzt keine Rechte- oder Freigabelogik. 
+•KI bleibt Assistenz, kein unkontrollierter Autopilot. 
+6. Priorisierung
+Priorität A – zwingender Kern
+•M01 Projektakte 
+•M03 Mitarbeiter / Verfügbarkeit / Externe 
+•M04 Wochenplanung 
+•M06 Begehungen / Protokolle 
+•M07 Aufgaben / Wiedervorlagen / Mängel 
+•M08 Dokumente 
+•M10 Chronik 
+•M11 Arbeitskorb 
+•M13 Rollen / Rechte 
+
+Priorität B – sehr wichtig
+•M02 Kontakte 
+•M05 Touren 
+•M09 Kommunikation 
+•M12 Dashboard 
+•M14 Vorlagen / SOP / WIKI 
+•M15 Export 
+Priorität C – Ausbau
+•M16 Abrechnung / LV / GAEB / REB 
+•M17 Feedback / QA / Eskalation 
+•M18 KI-Assistenz 
+7. MVP-Empfehlung
+Für einen ersten echten produktiven Kern würde ich neutral fachlich so schneiden:
+MVP 1
+•Projektakte 
+•Mitarbeiter / Externe / Verfügbarkeit 
+•Wochenplanung 
+•Begehungen / Protokolle 
+•Aufgaben / Wiedervorlagen / Mängel 
+•Dokumente 
+•Chronik 
+•Rollen / Rechte 
+MVP 2
+•Arbeitskorb 
+•Kontakte 
+•Kommunikation 
+•Export 
+•einfaches Dashboard 
+Ausbau
+•Touren vertiefen 
+•Abrechnung / LV 
+•QA / Eskalation 
+•KI-Assistenz

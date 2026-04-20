@@ -101,7 +101,7 @@ export default async function KontaktePage({ searchParams }: { searchParams: { q
             </TableHeader>
             <TableBody>
               {organizations.map((o) => (
-                <TableRow key={o.id}>
+                <TableRow key={o.id} data-organization-name={o.name}>
                   <TableCell className="font-medium">{o.name}</TableCell>
                   <TableCell>{o.legalForm ?? "—"}</TableCell>
                   <TableCell className="max-w-[240px] truncate">{o.address ?? "—"}</TableCell>
@@ -135,6 +135,7 @@ export default async function KontaktePage({ searchParams }: { searchParams: { q
                   key={c.id}
                   className={cn(highlightId === c.id && "bg-muted ring-2 ring-primary/40")}
                   data-contact-id={c.id}
+                  data-contact-name={c.name}
                 >
                   <TableCell className="font-medium">{c.name}</TableCell>
                   <TableCell>{c.organization?.name ?? "—"}</TableCell>
