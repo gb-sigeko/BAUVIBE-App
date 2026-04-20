@@ -12,9 +12,9 @@ const tinyPng = Buffer.from(
 test.describe("Phase 4 – Begehungsprotokoll", () => {
   test("Upload, Mangel, PDF, E-Mail (Mock)", async ({ page, request, baseURL }) => {
     await page.goto("/projects");
-    await page.getByRole("link", { name: "Öffnen" }).first().click();
+    await page.locator("tr").filter({ has: page.getByText("PRJ-2401", { exact: true }) }).getByRole("link", { name: "Öffnen" }).click();
     await page.getByRole("tab", { name: "Begehungen" }).click();
-    await page.getByRole("link", { name: "Protokoll" }).first().click();
+    await page.getByTestId("begehung-protokoll-link").first().click();
 
     await expect(page.getByRole("heading", { name: "Begehungsprotokoll" })).toBeVisible({ timeout: 30_000 });
 

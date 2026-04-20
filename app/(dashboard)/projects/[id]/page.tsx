@@ -16,7 +16,7 @@ import { ProjectAbrechnungTab } from "@/components/project/tabs/project-abrechnu
 export const dynamic = "force-dynamic";
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const [project, organizations, contacts, employees, planUpcoming, planFixedManual] = await Promise.all([
+  const [project, organizations, contacts, employees, planEntriesActive] = await Promise.all([
     prisma.project.findUnique({
       where: { id: params.id },
       include: {
@@ -58,12 +58,10 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
       select: { id: true, shortCode: true, displayName: true },
     }),
     prisma.planungEntry.findMany({
-      where: { projectId: params.id, planungStatus: { not: PlanungStatus.ERLEDIGT } },
-      include: { employee: true },
-      orderBy: [{ isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
-    }),
-    prisma.planungEntry.findMany({
-      where: { projectId: params.id, planungType: "FEST", planungSource: "MANUELL" },
+      where: {
+        projectId: params.id,
+        planungStatus: { notIn: [PlanungStatus.ERLEDIGT, PlanungStatus.ABGESAGT] },
+      },
       include: { employee: true },
       orderBy: [{ isoYear: "asc" }, { isoWeek: "asc" }, { sortOrder: "asc" }],
     }),
@@ -81,7 +79,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     contactPerson: pp.contactPerson ? { id: pp.contactPerson.id, name: pp.contactPerson.name } : null,
   }));
 
-  const toPlanRow = (e: (typeof planUpcoming)[0]): PlanRow => ({
+  const toPlanRow = (e: (typeof planEntriesActive)[0]): PlanRow => ({
     id: e.id,
     isoYear: e.isoYear,
     isoWeek: e.isoWeek,
@@ -90,13 +88,16 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     planungSource: e.planungSource,
     plannedDate: e.plannedDate ? e.plannedDate.toISOString() : null,
     note: e.note,
+    priority: e.priority,
+    conflict: e.conflict,
+    begehungSollNummer: e.begehungSollNummer,
+    begehungIstNummer: e.begehungIstNummer,
     employee: e.employee
       ? { id: e.employee.id, shortCode: e.employee.shortCode, displayName: e.employee.displayName }
       : null,
   });
 
-  const upcomingRows: PlanRow[] = planUpcoming.map(toPlanRow);
-  const fixedRows: PlanRow[] = planFixedManual.map(toPlanRow);
+  const planEntryRows: PlanRow[] = planEntriesActive.map(toPlanRow);
 
   const begehungenRows: BegehungRow[] = project.begehungen.map((i) => ({
     id: i.id,
@@ -198,8 +199,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           <ProjectTermineTab
             projectId={params.id}
             projectCode={project.code}
-            initialUpcoming={upcomingRows}
-            initialFixedManual={fixedRows}
+            contractualBegehungen={project.contractualBegehungen}
+            initialEntries={planEntryRows}
             employees={employees}
           />
         </TabsContent>
@@ -225,6 +226,8 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               occurredAt: c.occurredAt.toISOString(),
               subject: c.subject,
               body: c.body,
+              status: c.status,
+              followUp: c.followUp ? c.followUp.toISOString() : null,
               organization: c.organization ? { name: c.organization.name } : null,
               contactPerson: c.contactPerson ? { name: c.contactPerson.name } : null,
               responsibleEmployee: c.responsibleEmployee,

@@ -29,7 +29,7 @@ export default async function ArbeitskorbPage() {
   const endOfDay = new Date(startOfDay);
   endOfDay.setHours(23, 59, 59, 999);
 
-  const [dueToday, overdue, missingTaskProtocols, missingBegehungProtocols] = await Promise.all([
+  const [dueToday, overdue, missingTaskProtocols, missingBegehungProtocols, telefonWv, commWv] = await Promise.all([
     prisma.task.findMany({
       where: { status: { not: "DONE" }, dueDate: { gte: startOfDay, lte: endOfDay } },
       include: { project: true, assignee: true },
@@ -50,14 +50,105 @@ export default async function ArbeitskorbPage() {
       include: { project: true },
       orderBy: { date: "desc" },
     }),
+    prisma.telefonnotiz.findMany({
+      where: {
+        erledigt: false,
+        followUp: { not: null, lte: endOfDay },
+      },
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { followUp: "asc" },
+    }),
+    prisma.communication.findMany({
+      where: {
+        followUp: { not: null, lte: endOfDay },
+        status: { notIn: ["erledigt", "Erledigt", "ERLEDIGT"] },
+      },
+      include: { project: { select: { id: true, name: true } } },
+      orderBy: { followUp: "asc" },
+    }),
   ]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Arbeitskorb</h1>
-        <p className="text-muted-foreground">Heute fällig, überfällig und fehlende Protokolle.</p>
+        <p className="text-muted-foreground">Heute fällig, überfällig, Kommunikations-Wiedervorlagen und fehlende Protokolle.</p>
       </div>
+
+      <Card data-testid="arbeitskorb-wiedervorlagen">
+        <CardHeader>
+          <CardTitle>Wiedervorlagen (Kommunikation)</CardTitle>
+          <CardDescription>Telefon- und E-Mail-Notizen mit Follow-up bis heute (inkl. überfällig).</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <div className="mb-2 text-sm font-medium">Telefon</div>
+            {telefonWv.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Keine offenen Telefon-Wiedervorlagen.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Projekt</TableHead>
+                    <TableHead>Notiz</TableHead>
+                    <TableHead>Follow-up</TableHead>
+                    <TableHead className="text-right">Aktion</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {telefonWv.map((n) => (
+                    <TableRow key={n.id} data-testid={`arbeitskorb-wv-telefon-${n.id}`}>
+                      <TableCell>{n.project.name}</TableCell>
+                      <TableCell className="max-w-[280px] truncate text-sm">{n.notiz}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {n.followUp ? n.followUp.toLocaleString("de-DE") : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/projects/${n.projectId}`}>Zur Akte</Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <div>
+            <div className="mb-2 text-sm font-medium">E-Mail / Sonstiges</div>
+            {commWv.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Keine offenen Einträge.</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Projekt</TableHead>
+                    <TableHead>Betreff / Inhalt</TableHead>
+                    <TableHead>Follow-up</TableHead>
+                    <TableHead className="text-right">Aktion</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {commWv.map((c) => (
+                    <TableRow key={c.id} data-testid={`arbeitskorb-wv-comm-${c.id}`}>
+                      <TableCell>{c.project.name}</TableCell>
+                      <TableCell className="max-w-[280px] truncate text-sm">{c.subject ?? c.body}</TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {c.followUp ? c.followUp.toLocaleString("de-DE") : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/projects/${c.projectId}`}>Zur Akte</Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
