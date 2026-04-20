@@ -25,6 +25,15 @@ export default async function BegehungDetailPage({
     take: 50,
   });
 
+  const participants = await prisma.projectParticipant.findMany({
+    where: { projectId: params.id },
+    include: {
+      contactPerson: { select: { name: true, email: true } },
+      organization: { select: { name: true } },
+    },
+    orderBy: [{ isPrimary: "desc" }, { validFrom: "desc" }],
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -59,6 +68,13 @@ export default async function BegehungDetailPage({
           })),
         }}
         textbausteine={textbausteine.map((t) => ({ id: t.id, name: t.name }))}
+        participants={participants.map((p) => ({
+          id: p.id,
+          roleInProject: p.roleInProject,
+          contactName: p.contactPerson?.name ?? null,
+          contactEmail: p.contactPerson?.email ?? null,
+          orgName: p.organization?.name ?? null,
+        }))}
       />
     </div>
   );

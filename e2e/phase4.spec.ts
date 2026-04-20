@@ -10,7 +10,7 @@ const tinyPng = Buffer.from(
 );
 
 test.describe("Phase 4 – Begehungsprotokoll", () => {
-  test("Upload, Mangel, PDF, E-Mail (Mock)", async ({ page, request, baseURL }) => {
+  test("Upload, Mangel, PDF, E-Mail (Mock)", async ({ page }) => {
     await page.goto("/projects");
     await page.locator("tr").filter({ has: page.getByText("PRJ-2401", { exact: true }) }).getByRole("link", { name: "Öffnen" }).click();
     await page.getByRole("tab", { name: "Begehungen" }).click();
@@ -46,10 +46,12 @@ test.describe("Phase 4 – Begehungsprotokoll", () => {
     const pdfJson = (await pdfResp.json()) as { path: string };
     expect(pdfJson.path).toMatch(/^\/protokolle\//);
 
-    const origin = baseURL ?? "http://localhost:3005";
-    const pdfBin = await request.get(`${origin}${pdfJson.path}`);
-    expect(pdfBin.ok()).toBeTruthy();
-    const buf = Buffer.from(await pdfBin.body());
+    const idMatch = pdfJson.path.match(/begehung-(.+)\.pdf$/);
+    expect(idMatch).toBeTruthy();
+    const begehungId = idMatch![1]!;
+    const pdfRes = await page.request.get(`/api/begehungen/${begehungId}/protokoll-pdf`);
+    expect(pdfRes.ok(), `PDF API HTTP ${pdfRes.status()} for ${begehungId}`).toBeTruthy();
+    const buf = Buffer.from(await pdfRes.body());
     expect(buf.subarray(0, 4).toString("ascii")).toBe("%PDF");
     const parsed = await pdfParse(buf);
     expect(parsed.text).toMatch(/Mangel/i);

@@ -226,7 +226,11 @@ export default async function ProjectDetailPage({
         </TabsContent>
 
         <TabsContent value="begehungen" className="mt-4">
-          <ProjectBegehungenTab projectId={params.id} rows={begehungenRows} />
+          <ProjectBegehungenTab
+            projectId={params.id}
+            rows={begehungenRows}
+            employees={employees.map((e) => ({ id: e.id, shortCode: e.shortCode, displayName: e.displayName }))}
+          />
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
