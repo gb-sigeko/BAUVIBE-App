@@ -9,14 +9,17 @@ import { Label } from "@/components/ui/label";
 export function CreateOrganizationForm() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <form
+      data-testid="organization-create-form"
       className="grid gap-3 md:grid-cols-2"
       onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
         setPending(true);
+        setError(null);
         try {
           const res = await fetch("/api/organizations", {
             method: "POST",
@@ -25,12 +28,17 @@ export function CreateOrganizationForm() {
               name: String(fd.get("name") || ""),
               legalForm: fd.get("legalForm") ? String(fd.get("legalForm")) : null,
               address: fd.get("address") ? String(fd.get("address")) : null,
+              industry: fd.get("industry") ? String(fd.get("industry")) : null,
+              notes: fd.get("notes") ? String(fd.get("notes")) : null,
             }),
           });
-          if (res.ok) {
-            (e.target as HTMLFormElement).reset();
-            router.refresh();
+          const j = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            setError(j.error ?? `Fehler ${res.status}`);
+            return;
           }
+          (e.target as HTMLFormElement).reset();
+          router.refresh();
         } finally {
           setPending(false);
         }
@@ -38,18 +46,27 @@ export function CreateOrganizationForm() {
     >
       <div className="space-y-2">
         <Label htmlFor="org-name">Organisation</Label>
-        <Input id="org-name" name="name" required placeholder="Name" />
+        <Input id="org-name" name="name" data-testid="organization-name-input" required placeholder="Name" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="org-legal">Rechtsform</Label>
-        <Input id="org-legal" name="legalForm" placeholder="z. B. GmbH" />
+        <Input id="org-legal" name="legalForm" data-testid="organization-legal-input" placeholder="z. B. GmbH" />
       </div>
       <div className="space-y-2 md:col-span-2">
         <Label htmlFor="org-address">Adresse</Label>
-        <Input id="org-address" name="address" placeholder="Straße, PLZ Ort" />
+        <Input id="org-address" name="address" data-testid="organization-address-input" placeholder="Straße, PLZ Ort" />
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="org-industry">Branche / Typ</Label>
+        <Input id="org-industry" name="industry" data-testid="organization-industry-input" placeholder="z. B. Bau" />
+      </div>
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="org-notes">Notizen</Label>
+        <Input id="org-notes" name="notes" data-testid="organization-notes-input" placeholder="Interne Bemerkung" />
+      </div>
+      {error ? <p className="text-sm text-destructive md:col-span-2">{error}</p> : null}
       <div>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" data-testid="organization-create-submit" disabled={pending}>
           Organisation speichern
         </Button>
       </div>
@@ -61,14 +78,17 @@ export function CreateContactForm({ organizations }: { organizations: { id: stri
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [dupHint, setDupHint] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <form
+      data-testid="contact-create-form"
       className="grid gap-3 md:grid-cols-2"
       onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
         setPending(true);
+        setError(null);
         try {
           const org = fd.get("organizationId");
           const res = await fetch("/api/contacts", {
@@ -82,10 +102,13 @@ export function CreateContactForm({ organizations }: { organizations: { id: stri
               phone: fd.get("phone") ? String(fd.get("phone")) : null,
             }),
           });
-          if (res.ok) {
-            (e.target as HTMLFormElement).reset();
-            router.refresh();
+          const j = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            setError(j.error ?? `Fehler ${res.status}`);
+            return;
           }
+          (e.target as HTMLFormElement).reset();
+          router.refresh();
         } finally {
           setPending(false);
         }
@@ -109,7 +132,7 @@ export function CreateContactForm({ organizations }: { organizations: { id: stri
       </div>
       <div className="space-y-2">
         <Label htmlFor="c-name">Name</Label>
-        <Input id="c-name" name="name" required placeholder="Kontaktperson" />
+        <Input id="c-name" name="name" data-testid="contact-name-input" required placeholder="Kontaktperson" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="c-fn">Funktion</Label>
@@ -141,8 +164,9 @@ export function CreateContactForm({ organizations }: { organizations: { id: stri
         <Label htmlFor="c-phone">Telefon</Label>
         <Input id="c-phone" name="phone" placeholder="+49 …" />
       </div>
+      {error ? <p className="text-sm text-destructive md:col-span-2">{error}</p> : null}
       <div className="md:col-span-2">
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" data-testid="contact-create-submit" disabled={pending}>
           Kontakt speichern
         </Button>
       </div>

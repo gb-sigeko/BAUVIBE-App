@@ -46,6 +46,8 @@ export default defineConfig({
       // Muss zum Playwright-Port passen, sonst schlagen Callback/CSRF und Cookies fehl.
       NEXTAUTH_URL: "http://localhost:3005",
       EMAIL_MOCK: "1",
+      // `prebuild`/`check-env` soll den E2E-Webserver nicht blockieren (DB kommt aus TEST_DATABASE_URL im Job).
+      SKIP_REQUIRED_ENV_CHECK: "1",
     },
   },
 });
