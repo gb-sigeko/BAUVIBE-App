@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check-env": "tsx scripts/check-env.ts",
+    "predev": "npm run check-env",
+    "prebuild": "npm run check-env",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

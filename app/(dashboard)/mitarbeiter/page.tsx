@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CreateEmployeeForm } from "@/components/mitarbeiter/create-employee-form";
 
 export default async function MitarbeiterPage() {
   const employees = await prisma.employee.findMany({
@@ -21,6 +22,16 @@ export default async function MitarbeiterPage() {
         <h1 className="text-3xl font-semibold tracking-tight">Mitarbeiter & Verfügbarkeit</h1>
         <p className="text-muted-foreground">Intern/extern, Kürzel, Urlaub und Vertretung.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Neuer Mitarbeiter</CardTitle>
+          <CardDescription>Intern oder extern — Kürzel muss eindeutig sein.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CreateEmployeeForm />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -42,7 +53,7 @@ export default async function MitarbeiterPage() {
             </TableHeader>
             <TableBody>
               {employees.map((e) => (
-                <TableRow key={e.id}>
+                <TableRow key={e.id} data-testid={`employee-row-${e.shortCode}`}>
                   <TableCell className="font-mono text-xs">{e.shortCode}</TableCell>
                   <TableCell className="font-medium">{e.displayName}</TableCell>
                   <TableCell>

@@ -1,0 +1,629 @@
+
+
+Wochenplan-Modul – vollständige fachliche 
+Darstellung
+1. Zweck des Moduls
+Das Wochenplan-Modul ist nicht einfach ein Kalender.
+Es ist das operative Steuerzentrum des SiGeKo-Büros.
+Es muss gleichzeitig können:
+•laufende Projekte in Kalenderwochen strukturieren 
+•Begehungen nach Turnus steuern 
+•feste Termine berücksichtigen 
+•interne und externe Mitarbeiter disponieren 
+•Vertreterlogik abbilden 
+•Rückmeldungen aus der Woche verarbeiten 
+•Verschiebungen sauber nach vorne schieben 
+•Touren logisch bündeln 
+•Soll-/Ist transparent machen 
+•Büro, Leitung und Koordinatoren auf denselben Stand bringen 
+Das Modul ist also die Schnittstelle zwischen:
+•Projektstamm 
+•Mitarbeiterverfügbarkeit 
+•Rückmeldung aus dem Feld 
+•Protokollwesen 
+•Aufgaben/Mängeln 
+•Dokumentation 
+•Arbeitskorb 
+•Chef-/Leitstandsicht 
+Genau deshalb ist die Wochenplanung in deiner Modulübersicht im Bereich operative Steuerung 
+verankert und nicht als Nebentool behandelt. 
+2. Grundidee des Wochenplan-Moduls
+Die Wochenplanung muss für euer Büro so arbeiten, wie ihr faktisch denkt:
+Nicht:
+•„Welcher Termin steht im Kalender?“ 
+Sondern:
+•Welche Baustellen müssen wann begangen werden? 
+•Wer ist dafür zuständig? 
+•Welche Projekte sind turnusbedingt fällig? 
+
+•Welche Projekte haben feste Termine? 
+•Welche Rückmeldungen aus letzter Woche liegen vor? 
+•Was wurde erledigt, was nicht? 
+•Was wurde verschoben? 
+•Wer ist krank, im Urlaub oder verhindert? 
+•Welche Touren kann man sinnvoll bündeln? 
+•Welche Projekte sind unterversorgt oder kritisch? 
+Das Modul ist also eine Mischung aus:
+•Einsatzplanung 
+•Ressourcenplanung 
+•Kontrollsystem 
+•Rücklauf- und Nachverfolgungssystem 
+3. Die reale Datenbasis, von der wir bereits ausgegangen sind
+Aus unseren bisherigen Chats ist die vorhandene Praxislogik ziemlich klar:
+3.1 Baustellenliste als Hauptquelle
+Die Wochenplanung basiert aktuell auf einer Google-Sheet-/Baustellenlisten-Logik.
+Bekannte Struktur:
+•Spalten B bis X: allgemeine Projektdaten 
+•ab Spalte Y: Kalenderwochen-Spalten 
+•in Zeile 1 jeder KW-Spalte steht das Datum des Montags dieser ISO-Kalenderwoche 
+•teils gibt es direkt vor einer Wochen-Spalte eine Checkbox-Spalte 
+•diese Checkboxen werden von Ute / UF erst nach Ablauf der Woche gesetzt, nachdem 
+Rückmeldungen der Mitarbeiter vorliegen 
+Das ist extrem wichtig, weil diese Struktur zeigt:
+Die Planung ist nicht nur „Vorschau“, sondern auch Rücklauf- und Erledigungslogik.
+3.2 Mitarbeiterkürzel in den Wochenzellen
+Für die Zuordnung werden Mitarbeiterkürzel verwendet, zum Beispiel:
+•JG 
+•GB 
+•PG 
+•ML 
+•EH 
+•MG 
+•GG 
+•KL 
+•MH 
+
+•UF 
+Dabei gilt:
+•UF ist Büro/Verwaltung und soll bei fachlichen Begehungszählungen normalerweise nicht 
+als operative Begehung zählen 
+•MH ist extern 
+•die Kürzel müssen case-insensitive verarbeitet werden 
+3.3 Turnusinformationen
+Bekannte Turnuswerte:
+•w 
+•2w 
+•3w 
+•Abruf 
+Bekannte Referenzspalten:
+•S = Turnus 
+•W = vertraglich vereinbarte Gesamtzahl der Begehungen 
+3.4 Rückmeldecode / Sondercodes
+In Wochenzellen können Kombinationen vorkommen wie:
+•EH 30/26 nb 
+Das bedeutet sinngemäß:
+•EH = geplanter/verantwortlicher Mitarbeiter 
+•30 = vertragliche Gesamtzahl 
+•26 = laufende Nummer / bisherige Begehung 
+•nb = nicht besetzt / nicht wie normal erfolgt 
+Außerdem relevant:
+•nb = nicht besetzt 
+•ob = ohne Besetzung 
+Diese Marker dürfen nicht als normale erfolgreiche Durchführung gezählt werden.
+4. Kernaufgabe des Moduls
+Das Wochenplan-Modul muss drei Dinge gleichzeitig beherrschen:
+A. Vorausplanung
+•Welche Projekte sind nächste Woche / in den nächsten 12 Wochen fällig? 
+•Wer ist verfügbar? 
+
+•Was ist turnusbedingt dran? 
+•Wo gibt es feste Termine? 
+•Welche Touren machen Sinn? 
+B. Laufende Wochensteuerung
+•Welche Begehungen sind für die aktuelle KW geplant? 
+•Wer übernimmt was? 
+•Was ist offen? 
+•Wo gibt es Konflikte oder Überlast? 
+•Welche Vertretungen greifen? 
+C. Rücklauf / Nachsteuerung
+•Was wurde wirklich erledigt? 
+•Was wurde abgesagt? 
+•Was wurde verschoben? 
+•Welche Projekte müssen in die Folgewoche geschoben werden? 
+•Welche Begehungsnummern / Sollstände ändern sich? 
+•Welche Aufgaben oder Protokolle fehlen noch? 
+5. Fachobjekte des Wochenplan-Moduls
+Aus deiner Modulstruktur ergeben sich für die Wochenplanung direkt oder indirekt diese 
+Kernobjekte:
+•Projekt 
+•Mitarbeiter 
+•MitarbeiterVerfügbarkeit 
+•Planungseintrag 
+•Tour 
+•Kalenderereignis 
+•Begehung 
+•Protokoll 
+•Aufgabe 
+•ChronikEintrag 
+•Benutzer/Rolle/Recht 
+Für die Wochenplanung selbst würde ich diese Objektlogik fest definieren:
+5.1 Projekt
+Wichtige Planungsfelder:
+•Projekt-ID 
+•Projektnummer 
+
+•Projektname 
+•Ort / Region 
+•Auftraggeber 
+•Ansprechpartner 
+•Status 
+•aktiver Ja/Nein 
+•Turnus 
+•letzte Begehung 
+•nächste fällige Begehung 
+•Gesamtanzahl vertraglicher Begehungen 
+•bisher erledigte Begehungen 
+•feste Termine 
+•Priorität 
+•externe Besonderheiten 
+•Projektpause / Baustopp 
+•feste zuständige Person 
+•Vertreter / Zweitverantwortlicher 
+5.2 Mitarbeiter
+Wichtige Felder:
+•Mitarbeiter-ID 
+•Kürzel 
+•Name 
+•intern / extern 
+•Rolle 
+•Region / Einsatzgebiet 
+•Qualifikation 
+•Wochenkapazität 
+•Tageskapazität 
+•Fahrzeug / Mobilität optional 
+•Hauptzuständigkeiten 
+•aktive Projekte 
+•Verfügbarkeitsstatus 
+5.3 Mitarbeiterverfügbarkeit
+•Datum von/bis 
+•Urlaub 
+•Krankheit 
+•Fortbildung 
+•Teilzeit / freie Tage 
+•blockierte Zeit 
+•externe Verfügbarkeit 
+•Vertretungsbereitschaft 
+•Hinweistext 
+
+5.4 Planungseintrag
+Das ist das Herzstück.
+Felder:
+•Planungseintrag-ID 
+•Projekt-ID 
+•KW 
+•Datum optional 
+•Mitarbeiter-ID 
+•geplanter Modus: regulär / fest / verschoben / Vertreter / Abruf 
+•Status: geplant / bestätigt / erledigt / nicht erledigt / verschoben / pausiert 
+•Quelle: Turnus / manuell / Rücklauf / Startgespräch / Sondertermin 
+•Priorität 
+•Bemerkung 
+•Rückmeldung 
+•Tour-ID optional 
+•Konfliktstatus 
+•Sollbegehungsnummer 
+•Istbegehungsnummer 
+•Checkbox-/Erledigt-Flag 
+•Erzeugungszeitpunkt 
+•geändert von 
+•Änderungsgrund 
+5.5 Tour
+•Tour-ID 
+•KW 
+•Datum 
+•Mitarbeiter 
+•Region 
+•Startort optional 
+•Reihenfolge der Baustellen 
+•geschätzte Fahrzeit 
+•geschätzte Vor-Ort-Zeit 
+•Gesamtlast 
+•Tourstatus 
+6. Rollen im Wochenplan-Modul
+6.1 Büro / Disposition
+Typisch:
+
+•erstellt oder prüft Wochenplanung 
+•pflegt Rückmeldungen ein 
+•setzt Checkboxen / Ist-Stände 
+•verschiebt Einträge 
+•koordiniert Vertretungen 
+•erzeugt Wochenlisten 
+6.2 SiGeKo intern
+•sieht eigene Planung 
+•meldet Rücklauf 
+•kann Status zurückgeben 
+•kann Verschiebungsgründe melden 
+•sieht Projektdetails 
+•sieht Aufgaben / Protokollstand 
+6.3 Externe Mitarbeiter
+•eingeschränkte Sicht 
+•nur eigene Projekte / eigene Touren 
+•Rückmeldung und Verfügbarkeit pflegen 
+•eventuell reduzierte Dokumentensicht 
+•keine globale Planungssicht 
+6.4 Leitung / Admin
+•sieht Gesamtauslastung 
+•Konflikte 
+•Rückstand 
+•Soll-/Ist 
+•Qualitäts- und Engpasssicht 
+In deiner Modulübersicht ist ausdrücklich festgehalten, dass externe Mitarbeiter früh mitgedacht 
+werden müssen, mit anderer Sichtbarkeit, anderer Verfügbarkeitspflege, eingeschränkter 
+Projektsicht und Vertreterlogik. 
+7. Fachlogik der Wochenplanung
+7.1 Planungsauslöser
+Ein Projekt kann aus verschiedenen Gründen in die Wochenplanung kommen:
+•Turnus fällig 
+•Startgespräch / fixer Termin 
+•AG-/BG-Termin 
+
+•Nachbegehung 
+•Rückstand aus Vorwoche 
+•Verschiebung aus Urlaub/Krankheit 
+•Abruf 
+•manuelle Sonderplanung 
+7.2 Turnuslogik
+Turnuswerte:
+•w = jede Woche 
+•2w = alle 2 Wochen 
+•3w = alle 3 Wochen 
+•Abruf = nicht automatisch, nur bei Bedarf 
+Zusätzlich braucht ihr:
+•Start- oder Referenzwoche 
+•Pause / Baustopp-Status 
+•Wiederanlaufregel 
+•automatische Vorschau über z. B. 12 Wochen 
+•Roll-Forward bei nicht erledigter Begehung 
+7.3 Zähl- und Fortschrittslogik
+Bekannte Praxis:
+•vertragliche Gesamtanzahl liegt in einer separaten Logik wie W 
+•Begehungsfortschritt kann in Zellen als Verhältnis dargestellt werden 
+•operative Kürzel und Statuscodes stehen gemeinsam in einer Zelle 
+•nb und ob dürfen nicht als erfolgreiche Begehung zählen 
+•UF zählt nicht als normale operative Begehung 
+Das Modul muss daher zwei Zählwelten auseinanderhalten:
+Planungszählung
+•was war geplant? 
+Leistungs-/Durchführungszählung
+•was wurde fachlich wirklich als Begehung erbracht? 
+Das ist ein Unterschied, und wenn man den nicht sauber trennt, wird die Statistik Murks.
+
+8. Der Wochenablauf als echter Prozess
+8.1 Vor der Woche
+•Büro prüft fällige Projekte 
+•Turnusprojekte werden vorgeschlagen 
+•feste Termine werden eingeblendet 
+•Abwesenheiten werden berücksichtigt 
+•Touren werden gebündelt 
+•Mitarbeiter werden zugewiesen 
+•Wochenliste wird erstellt 
+8.2 Während der Woche
+•Mitarbeiter sehen ihre geplanten Einsätze 
+•Änderungen, Ausfälle, Baustopps werden zurückgemeldet 
+•Vertretungen werden eingesteuert 
+•spontane Abrufe werden ergänzt 
+•offene Punkte wandern in Arbeitskorb / Nachsteuerung 
+8.3 Nach der Woche
+•Rückmeldungen werden gesammelt 
+•Büro prüft, was erledigt wurde 
+•Checkbox-/Erledigtstatus wird gesetzt 
+•nicht erledigte Begehungen werden verschoben 
+•Protokollstatus wird abgeglichen 
+•offene Aufgaben oder fehlende Unterlagen werden erzeugt 
+•Chronik wird ergänzt 
+In deiner Modulübersicht ist genau diese Verbindung zwischen Wochenplanung, Projektakte und 
+Arbeitskorb schon angelegt: Wochenplanung als Cockpit, Projektakte als fachlicher Anker, 
+Arbeitskorb als Tagessteuerung für offene Rückmeldungen, Protokolle, fehlende Unterlagen und 
+kritische Projekte. 
+9. Was der Planungsleitstand können muss
+Der Planungsleitstand ist die eigentliche Hauptoberfläche des Moduls.
+Bekannte Muss-Funktionen aus der Übersicht:
+•Kalenderwochen-Wechsel 
+•Mitarbeiterfilter 
+•Regionsfilter 
+•Projektstatusfilter 
+•Turnusfilter 
+
+•feste Termine sichtbar 
+•Tourblöcke sichtbar 
+•Konfliktwarnungen 
+•Unter-/Überlast sichtbar 
+•Rückmeldungen sichtbar 
+•Verschiebung / Umplanung 
+•Soll-/Ist-Sicht 
+Dazu kommen aus unserer bisherigen Fachlogik:
+9.1 Zeilenlogik
+Je nach Ansicht:
+•Projektzeilen 
+•Baustellenzeilen 
+•Tourzeilen 
+•Mitarbeiterzeilen 
+9.2 Spaltenlogik
+•KW-Ansicht 
+•Tagesansicht innerhalb einer KW 
+•evtl. Mehrwochenvorschau 6 / 8 / 12 Wochen 
+9.3 Layer / Inhalte in einer Planungszelle
+Eine Zelle darf nicht nur „GB“ anzeigen. Sie muss mehrere Informationen tragen können:
+•Mitarbeiterkürzel 
+•Planungsart 
+•Status 
+•feste Termine 
+•Rückmeldung 
+•Konfliktsymbol 
+•Begehungsnummer 
+•Tourzugehörigkeit 
+•Pause / Baustopp 
+•Priorität 
+Die Modulübersicht beschreibt das exakt als hybrides Raster: Zeilen = Projekte/Baustellen/Touren, 
+Spalten = Wochen/Tage, Layer = Mitarbeiter, Status, Rücklauf, Fristen, Sperren. 
+
+10. Detailansichten im Wochenplan-Modul
+10.1 KW-Gesamtansicht
+Ziel:
+•kompletter Überblick über eine Kalenderwoche 
+Inhalt:
+•alle geplanten Baustellen 
+•Mitarbeiterzuordnung 
+•Touren 
+•Konflikte 
+•Vertretungen 
+•Rückmeldung offen/erledigt 
+10.2 Mitarbeiteransicht
+Ziel:
+•was macht Person X in KW 18? 
+Inhalt:
+•zugewiesene Projekte 
+•Tage / Uhrzeiten 
+•Tour 
+•Überlastung 
+•Konflikte 
+•Vertretung 
+•offene Rückmeldungen 
+10.3 Projektansicht innerhalb der Planung
+Ziel:
+•wie ist Projekt Y aktuell eingeplant? 
+Inhalt:
+•letzte / nächste Begehung 
+•Turnus 
+•zuständiger Mitarbeiter 
+•Vertreter 
+•letzte Rückmeldung 
+•offene Aufgaben 
+•letzter Protokollstand 
+•nächste feste Termine 
+
+10.4 Rücklaufansicht
+Ziel:
+•was aus letzter Woche ist noch unklar? 
+Inhalt:
+•fehlende Rückmeldungen 
+•nicht gesetzte Erledigungen 
+•unklare Status 
+•fehlende Protokolle 
+•verschobene Einsätze 
+•offene Mängelnachverfolgung 
+11. Zustände eines Planungseintrags
+Ein Planungseintrag braucht saubere Statuswerte.
+Ich würde mindestens definieren:
+•vorgeschlagen 
+•geplant 
+•bestätigt 
+•in_durchführung 
+•erledigt 
+•nicht_erledigt 
+•verschoben 
+•pausiert 
+•abgesagt 
+•vertretung_aktiv 
+•rückmeldung_offen 
+Optional zusätzlich:
+•protokoll_offen 
+•nacharbeit_erforderlich 
+Damit kann man viel sauberer auswerten als mit reinen Freitextnotizen.
+
+12. Sonderfälle, die das Modul unbedingt 
+beherrschen muss
+12.1 Baustopp
+Ein Projekt läuft eigentlich im 2w-Turnus, ruht aber 5 Wochen.
+Dann darf die Planung nicht stumpf weiterschieben wie ein kaputter Scheibenwischer.
+Benötigt:
+•Status pausiert 
+•Pausenzeitraum 
+•Wiedervorlage 
+•Wiederanlaufregel 
+12.2 Krankheitsvertretung
+Ein Mitarbeiter fällt kurzfristig aus.
+Benötigt:
+•automatische Konfliktmeldung 
+•Vertretervorschlag 
+•Anzeige betroffener Projekte 
+•Umplanung mit Begründung 
+•Chronikeintrag 
+12.3 Externer Mitarbeiter meldet verspätet zurück
+Benötigt:
+•Rücklaufstatus offen 
+•Erinnerung 
+•Eskalation an Büro 
+•kein automatisches Durchzählen als erledigt 
+12.4 Fester Termin schlägt Turnus
+Wenn ein Projekt turnusmäßig nächste Woche dran wäre, aber ein fix vereinbartes Gespräch schon 
+diese Woche liegt, muss das Modul Prioritätsregeln haben.
+12.5 Abruf
+Diese Projekte dürfen nicht automatisch in Massenplanung auftauchen wie Kirmesgäste ohne 
+Ticket.
+Sie brauchen:
+•eigene Kennzeichnung 
+•manuelle Aktivierung 
+
+•andere Auswertung 
+13. Ableitungen und Automationen
+Das Wochenplan-Modul sollte nicht nur anzeigen, sondern Dinge automatisch vorbereiten.
+13.1 Automatische Vorschläge
+•fällige Projekte für kommende KW 
+•sinnvolle Bündelung nach Region 
+•freie Mitarbeiter mit passender Kapazität 
+•Vertretervorschläge 
+•Warnung bei Überlastung 
+13.2 Automatische Folgeaktionen
+Wenn Rückmeldung = erledigt:
+•Begehungsstand erhöhen 
+•Chronikeintrag erzeugen 
+•ggf. Protokoll erwartet markieren 
+Wenn Rückmeldung = nicht erledigt:
+•Wiedervorlage erzeugen 
+•in nächste KW verschieben 
+•Konflikt/Begründung merken 
+Wenn Protokoll fehlt:
+•Arbeitskorb-Eintrag erzeugen 
+Wenn vertragliche Gesamtzahl erreicht:
+•Meldung an Büro 
+•Meldung an zuständigen SiGeKo 
+•Vorbereitung einer Folgekommunikation 
+14. Verbindung zu anderen Modulen
+Die Modulübersicht sagt ausdrücklich: Wochenplanung darf kein isoliertes Tool sein; aus der 
+Wochenplanung muss man direkt in Projekt, Ansprechpartner, letzten Protokollstand, offene 
+Aufgaben, letzte Rückmeldung und Abwesenheit des zuständigen Mitarbeiters springen können. 
+Deshalb die festen Abhängigkeiten:
+
+14.1 Projektmodul
+liefert:
+•Projektstatus 
+•Beteiligte 
+•Turnus 
+•feste Termine 
+•Ort/Region 
+•Vertragssoll 
+14.2 Mitarbeiter-/Verfügbarkeitsmodul
+liefert:
+•Urlaub 
+•Krankheit 
+•externe Verfügbarkeit 
+•Kapazität 
+•Vertreter 
+14.3 Begehungs-/Protokollmodul
+liefert:
+•letzter Begehungsstand 
+•Protokollstatus 
+•offene Nacharbeit 
+14.4 Aufgaben-/Mängelmodul
+liefert:
+•offene Maßnahmen 
+•überfällige Aufgaben 
+•projektrelevante Warnungen 
+14.5 Arbeitskorb
+zieht heraus:
+•Rückmeldungen offen 
+•Protokolle nacharbeiten 
+•kritische Projekte 
+•fehlende Unterlagen 
+14.6 Chronik
+protokolliert:
+
+•Zuweisung 
+•Verschiebung 
+•Vertretung 
+•Rückmeldung 
+•Erledigung 
+•Konflikte 
+•Protokollbezug 
+15. Empfohlene UI-Struktur des Wochenplan-
+Moduls
+15.1 Hauptlayout
+Links:
+•Filter 
+•gespeicherte Ansichten 
+•Mitarbeiter / Regionen / Status 
+Mitte:
+•Planungsraster 
+Rechts:
+•Kontextpanel 
+Im Kontextpanel:
+•Projektdetails 
+•Ansprechpartner 
+•letzte Begehung 
+•nächste Fälligkeit 
+•offene Aufgaben 
+•letzte Rückmeldung 
+•Vertreterstatus 
+•Schnellaktionen 
+Diese Shell-/Drawer-Denke ist auch in deiner Modulübersicht schon genauso angelegt. 
+15.2 Schnellaktionen in der Zelle
+•zuweisen 
+•verschieben 
+•Vertreter setzen 
+•Tour zuordnen 
+•Rückmeldung erfassen 
+•erledigt markieren 
+
+•Projekt öffnen 
+•Protokoll öffnen 
+•Aufgabe anlegen 
+15.3 Farb- und Statuslogik
+Beispiel:
+•grün = erledigt 
+•blau = geplant 
+•orange = Rückmeldung offen 
+•rot = Konflikt / überfällig 
+•grau = pausiert 
+•lila = fester Termin 
+•gelb = Vertreter / Sonderfall 
+16. Performance-Anforderungen
+Da ihr viele Projekte und viele Mitarbeiter habt, darf die Wochenplanung technisch nicht „alles auf 
+einmal rendern und hoffen“.
+In der Modulübersicht ist für große Planungsraster ausdrücklich festgehalten:
+•Virtualisierung 
+•kontrolliertes Rendering 
+•serverseitige Filterung 
+•keine Voll-Neuberechnung bei jeder Kleinigkeit 
+•Trennung von Stammdaten, operativen Daten und Timeline-Daten 
+•Query-Caching 
+Für das Wochenplan-Modul heißt das konkret:
+•nur sichtbare KW-Bereiche rendern 
+•nur sichtbare Zeilen rendern 
+•Änderungen lokal/gezielt patchen 
+•keine komplette Wochenmatrix neu rechnen 
+•Filter serverseitig oder stark optimiert 
+•Vorschau und Historie getrennt laden 
+•Tourdaten separat aggregieren 
+Sonst ist bei 300 Projekten und 10+ Koordinatoren Feierabend, bevor der Kaffee kalt ist.
+
+17. Was in der ersten Version zwingend drin 
+sein muss
+Wenn wir das Modul auf eine brauchbare erste echte Version zuschneiden, dann muss V1 
+mindestens können:
+V1 Pflicht
+•KW-Ansicht 
+•Projektliste mit Turnusbezug 
+•Mitarbeiterzuordnung 
+•Verfügbarkeiten berücksichtigen 
+•Rückmeldestatus erfassen 
+•Verschieben in Folgewochen 
+•Vertreterlogik einfach 
+•Soll-/Ist sichtbar 
+•Projekt-Kontextpanel 
+•Wochenliste exportierbar / druckbar 
+•offene Rückmeldungen sichtbar 
+V1.5 sehr sinnvoll
+•Tourenbildung 
+•Konfliktwarnungen 
+•Kapazitätsanzeige 
+•farbliche Statuslogik 
+•gespeicherte Filteransichten 
+V2
+•automatische Vorschlagsplanung 
+•intelligente Tourenoptimierung 
+•Rücklaufautomationen 
+•tiefe KPI-/Chef-Sicht 
+•Forecast 12 Wochen 
+•KI-Vorschläge 
+18. Mein fachliches Fazit
+Das Wochenplan-Modul ist bei euch kein Untermodul, sondern eines der absoluten Kernsysteme.
+Eigentlich sogar das operative Herz.
+Wenn ich alles auf einen Satz reduziere:
+
+Die Wochenplanung ist das Modul, in dem aus Projektstamm, Turnus, 
+Mitarbeiterverfügbarkeit, Rückmeldungen und Feldrealität eine steuerbare Arbeitswoche 
+gemacht wird.
+Oder etwas weniger geschniegelt:
+Hier entscheidet sich, ob die App wirklich arbeitet — oder nur geschniegelt Daten anguckt.
